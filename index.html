@@ -2,9 +2,6 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<!-- This site is hosted on Netlify. Anyone can build and deploy a site
-     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=0f4d3c08-95a4-494b-9076-ef2bdfcf86a1
-     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
 <meta name="mobile-web-app-capable" content="yes">
@@ -310,6 +307,31 @@ window.PK_DONATE = null;
   body.picking .pickbar.top{display:block} body.picking .pickbar.bottom{display:flex}
   body.picking .panel, body.picking .fabs, body.picking .mysos{display:none!important}
 
+  /* ---------- ride flyover video ---------- */
+  body.vidopen{overflow:hidden}
+  .vidui{position:fixed;inset:0;z-index:1300;background:#0d1513;color:#fff;display:flex;flex-direction:column;padding:calc(8px + var(--sat)) 12px calc(12px + var(--sab))}
+  .vhead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 2px 8px}
+  .vhead b{font-size:17px}
+  .vx{width:40px;height:40px;border-radius:12px;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:18px}
+  .vstage{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;background:#000;border-radius:14px;overflow:hidden}
+  .vstage canvas{display:block;width:auto;height:auto;max-width:100%;max-height:100%}
+  .vmsg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.72);padding:14px 18px;border-radius:14px;text-align:center;font-size:15px;min-width:230px}
+  .vmsg .btn{margin-top:10px;background:rgba(255,255,255,.16);color:#fff;border:0}
+  .vprog{height:8px;border-radius:5px;background:rgba(255,255,255,.2);margin-top:10px;overflow:hidden} .vprog i{display:block;height:100%;background:#fc4c02}
+  .vbar{display:flex;align-items:center;gap:10px;padding:10px 2px 4px}
+  .vplay{width:44px;height:44px;border-radius:50%;border:0;background:#fc4c02;color:#fff;font-size:17px;flex:none}
+  .vbar input{flex:1;accent-color:#fc4c02}
+  .vbar span{font-size:13px;font-variant-numeric:tabular-nums;opacity:.85;min-width:78px;text-align:right}
+  .vopts{display:flex;flex-direction:column;gap:7px;padding:6px 0}
+  .vrow{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .vrow span{font-size:13px;opacity:.7;width:58px}
+  .vrow button{border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;border-radius:999px;padding:6px 12px;font-size:13.5px}
+  .vrow button.on{background:#fff;color:#0d1513;border-color:#fff;font-weight:600}
+  .vrow button:disabled,.vgo .btn:disabled{opacity:.45}
+  .vgo{padding-top:6px} .vgo>.btn{width:100%}
+  .vnote{font-size:13px;opacity:.85;margin-top:8px;text-align:center}
+  .vnote .two{display:flex;gap:8px} .vnote .two .btn{flex:1;text-decoration:none;display:flex;align-items:center;justify-content:center}
+  @media (min-width:900px){ .vidui{padding:16px 24px} }
   /* ---------- full-screen ride mode ---------- */
   .rui{display:none}
   body.ridemode .rui{display:block}
@@ -2511,18 +2533,205 @@ function renderHistory(){
 }
 $('#periodSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; period=b.dataset.p; $$('#periodSeg button').forEach(x=>x.classList.toggle('on',x===b)); renderHistory(); });
 $('#rideList').addEventListener('click',e=>{ const b=e.target.closest('[data-rid]'); if(b) openRide(b.dataset.rid); });
+/* =================== 3D flyover video of a ride (satellite + terrain, follows the route, exports MP4) =================== */
+const VID_LIB={gl:'https://unpkg.com/maplibre-gl@5.16.0/dist/maplibre-gl.js',css:'https://unpkg.com/maplibre-gl@5.16.0/dist/maplibre-gl.css',mux:'https://unpkg.com/mp4-muxer@5.2.2/build/mp4-muxer.js'};
+const VID_SRC={sat:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  lbl:'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+  dem:'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'};
+const VID_ATTR='ภาพดาวเทียม © Esri, Maxar, Earthstar Geographics · ความสูงภูมิประเทศ © AWS Terrain Tiles';
+const VID_SIZE={'16:9':[1280,720],'9:16':[720,1280],'1:1':[1080,1080]}, VID_FPS=30, VID_OR='#fc4c02';
+const _jsP={};
+function loadJS(u){ return _jsP[u]||(_jsP[u]=new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=u; s.onload=res; s.onerror=()=>{ delete _jsP[u]; s.remove(); rej(new Error('โหลดไม่ได้')); }; document.head.appendChild(s); })); }
+function loadCSS(u){ if(document.querySelector('link[href="'+u+'"]')) return; const l=document.createElement('link'); l.rel='stylesheet'; l.href=u; document.head.appendChild(l); }
+const vEase=u=>u<0?0:u>1?1:u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+const vLerpA=(a,b,u)=>(a+((((b-a)%360)+540)%360-180)*u+360)%360;
+
+// route data: points, cumulative distance, moving speed and smoothed altitude along the route
+function vidPrep(r,segs){ const P=[]; segs.forEach((s,si)=>s.forEach(p=>{ if(p&&isFinite(p[0])&&isFinite(p[1])){ const l=P[P.length-1]; if(!l||l.lat!==p[0]||l.lng!==p[1]) P.push({lat:p[0],lng:p[1],t:p[2]!=null?+p[2]:null,alt:p[3]!=null?+p[3]:null,seg:si}); } }));
+  if(P.length<2) return null; const n=P.length, cum=new Float64Array(n), D=new Float64Array(n), T=new Float64Array(n);
+  for(let i=1;i<n;i++){ const d=hav(P[i-1].lat,P[i-1].lng,P[i].lat,P[i].lng); cum[i]=cum[i-1]+d; const dt=P[i].t!=null&&P[i-1].t!=null?P[i].t-P[i-1].t:null;
+    const ok=P[i].seg===P[i-1].seg&&dt!=null&&dt>0&&dt<=30; D[i]=D[i-1]+(ok?d:0); T[i]=T[i-1]+(ok?dt:0); }
+  const hasT=T[n-1]>0; let alt=P.map(p=>p.alt); const hasA=alt.some(a=>a!=null);
+  if(hasA){ let last=alt.find(a=>a!=null); alt=alt.map(a=>a==null?last:(last=a)); const sm=new Float64Array(n); for(let i=0;i<n;i++){ let s=0,c=0; for(let j=Math.max(0,i-6);j<=Math.min(n-1,i+6);j++){ s+=alt[j]; c++; } sm[i]=s/c; } alt=sm; } else alt=null;
+  let mnLa=90,mxLa=-90,mnLo=180,mxLo=-180; P.forEach(p=>{ mnLa=Math.min(mnLa,p.lat); mxLa=Math.max(mxLa,p.lat); mnLo=Math.min(mnLo,p.lng); mxLo=Math.max(mxLo,p.lng); });
+  return {r,P,n,cum,D,T,hasT,alt,tot:cum[n-1],bb:[[mnLo,mnLa],[mxLo,mxLa]]}; }
+function vidIdx(V,s){ let lo=0,hi=V.n-1; if(s<=0) return 0; if(s>=V.tot) return V.n-2; while(hi-lo>1){ const m=(lo+hi)>>1; if(V.cum[m]<=s) lo=m; else hi=m; } return lo; }
+function vidAt(V,s){ s=Math.max(0,Math.min(V.tot,s)); const i=vidIdx(V,s), a=V.P[i], b=V.P[i+1], L=V.cum[i+1]-V.cum[i], f=L>0?(s-V.cum[i])/L:0; return {lat:a.lat+(b.lat-a.lat)*f,lng:a.lng+(b.lng-a.lng)*f,i,f}; }
+function vidStats(V,s){ const i=vidIdx(V,s), q=vidAt(V,s); let spd=null;
+  if(V.hasT){ const a=vidIdx(V,s-150), b=Math.min(V.n-1,vidIdx(V,s+150)+1), dt=V.T[b]-V.T[a]; if(dt>3) spd=(V.D[b]-V.D[a])/dt*3.6; }
+  const alt=V.alt?V.alt[i]+(V.alt[Math.min(V.n-1,i+1)]-V.alt[i])*q.f:null; return {spd,alt,dist:s/1000}; }
+
+// deterministic camera timeline (precomputed per frame so preview, scrubbing and export match)
+function vidPlan(st){ const V=st.V, L=st.len, ti=Math.min(3,L*0.15), to=Math.min(4,L*0.2), tf=L-ti-to, N=Math.round(L*VID_FPS);
+  const v=V.tot/Math.max(1,tf), lat=(V.bb[0][1]+V.bb[1][1])/2, k=Math.min(st.W,st.H)/720;
+  const zf=Math.max(11.3,Math.min(15.6,Math.log2(156543.03*Math.cos(lat*Math.PI/180)/Math.max(0.5,v/(70*k)))));
+  const la=Math.max(150,Math.min(1600,v*2.6)), tb=s=>{ const a=vidAt(V,s-la*0.25), b=vidAt(V,s+la); return bearing(a.lat,a.lng,b.lat,b.lng); };
+  const B=new Float32Array(N+1), S=new Float64Array(N+1); let b=tb(0); const al=1-Math.exp(-(1/VID_FPS)/0.9);
+  for(let f=0;f<=N;f++){ const t=f/VID_FPS, u=Math.max(0,Math.min(1,(t-ti)/tf)), s=V.tot*u; S[f]=s; if(t>ti&&t<=ti+tf) b=vLerpA(b,tb(s),al); B[f]=b; }
+  st.plan={ti,to,tf,N,zf,B,S,pitch:st.ratio==='9:16'?74:72}; }
+// the camera looks at a point ahead of the rider so the rider sits in the lower third (no viewport padding: keeps the horizon/sky correct)
+function vDest(lat,lng,brg,d){ const r=Math.PI/180; return [lng+d*Math.sin(brg*r)/(111320*Math.cos(lat*r)),lat+d*Math.cos(brg*r)/110540]; }
+function vidCam(st,t){ const p=st.plan, f=Math.max(0,Math.min(p.N,Math.round(t*VID_FPS))), s=p.S[f], b=p.B[f], q=vidAt(st.V,s), H=st.H;
+  const mpp=78271.5*Math.cos(q.lat*Math.PI/180)/Math.pow(2,p.zf), ah=H*0.15*mpp/Math.cos(p.pitch*Math.PI/180)*0.8;
+  const fol={c:vDest(q.lat,q.lng,b,ah),z:p.zf,pi:p.pitch,b}, ov=st.ov;
+  if(t<p.ti){ const u=vEase(t/p.ti), c=vDest(q.lat,q.lng,b,ah*u); return {c:[ov.c[0]+(c[0]-ov.c[0])*u,ov.c[1]+(c[1]-ov.c[1])*u],z:ov.z+(fol.z-ov.z)*u,pi:fol.pi*u,b:vLerpA(0,b,u),s,head:q}; }
+  if(t>p.ti+p.tf){ const u=vEase((t-p.ti-p.tf)/p.to), e={c:ov.c,z:ov.z-0.15,pi:45};
+    return {c:[fol.c[0]+(e.c[0]-fol.c[0])*u,fol.c[1]+(e.c[1]-fol.c[1])*u],z:fol.z+(e.z-fol.z)*u,pi:fol.pi+(e.pi-fol.pi)*u,b,s:st.V.tot,head:q,out:u}; }
+  return Object.assign(fol,{s,head:q}); }
+
+// the ridden part is shown by switching on short route pieces with feature-state (far cheaper than re-sending the line every frame)
+function vidStyle(st){ const V=st.V, line=V.P.map(p=>[p.lng,p.lat]), k=Math.min(st.W,st.H)/720, on=['case',['boolean',['feature-state','on'],false],1,0];
+  if(!V.seg){ V.seg=[]; V.segAt=[]; let a=0; for(let i=1;i<V.n;i++){ if(V.cum[i]-V.cum[a]>=6||i===V.n-1){ V.seg.push({type:'Feature',id:V.seg.length,properties:{},geometry:{type:'LineString',coordinates:line.slice(a,i+1)}}); V.segAt.push(V.cum[i]); a=i; } } }
+  const style={version:8,sources:{sat:{type:'raster',tiles:[VID_SRC.sat],tileSize:256,maxzoom:18},
+      segs:{type:'geojson',data:{type:'FeatureCollection',features:V.seg}},
+      all:{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:line}}},
+      head:{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:line[0]}}}},
+    layers:[{id:'bg',type:'background',paint:{'background-color':'#2d3a2e'}},{id:'sat',type:'raster',source:'sat',paint:{'raster-fade-duration':0}},
+      {id:'all',type:'line',source:'all',layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':'#ffffff','line-opacity':0.55,'line-width':3.5*k}},
+      {id:'doneC',type:'line',source:'segs',layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':'#ffffff','line-width':9*k,'line-opacity':on}},
+      {id:'done',type:'line',source:'segs',layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':VID_OR,'line-width':6*k,'line-opacity':on}},
+      {id:'head',type:'circle',source:'head',paint:{'circle-radius':8*k,'circle-color':VID_OR,'circle-stroke-color':'#fff','circle-stroke-width':3.5*k,'circle-pitch-alignment':'viewport'}}],
+    sky:{'sky-color':'#24406e','horizon-color':'#9fbbd8','fog-color':'#c7d6e4','sky-horizon-blend':0.6,'horizon-fog-blend':0.55,'fog-ground-blend':0.8,'atmosphere-blend':0}};
+  if(st.labels){ style.sources.lbl={type:'raster',tiles:[VID_SRC.lbl],tileSize:256,maxzoom:18}; style.layers.splice(2,0,{id:'lbl',type:'raster',source:'lbl',paint:{'raster-fade-duration':0}}); }
+  if(st.terrain){ style.sources.dem={type:'raster-dem',tiles:[VID_SRC.dem],encoding:'terrarium',tileSize:256,maxzoom:14}; style.terrain={source:'dem',exaggeration:1.5}; }
+  return style; }
+
+function vidApply(st,t){ const m=st.map, c=vidCam(st,t); st.cam=c;
+  m.jumpTo({center:c.c,zoom:c.z,pitch:c.pi,bearing:c.b});
+  const key=Math.round(c.s*2); if(key!==st.lastKey){ st.lastKey=key; const A=st.V.segAt; let lo=0,hi=A.length; while(lo<hi){ const md=(lo+hi)>>1; if(A[md]<=c.s+0.5) lo=md+1; else hi=md; }
+    const was=st.on||0; if(lo>was) for(let j=was;j<lo;j++) m.setFeatureState({source:'segs',id:j},{on:true}); else for(let j=lo;j<was;j++) m.setFeatureState({source:'segs',id:j},{on:false}); st.on=lo;
+    m.getSource('head').setData({type:'Feature',geometry:{type:'Point',coordinates:[c.head.lng,c.head.lat]}}); } }
+function vidSettle(m,ms){ return new Promise(res=>{ let done=false; const fin=()=>{ if(!done){ done=true; res(); } }; m.once('idle',fin); m.triggerRepaint(); setTimeout(fin,ms||9000); }); }
+// per video frame: wait for the frame to draw, then give missing tiles a short moment (distant tiles may stay at lower detail)
+function vidFrameReady(m){ return new Promise(res=>{ let done=false; const fin=()=>{ if(!done){ done=true; res(); } };
+  const lines=()=>['segs','all','head'].every(id=>m.isSourceLoaded(id));
+  const chk=()=>{ if(m.areTilesLoaded()&&lines()) fin(); else { m.once('idle',fin); const t0=performance.now(), poll=()=>{ if(done) return; if(lines()&&performance.now()-t0>=400) fin(); else setTimeout(poll,30); }; setTimeout(poll,30); } };
+  m.once('render',chk); m.triggerRepaint(); setTimeout(fin,6000); }); }
+
+function vidRR(g,x,y,w,h,r){ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
+function vidOverlay(g,st,t){ const W=st.W,H=st.H,k=Math.min(W,H)/720, c=st.cam||{s:0}, V=st.V, r=V.r, p=st.plan, sv=vidStats(V,c.s);
+  if(st.info){ const x=22*k, y=22*k, w=Math.min(W-44*k,450*k), h=150*k, who=settings.showOnImage&&settings.name;
+    g.save(); vidRR(g,x,y,w,h,18*k); g.fillStyle='rgba(16,24,34,.72)'; g.fill(); g.restore();
+    let tx=x+20*k;
+    if(who){ const d=52*k, ax=x+16*k, ay=y+16*k; g.save(); g.beginPath(); g.arc(ax+d/2,ay+d/2,d/2,0,7); g.clip();
+      if(st.av){ g.drawImage(st.av,ax,ay,d,d); } else { g.fillStyle='#e2f1ec'; g.fillRect(ax,ay,d,d); g.fillStyle='#0f5b4d'; g.font='700 '+Math.round(d*.45)+'px '+FONT; g.textAlign='center'; g.fillText(initials(settings.name),ax+d/2,ay+d*.64); }
+      g.restore(); g.beginPath(); g.arc(ax+d/2,ay+d/2,d/2,0,7); g.strokeStyle='#fff'; g.lineWidth=2.5*k; g.stroke(); tx=ax+d+14*k;
+      shText(g,settings.name,tx,y+38*k,Math.round(21*k),{max:w-(tx-x)-110*k,sh:false}); }
+    shText(g,r.name||'การปั่น',tx,y+(who?64:44)*k,Math.round((who?16:21)*k),{w:500,max:w-(tx-x)-110*k,c:'rgba(255,255,255,.85)',sh:false});
+    shBrand(g,x+w-16*k,y+38*k,Math.round(16*k),'#fff','right');
+    const cols=[['ความเร็ว',sv.spd!=null?sv.spd.toFixed(1):'--','กม./ชม.'],['ระดับความสูง',sv.alt!=null?String(Math.round(sv.alt)):'--','ม.'],['ระยะทาง',sv.dist.toFixed(sv.dist<100?1:0),'กม.']];
+    cols.forEach((q,i)=>{ const cx=x+(i+0.5)*w/3; shText(g,q[0],cx,y+96*k,Math.round(13*k),{a:'center',w:500,c:'rgba(255,255,255,.7)',sh:false});
+      shText(g,q[1],cx,y+126*k,Math.round(28*k),{a:'center',w:800,sh:false}); shText(g,q[2],cx,y+143*k,Math.round(12*k),{a:'center',w:500,c:'rgba(255,255,255,.7)',sh:false}); }); }
+  // opening title
+  if(t<p.ti){ const a=Math.max(0,Math.min(1,1-(t-p.ti*0.45)/(p.ti*0.5))); if(a>0){ g.save(); g.globalAlpha=a;
+      shText(g,r.name||'การปั่น',W/2,H*0.5,Math.round(40*k),{a:'center',w:800,max:W-80*k,blur:14}); shText(g,fmtDate(r.start)+' · '+(V.tot/1000).toFixed(1)+' กม.',W/2,H*0.5+44*k,Math.round(20*k),{a:'center',w:500,blur:10}); g.restore(); } }
+  // closing summary
+  if(c.out!=null){ const a=Math.max(0,Math.min(1,(c.out-0.35)/0.4)); if(a>0){ const S=shStats(r), bw=Math.min(W-60*k,560*k), bh=170*k, bx=(W-bw)/2, by=H-bh-70*k;
+      g.save(); g.globalAlpha=a; vidRR(g,bx,by,bw,bh,20*k); g.fillStyle='rgba(16,24,34,.8)'; g.fill();
+      shText(g,r.name||'การปั่น',W/2,by+40*k,Math.round(22*k),{a:'center',max:bw-40*k,sh:false});
+      [['ระยะทาง',S.dist,'กม.'],['เวลาปั่น',S.clock,''],['เฉลี่ย',S.avg,'กม./ชม.'],['ไต่ระดับ',S.gain,'ม.']].forEach((q,i)=>{ const cx=bx+(i+0.5)*bw/4;
+        shText(g,q[0],cx,by+80*k,Math.round(14*k),{a:'center',w:500,c:'rgba(255,255,255,.7)',sh:false}); shText(g,q[1],cx,by+118*k,Math.round(27*k),{a:'center',w:800,sh:false});
+        if(q[2]) shText(g,q[2],cx,by+142*k,Math.round(12*k),{a:'center',w:500,c:'rgba(255,255,255,.7)',sh:false}); });
+      g.restore(); } }
+  shText(g,VID_ATTR,14*k,H-12*k,Math.max(10,Math.round(11*k)),{w:500,c:'rgba(255,255,255,.8)',blur:4});
+  if(!st.info) shBrand(g,W-18*k,H-30*k,Math.round(20*k),'#fff','right'); }
+function vidCompose(st,t){ const g=st.g; g.drawImage(st.map.getCanvas(),0,0,st.W,st.H); vidOverlay(g,st,t); }
+
+let vidCur=null;
+async function openRideVideo(r,segs){
+  const V=vidPrep(r,(segs||[]).filter(s=>s.length>1)); if(!V||V.tot<200){ toast('ทริปนี้สั้นเกินไปหรือไม่มีข้อมูลเส้นทาง'); return; }
+  const st={V,ratio:settings.vidRatio||'16:9',len:+settings.vidLen||30,labels:settings.vidLbl!==false,terrain:settings.vidTer!==false,info:settings.vidInfo!==false,t:0,playing:false,busy:false,open:true};
+  const ui=document.createElement('div'); ui.className='vidui'; st.ui=ui; vidCur=st;
+  ui.innerHTML='<div class="vhead"><button class="vx" id="vX" aria-label="ปิด">✕</button><b>วิดีโอเส้นทาง 3 มิติ</b><span></span></div>'+
+    '<div class="vstage" id="vStage"><canvas id="vCv"></canvas><div class="vmsg" id="vMsg">กำลังโหลดแผนที่ดาวเทียม…</div></div>'+
+    '<div class="vbar"><button class="vplay" id="vPlay" aria-label="เล่น">▶</button><input type="range" id="vSeek" min="0" max="1000" value="0" aria-label="ตำแหน่งในวิดีโอ"><span id="vTime">0:00</span></div>'+
+    '<div class="vopts"><div class="vrow"><span>สัดส่วน</span>'+['16:9','9:16','1:1'].map(x=>'<button data-ratio="'+x+'">'+({'16:9':'แนวนอน','9:16':'แนวตั้ง','1:1':'จัตุรัส'})[x]+'</button>').join('')+'</div>'+
+    '<div class="vrow"><span>ความยาว</span>'+[15,30,60].map(x=>'<button data-len="'+x+'">'+x+' วิ.</button>').join('')+'</div>'+
+    '<div class="vrow"><span>แสดง</span><button data-tg="info">ข้อมูลการปั่น</button><button data-tg="labels">ชื่อสถานที่</button><button data-tg="terrain">ภูเขา 3 มิติ</button></div></div>'+
+    '<div class="vgo"><button class="btn pri" id="vMake">🎬 สร้างไฟล์วิดีโอ (MP4)</button><div class="vnote" id="vNote">วิดีโอสร้างในเครื่องนี้ ใช้เวลาประมาณ 1–3 นาที ระหว่างสร้างให้เปิดหน้านี้ไว้</div></div>';
+  document.body.appendChild(ui); document.body.classList.add('vidopen');
+  const $v=id=>ui.querySelector('#'+id), cv=$v('vCv'); st.cv=cv; st.g=cv.getContext('2d');
+  const close=()=>{ if(st.busy){ st.cancel=true; } st.open=false; cancelAnimationFrame(st.raf); try{ st.map&&st.map.remove(); }catch(e){} if(st.box) st.box.remove(); if(st.url) URL.revokeObjectURL(st.url); ui.remove(); document.body.classList.remove('vidopen'); };
+  $v('vX').onclick=close;
+  const sync=()=>{ ui.querySelectorAll('[data-ratio]').forEach(b=>b.classList.toggle('on',b.dataset.ratio===st.ratio)); ui.querySelectorAll('[data-len]').forEach(b=>b.classList.toggle('on',+b.dataset.len===st.len));
+    ui.querySelectorAll('[data-tg]').forEach(b=>b.classList.toggle('on',!!st[b.dataset.tg])); ui.querySelectorAll('.vopts button,#vMake').forEach(b=>b.disabled=st.busy); };
+  sync();
+  if(settings.showOnImage&&settings.photo){ const im=new Image(); im.onload=()=>st.av=im; im.src=settings.photo; }
+  try{ loadCSS(VID_LIB.css); await loadJS(VID_LIB.gl); }catch(e){ $v('vMsg').textContent='โหลดตัวสร้างแผนที่ 3 มิติไม่ได้ (ต้องใช้อินเทอร์เน็ต)'; return; }
+  if(!st.open) return;
+  if(!(window.maplibregl&&maplibregl.supported?maplibregl.supported():true)){ $v('vMsg').textContent='เครื่องหรือเบราว์เซอร์นี้ไม่รองรับแผนที่ 3 มิติ (WebGL)'; return; }
+  const build=async()=>{ const [W,H]=VID_SIZE[st.ratio]; st.W=W; st.H=H; cv.width=W; cv.height=H; st.lastKey=null; st.cam=null;
+    try{ st.map&&st.map.remove(); }catch(e){} if(st.box) st.box.remove();
+    st.box=document.createElement('div'); st.box.style.cssText='position:fixed;left:-30000px;top:0;width:'+W+'px;height:'+H+'px;pointer-events:none'; document.body.appendChild(st.box);
+    $v('vMsg').textContent='กำลังโหลดแผนที่ดาวเทียม…'; $v('vMsg').style.display='';
+    st.map=new maplibregl.Map({container:st.box,style:vidStyle(st),interactive:false,attributionControl:false,pixelRatio:1,maxPitch:80,fadeDuration:0,maxTileCacheSize:600,
+      canvasContextAttributes:{preserveDrawingBuffer:true,antialias:true},preserveDrawingBuffer:true,center:[(V.bb[0][0]+V.bb[1][0])/2,(V.bb[0][1]+V.bb[1][1])/2],zoom:12});
+    await new Promise(res=>st.map.once('load',res)); st.map.on('render',()=>{ st.drawn=true; }); st.appliedT=null; st.on=0;
+    const cam=st.map.cameraForBounds(V.bb,{padding:{top:H*0.2,bottom:H*0.12,left:W*0.08,right:W*0.08}}); st.ov={c:[cam.center.lng,cam.center.lat],z:Math.min(cam.zoom,15.5)};
+    vidPlan(st); vidApply(st,st.t); await vidSettle(st.map,6000); if(!st.open) return; $v('vMsg').style.display='none'; vidCompose(st,st.t); };
+  const rebuild=async(keepT)=>{ st.playing=false; $v('vPlay').textContent='▶'; if(!keepT) st.t=0; await build(); };
+  const fmtT=s=>Math.floor(s/60)+':'+pad(Math.floor(s%60));
+  let last=performance.now();
+  const loop=now=>{ if(!st.open) return; const dt=Math.min(0.1,(now-last)/1000); last=now;
+    if(st.map&&st.plan&&!st.busy){ if(st.playing){ st.t+=dt; if(st.t>=st.len){ st.t=st.len; st.playing=false; $v('vPlay').textContent='↺'; } }
+      if(st.t!==st.appliedT){ st.appliedT=st.t; vidApply(st,st.t); } if(st.drawn){ st.drawn=false; vidCompose(st,st.t); } $v('vSeek').value=Math.round(st.t/st.len*1000); $v('vTime').textContent=fmtT(st.t)+' / '+fmtT(st.len); }
+    st.raf=requestAnimationFrame(loop); };
+  $v('vPlay').onclick=()=>{ if(st.busy||!st.plan) return; if(st.t>=st.len) st.t=0; st.playing=!st.playing; $v('vPlay').textContent=st.playing?'❚❚':'▶'; };
+  $v('vSeek').oninput=e=>{ if(st.busy||!st.plan) return; st.t=+e.target.value/1000*st.len; };
+  ui.querySelectorAll('[data-ratio]').forEach(b=>b.onclick=()=>{ if(st.busy||st.ratio===b.dataset.ratio) return; st.ratio=settings.vidRatio=b.dataset.ratio; saveSettings(); sync(); rebuild(true); });
+  ui.querySelectorAll('[data-len]').forEach(b=>b.onclick=()=>{ if(st.busy) return; const f=st.t/st.len; st.len=settings.vidLen=+b.dataset.len; saveSettings(); st.t=f*st.len; sync(); vidPlan(st); st.appliedT=null; st.drawn=true; });
+  ui.querySelectorAll('[data-tg]').forEach(b=>b.onclick=()=>{ if(st.busy) return; const k=b.dataset.tg; st[k]=!st[k]; settings['vid'+{info:'Info',labels:'Lbl',terrain:'Ter'}[k]]=st[k]; saveSettings(); sync(); if(k!=='info') rebuild(true); else st.drawn=true; });
+  $v('vMake').onclick=()=>vidExport(st,$v,sync);
+  await build(); st.raf=requestAnimationFrame(loop);
+}
+
+async function vidExport(st,$v,sync){ if(st.busy||!st.map) return; st.busy=true; st.cancel=false; st.playing=false; $v('vPlay').textContent='▶'; sync(); requestWake();
+  const note=$v('vNote'), msg=$v('vMsg'), N=st.plan.N, W=st.W, H=st.H; let blob=null, ext='mp4', err=null;
+  const prog=(a,txt)=>{ msg.style.display=''; msg.innerHTML=txt+' <b>'+Math.round(a*100)+'%</b><div class="vprog"><i style="width:'+(a*100).toFixed(1)+'%"></i></div><button class="btn sm" id="vCancel">ยกเลิก</button>'; const c=msg.querySelector('#vCancel'); if(c) c.onclick=()=>st.cancel=true; };
+  try{
+    let cfg=null; if('VideoEncoder' in window&&'VideoFrame' in window){ for(const codec of ['avc1.640028','avc1.4d0028','avc1.42e028','avc1.42001f']){
+        const c={codec,width:W,height:H,bitrate:W*H>1e6?8e6:6e6,framerate:VID_FPS,avc:{format:'avc'}}; try{ const s=await VideoEncoder.isConfigSupported(c); if(s&&s.supported){ cfg=c; break; } }catch(e){} } }
+    if(cfg){ await loadJS(VID_LIB.mux);
+      const muxer=new Mp4Muxer.Muxer({target:new Mp4Muxer.ArrayBufferTarget(),video:{codec:'avc',width:W,height:H,frameRate:VID_FPS},fastStart:'in-memory'});
+      const enc=new VideoEncoder({output:(ch,meta)=>muxer.addVideoChunk(ch,meta),error:e=>{ err=e; }}); enc.configure(cfg);
+      vidApply(st,0); await vidSettle(st.map,9000);
+      for(let f=0;f<=N&&!st.cancel&&!err;f++){ const t=f/VID_FPS; vidApply(st,t); await vidFrameReady(st.map); vidCompose(st,t);
+        const fr=new VideoFrame(st.cv,{timestamp:Math.round(f*1e6/VID_FPS),duration:Math.round(1e6/VID_FPS)}); enc.encode(fr,{keyFrame:f%(VID_FPS*2)===0}); fr.close();
+        while(enc.encodeQueueSize>3) await new Promise(r=>setTimeout(r,4)); if(f%3===0) prog(f/N,'กำลังสร้างวิดีโอ'); }
+      if(!st.cancel&&!err){ await enc.flush(); muxer.finalize(); blob=new Blob([muxer.target.buffer],{type:'video/mp4'}); } try{ enc.close(); }catch(e){} }
+    else if(window.MediaRecorder&&st.cv.captureStream){ // older browsers: warm the tile cache, then record in real time
+      for(let f=0;f<=N&&!st.cancel;f+=VID_FPS/2){ vidApply(st,f/VID_FPS); await vidSettle(st.map,5000); prog(f/N*0.5,'กำลังเตรียมแผนที่'); }
+      const mt=['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm'].find(x=>MediaRecorder.isTypeSupported(x))||''; ext=mt.includes('mp4')?'mp4':'webm';
+      const rec=new MediaRecorder(st.cv.captureStream(VID_FPS),mt?{mimeType:mt,videoBitsPerSecond:6e6}:{}), parts=[]; rec.ondataavailable=e=>e.data.size&&parts.push(e.data);
+      const stopped=new Promise(r=>rec.onstop=r); rec.start(500); const t0=performance.now();
+      await new Promise(res=>{ const step=()=>{ const t=(performance.now()-t0)/1000; if(st.cancel||t>st.len){ res(); return; } vidApply(st,t); vidCompose(st,t); prog(0.5+t/st.len*0.5,'กำลังบันทึกวิดีโอ'); requestAnimationFrame(step); }; requestAnimationFrame(step); });
+      rec.stop(); await stopped; if(!st.cancel) blob=new Blob(parts,{type:mt||'video/webm'}); }
+    else err=new Error('เบราว์เซอร์นี้สร้างไฟล์วิดีโอไม่ได้ ลองใช้ Chrome หรือ Safari รุ่นใหม่');
+  }catch(e){ err=e; }
+  st.busy=false; st.appliedT=null; sync(); msg.style.display='none';
+  if(!st.open) return;
+  if(err){ note.textContent='สร้างวิดีโอไม่สำเร็จ: '+(err.message||err); return; }
+  if(!blob){ note.textContent='ยกเลิกการสร้างวิดีโอแล้ว'; return; }
+  const name='pankrai-'+new Date(st.V.r.start).toISOString().slice(0,10)+'-'+st.ratio.replace(':','x')+'.'+ext, file=new File([blob],name,{type:blob.type});
+  if(st.url) URL.revokeObjectURL(st.url); st.url=URL.createObjectURL(blob); st.file=file;
+  const canShare=!!(navigator.canShare&&navigator.canShare({files:[file]}));
+  note.innerHTML='✅ ได้ไฟล์วิดีโอ '+(blob.size/1048576).toFixed(1)+' MB ('+ext.toUpperCase()+')<div class="two" style="margin-top:8px"><a class="btn pri" id="vSave" href="'+st.url+'" download="'+name+'">⬇️ บันทึกลงเครื่อง</a>'+(canShare?'<button class="btn" id="vShare">📤 แชร์</button>':'')+'</div>';
+  const sh=note.querySelector('#vShare'); if(sh) sh.onclick=async()=>{ try{ await navigator.share({files:[file],title:st.V.r.name||'ปั่นไกล'}); }catch(e){} };
+  st.t=0; }
+
 function openRide(id){
   const r=rides.find(x=>x.id===id); if(!r) return; const segs=store.get(K_TRK+id,[]);
   openModal('<h3>'+esc(r.name)+(r.demo?'<span class="tag">จำลอง</span>':'')+'</h3><div class="sub">'+fmtDate(r.start)+' · รวมพัก '+fmtDur(r.elapsed)+'</div>'+
     (segs.length&&hasL?'<div class="dmap" id="dmap"></div>':(r.noTrack?'<div class="sub">ไม่มีข้อมูลเส้นทาง</div>':(r.src==='import'?'<div class="sub">ไฟล์นี้ไม่มีข้อมูลตำแหน่ง (เช่น ปั่นในบ้านกับเทรนเนอร์)</div>':'')))+'<div class="pstrip" id="dPics" style="display:none"></div>'+statGrid(r)+sensorInfo(r)+'<div id="dSegs"></div>'+
     '<div class="sub" style="margin-top:-4px">* แคลอรี่เป็นค่าประมาณจากความเร็วเฉลี่ยและน้ำหนักตัว</div>'+
-    '<div class="stack"><button class="btn pri" id="dImg">📤 แชร์ / บันทึกเป็นรูปภาพ</button>'+(segs.length?'<button class="btn" id="dRoute">🧭 ปั่นเส้นทางนี้อีกครั้ง</button><button class="btn" id="dSeg">🏁 สร้างช่วงทางแข่งเวลา</button><button class="btn" id="dGpx">ส่งออกไฟล์ GPX</button>':'')+'<div class="two"><button class="btn ghost" id="dClose">ปิด</button><button class="btn ghost" id="dDel" style="color:var(--danger)">ลบ</button></div></div>',closeMini);
+    '<div class="stack"><button class="btn pri" id="dImg">📤 แชร์ / บันทึกเป็นรูปภาพ</button>'+(segs.length?'<button class="btn" id="dVid">🎬 วิดีโอเส้นทาง 3 มิติ</button><button class="btn" id="dRoute">🧭 ปั่นเส้นทางนี้อีกครั้ง</button><button class="btn" id="dSeg">🏁 สร้างช่วงทางแข่งเวลา</button><button class="btn" id="dGpx">ส่งออกไฟล์ GPX</button>':'')+'<div class="two"><button class="btn ghost" id="dClose">ปิด</button><button class="btn ghost" id="dDel" style="color:var(--danger)">ลบ</button></div></div>',closeMini);
   if(segs.length) miniMap('dmap',m=>{ const all=[]; segs.forEach(s=>{ const ll=s.map(p=>[p[0],p[1]]); all.push(...ll); L.polyline(ll,LINE).addTo(m); });
     L.circleMarker(all[0],{radius:7,color:'#fff',weight:2,fillColor:'#16a34a',fillOpacity:1}).addTo(m);
     L.circleMarker(all[all.length-1],{radius:7,color:'#fff',weight:2,fillColor:'#e5484d',fillOpacity:1}).addTo(m); m.fitBounds(L.latLngBounds(all),{padding:[24,24]}); });
   $('#dClose').onclick=closeModal;
   const g=$('#dGpx'); if(g) g.onclick=()=>exportGpx(r,segs);
   $('#dImg').onclick=()=>openShareGallery(r,segs);
+  const dv=$('#dVid'); if(dv) dv.onclick=()=>{ closeModal(); openRideVideo(r,segs); };
   const dr=$('#dRoute'); if(dr) dr.onclick=()=>routeFromRide(r.id);
   const ds=$('#dSeg'); if(ds) ds.onclick=()=>openSegCreate(r.id);
   renderRideSegs(r); ridePhotos(r.id);
@@ -3237,7 +3446,7 @@ window.addEventListener('beforeunload',()=>{ if(rec) saveLive(); });
 window.addEventListener('hashchange',()=>{ if(/^#b-/.test(location.hash)){ location.reload(); return; } if(!openHashRoute()){ hashDone=false; openHashGroup(); } });
 renderBeacon();
 }
-window.__pk={get be(){return be;},data,R,infra,get map(){return MAIN&&MAIN.m;},get nav(){return {navTargetPt,settings,turnsOf,R};}};
+window.__pk={get be(){return be;},data,R,infra,get map(){return MAIN&&MAIN.m;},get nav(){return {navTargetPt,settings,turnsOf,R};},get vid(){return {openRideVideo,vidPrep,vidPlan,vidApply,vidFrameReady,vidCompose,cur:()=>vidCur};}};
 })();
 </script>
 </body>
