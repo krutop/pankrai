@@ -307,6 +307,11 @@ window.PK_DONATE = null;
   body.picking .pickbar.top{display:block} body.picking .pickbar.bottom{display:flex}
   body.picking .panel, body.picking .fabs, body.picking .mysos{display:none!important}
 
+  .acct{border:1px solid var(--line,#e3e8e5);border-radius:14px;padding:12px 14px;margin:4px 0 10px;background:#f7faf8}
+  .acct-h{display:flex;gap:10px;align-items:flex-start} .acct-ok{font-size:22px;line-height:1.2}
+  .acct .two{display:flex;gap:8px} .acct .two .btn{flex:1}
+  .gbtn{background:#fff;border:1px solid #d0d7d4;color:#1f2a27;display:flex;align-items:center;justify-content:center;gap:10px;font-weight:600}
+  .or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;margin:14px 0 8px} .or::before,.or::after{content:"";flex:1;height:1px;background:#e0e6e3}
   /* ---------- ride flyover video ---------- */
   body.vidopen{overflow:hidden}
   .vidui{position:fixed;inset:0;z-index:1300;background:#0d1513;color:#fff;display:flex;flex-direction:column;padding:calc(8px + var(--sat)) 12px calc(12px + var(--sab))}
@@ -701,7 +706,7 @@ const store={
 const K_RIDES='pk_rides_v1', K_SET='pk_settings_v1', K_LIVE='pk_live_v1', K_TRK='pk_trk_', K_LOCAL='pk_local_db_v1', K_LUID='pk_local_uid';
 const settings=Object.assign({weight:60,autoPause:true,wakeLock:true,name:'',share:true,phone:'',wheel:2105,sensorSpeed:true,gender:'x',photo:'',showOnImage:true,voice:false,voiceKm:1,autoEndH:2,prec:'coarse',navView:'head'},store.get(K_SET,{}));
 let rides=store.get(K_RIDES,[]); if(!Array.isArray(rides)) rides=[];
-function saveSettings(){ store.set(K_SET,settings); }
+function saveSettings(){ settings.mt=Date.now(); store.set(K_SET,settings); if(typeof acctUser==='function'&&acctUser()) cloudProfSoon(); }
 
 /* =================== helpers =================== */
 function hav(a,b,c,d){ const R=6371000,r=Math.PI/180,dLa=(c-a)*r,dLo=(d-b)*r;
@@ -976,8 +981,12 @@ function FirebaseBackend(cfg){
     if(!cfg.databaseURL) throw new Error('ใน firebaseConfig ไม่มี databaseURL — สร้าง Realtime Database ก่อน แล้วคัดลอก config ใหม่');
     await loadScript(base+'firebase-app-compat.js'); await loadScript(base+'firebase-auth-compat.js'); await loadScript(base+'firebase-database-compat.js');
     if(!firebase.apps.length) firebase.initializeApp(cfg);
-    await firebase.auth().signInAnonymously();
-    self.uid=firebase.auth().currentUser.uid; db=firebase.database(); self.ok=true;
+    const A=firebase.auth(); await new Promise(res=>{ const off=A.onAuthStateChanged(()=>{ off(); res(); }); });
+    if(sessionStorage.getItem('pk_auth_redirect')){ sessionStorage.removeItem('pk_auth_redirect');
+      try{ const rr=await A.getRedirectResult(); if(rr&&rr.user) self.afterSignIn=true; }
+      catch(e){ if(e.code==='auth/credential-already-in-use'&&e.credential){ await A.signInWithCredential(e.credential); self.afterSignIn=true; } else self.authErr=e; } }
+    if(!A.currentUser) await A.signInAnonymously();
+    self.uid=A.currentUser.uid; db=firebase.database(); self.ok=true;
     db.ref('.info/connected').on('value',s=>{ self.connected=!!s.val();
       if(self.connected&&self.lastPresence){ const r=db.ref('presence/'+self.uid); r.onDisconnect().remove(); r.set(self.lastPresence).catch(()=>{}); }
       updateConnUI(); });
@@ -1026,6 +1035,8 @@ async function switchBackend(){
   unsubs.push(b.onShops(v=>{ data.cshops=v; renderShops(); }));
   if(b.onSegments) unsubs.push(b.onSegments(v=>{ data.segs=v; renderSegs(); segScanAllSoon(); }));
   updateConnUI(); presenceTick(true);
+  if(b.kind==='firebase'){ if(b.afterSignIn){ b.afterSignIn=false; acctAfterSignIn(); } else if(b.authErr){ toast('เข้าสู่ระบบไม่สำเร็จ: '+acctErr(b.authErr),5000); b.authErr=null; }
+    else if(acctUser()&&!syncBusy) setTimeout(()=>cloudSync(false),1200); acctRender(); }
 }
 function connText(){
   if(!be) return ['',''];
@@ -1605,8 +1616,8 @@ function saveRide(name){
 function storeRide(ride,segs){
   rides.unshift(ride); rides.sort((a,b)=>b.start-a.start);
   if(!store.set(K_RIDES,rides)){ rides=rides.filter(x=>x!==ride); toast('บันทึกไม่ได้ — พื้นที่ในเบราว์เซอร์เต็ม ลองลบประวัติเก่าก่อน',4000); return false; }
-  if(segs.length&&!store.set(K_TRK+ride.id,segs)){ ride.noTrack=true; store.set(K_RIDES,rides); return 'notrack'; }
-  setTimeout(()=>segScanRide(ride,true),800);
+  if(segs.length&&!store.set(K_TRK+ride.id,segs)){ ride.noTrack=true; store.set(K_RIDES,rides); cloudPutRide(ride); return 'notrack'; }
+  setTimeout(()=>segScanRide(ride,true),800); cloudPutRide(ride);
   return true;
 }
 function endRec(){ exitRideMode(true); R.follow=null; setTimeout(renderRoute,0); rec=null; store.del(K_LIVE); releaseWake(); follow=false; $('#btnLocate').classList.remove('on'); render(); presenceTick(true);
@@ -2719,8 +2730,9 @@ async function vidExport(st,$v,sync){ if(st.busy||!st.map) return; st.busy=true;
   const sh=note.querySelector('#vShare'); if(sh) sh.onclick=async()=>{ try{ await navigator.share({files:[file],title:st.V.r.name||'ปั่นไกล'}); }catch(e){} };
   st.t=0; }
 
-function openRide(id){
-  const r=rides.find(x=>x.id===id); if(!r) return; const segs=store.get(K_TRK+id,[]);
+function openRide(id,ov){
+  const r=rides.find(x=>x.id===id); if(!r) return; const segs=ov||store.get(K_TRK+id,[]);
+  if(!ov&&!segs.length&&r.cloudTrk&&acctUser()){ toast('กำลังโหลดเส้นทางจากบัญชี…'); cloudTrack(id).then(sg=>{ if(sg.length&&store.set(K_TRK+id,sg)){ delete r.cloudTrk; store.set(K_RIDES,rides); } openRide(id,sg.length?sg:[]); }); return; }
   openModal('<h3>'+esc(r.name)+(r.demo?'<span class="tag">จำลอง</span>':'')+'</h3><div class="sub">'+fmtDate(r.start)+' · รวมพัก '+fmtDur(r.elapsed)+'</div>'+
     (segs.length&&hasL?'<div class="dmap" id="dmap"></div>':(r.noTrack?'<div class="sub">ไม่มีข้อมูลเส้นทาง</div>':(r.src==='import'?'<div class="sub">ไฟล์นี้ไม่มีข้อมูลตำแหน่ง (เช่น ปั่นในบ้านกับเทรนเนอร์)</div>':'')))+'<div class="pstrip" id="dPics" style="display:none"></div>'+statGrid(r)+sensorInfo(r)+'<div id="dSegs"></div>'+
     '<div class="sub" style="margin-top:-4px">* แคลอรี่เป็นค่าประมาณจากความเร็วเฉลี่ยและน้ำหนักตัว</div>'+
@@ -2736,7 +2748,7 @@ function openRide(id){
   const ds=$('#dSeg'); if(ds) ds.onclick=()=>openSegCreate(r.id);
   renderRideSegs(r); ridePhotos(r.id);
   $('#dDel').onclick=e=>{ const b=e.currentTarget; if(!b.dataset.sure){ b.dataset.sure=1; b.textContent='แตะอีกครั้งเพื่อลบ'; return; }
-    rides=rides.filter(x=>x.id!==id); store.set(K_RIDES,rides); store.del(K_TRK+id); effDropRide(id); PDB.delRide(id).catch(()=>{}); closeModal(); renderHistory(); toast('ลบแล้ว'); };
+    rides=rides.filter(x=>x.id!==id); store.set(K_RIDES,rides); store.del(K_TRK+id); effDropRide(id); cloudDelRide(id); PDB.delRide(id).catch(()=>{}); closeModal(); renderHistory(); toast('ลบแล้ว'); };
 }
 function exportGpx(r,segs){
   let g='<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Pankrai" xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1">\n<metadata><name>'+esc(r.name)+'</name><time>'+new Date(r.start).toISOString()+'</time></metadata>\n<trk><name>'+esc(r.name)+'</name><type>cycling</type>\n';
@@ -3106,7 +3118,7 @@ $('#tabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(
 $('#pillOnline').onclick=()=>{ setTab('comm'); setTimeout(()=>$('#ridersHead').scrollIntoView({behavior:'smooth',block:'start'}),60); };
 function tg(id,on){ return '<label class="tg"><input type="checkbox" id="'+id+'"'+(on?' checked':'')+'><span></span></label>'; }
 function openSettings(){
-  openModal('<h3>ตั้งค่า</h3>'+profileBlockHTML()+
+  openModal('<h3>ตั้งค่า</h3>'+acctBlockHTML()+profileBlockHTML()+
     '<div class="row"><div><div class="rl">แสดงตัวบนแผนที่</div><div class="rs">ให้นักปั่นคนอื่นเห็นว่าคุณออนไลน์ เฉพาะตอนเปิดแอป</div></div>'+tg('sShare',settings.share)+'</div>'+
     '<div class="field" id="sPrecBox"'+(settings.share?'':' style="display:none"')+'><label>ความแม่นยำของตำแหน่งที่คนอื่นเห็น</label><div class="seg" id="sPrec">'+
       [['coarse','คร่าว ๆ ~500 ม.'],['ride','แม่นยำตอนปั่น'],['exact','แม่นยำเสมอ']].map(o=>'<button data-v="'+o[0]+'" class="'+((settings.prec||'coarse')===o[0]?'on':'')+'">'+o[1]+'</button>').join('')+'</div>'+
@@ -3119,11 +3131,11 @@ function openSettings(){
     '<div class="row"><div><div class="rl">เปิดหน้าจอค้างไว้ระหว่างปั่น</div><div class="rs">ช่วยให้ GPS ทำงานต่อเนื่อง</div></div>'+tg('sWake',settings.wakeLock)+'</div>'+
     '<div class="row"><div><div class="rl">โหมดจำลอง</div><div class="rs">ทดลองทุกฟีเจอร์โดยไม่ต้องออกไปปั่น</div></div>'+tg('sDemo',demo)+'</div>'+
     '<div class="row"><div><div class="rl">ฐานข้อมูลชุมชน</div><div class="rs" id="connStatus"></div></div></div>'+
-    '<div class="row"><div><div class="rl">ลบประวัติการปั่นทั้งหมด</div><div class="rs">เฉพาะข้อมูลในเครื่องนี้</div></div><button class="btn red" id="btnWipe" style="padding:9px 14px">ลบ</button></div>'+
+    '<div class="row"><div><div class="rl">ลบประวัติการปั่นทั้งหมด</div><div class="rs">เฉพาะข้อมูลในเครื่องนี้ (ถ้าเข้าสู่ระบบอยู่ ข้อมูลในบัญชียังอยู่และจะซิงก์กลับมา)</div></div><button class="btn red" id="btnWipe" style="padding:9px 14px">ลบ</button></div>'+
     '<div class="tips" style="margin:12px 0"><b>เคล็ดลับ</b><br>• กดค้างบนแผนที่ (หรือคลิกขวา) เพื่อตั้งจุด A/B จุดแวะ หรือแจ้งเหตุ<br>• ลากหมุด A, B หรือจุดแวะบนแผนที่เพื่อปรับเส้นทาง<br>• เปิดแอปค้างไว้ระหว่างปั่น เบราว์เซอร์มือถือมักหยุด GPS เมื่อจอดับ<br>• กด แชร์ → เพิ่มไปยังหน้าจอหลัก เพื่อเปิดเหมือนแอป</div>'+
     '<div class="tips" style="font-size:12px">แผนที่ © OpenStreetMap · เส้นทาง BRouter · ค้นหา Nominatim · ข้อมูลร้านและทางจักรยานจาก OpenStreetMap</div>'+
     '<div class="stack" style="margin-top:12px"><button class="btn ghost" id="setX">ปิด</button></div>');
-  updateConnUI(); $('#setX').onclick=closeModal; wireProfileBlock();
+  updateConnUI(); acctRender(); $('#setX').onclick=closeModal; wireProfileBlock();
   const precNote=()=>{ const v=settings.prec||'coarse'; $('#sPrecNote').textContent=v==='coarse'?'คนอื่นเห็นแค่ว่าคุณอยู่แถวไหน (ปัดเป็นช่องประมาณ 400 ม.) คนที่อยู่ใกล้กันจะเห็นหมุดเดียวกันในวงเส้นประ ปลอดภัยสำหรับการเปิดแอปที่บ้านหรือที่ทำงาน':
       v==='ride'?'ปกติแสดงแบบคร่าว ๆ แต่ระหว่างกด ▶ เริ่มปั่น จะแสดงตำแหน่งจริง เหมาะกับปั่นเป็นก๊วน':'ทุกคนที่เปิดแอปจะเห็นตำแหน่งจริงของคุณตลอดเวลาที่เปิดแอป รวมถึงตอนอยู่บ้าน — เลือกเฉพาะเมื่อจำเป็น'; };
   precNote();
@@ -3161,7 +3173,7 @@ function profileBlockHTML(){
   return '<div class="prof">'+avatarHTML(76)+'<div style="flex:1;min-width:0"><div class="rl" style="font-weight:700;font-size:17px">'+esc(settings.name||'ยังไม่ได้ตั้งชื่อ')+'</div>'+
     '<div class="pbtns"><button class="pbtn" data-pickav>🎨 เลือกตัวการ์ตูน</button><button class="pbtn" data-photo>📷 '+(settings.photo&&!settings.avatar?'เปลี่ยนรูปถ่าย':'ใช้รูปถ่าย')+'</button>'+(settings.photo?'<button class="pbtn" id="sDelPhoto">ลบรูป</button>':'')+'</div></div></div>'+
     '<div class="row"><div><div class="rl">ชื่อเล่น</div><div class="rs">แสดงให้นักปั่นคนอื่นเห็น และบนรูปที่แชร์</div></div><input class="inp w" id="sName" maxlength="30" value="'+esc(settings.name)+'"></div>'+
-    '<div class="row"><div><div class="rl">เพศ</div><div class="rs">เก็บไว้ในเครื่องนี้เท่านั้น ไม่แสดงให้คนอื่นเห็น</div></div>'+genderSeg('sGender')+'</div>'+
+    '<div class="row"><div><div class="rl">เพศ</div><div class="rs">เก็บในเครื่องนี้ (และในบัญชีของคุณถ้าเข้าสู่ระบบ) ไม่แสดงให้คนอื่นเห็น</div></div>'+genderSeg('sGender')+'</div>'+
     '<div class="row"><div><div class="rl">แสดงชื่อและรูปบนรูปที่แชร์</div><div class="rs">ใช้กับปุ่ม 🖼 บันทึกเป็นรูปภาพ</div></div>'+tg('sShowImg',settings.showOnImage)+'</div>';
 }
 function wireProfileBlock(){
@@ -3321,13 +3333,114 @@ function onboarding(then){
     '<div class="field"><label>ชื่อเล่นที่จะให้นักปั่นคนอื่นเห็น</label><input class="txt" id="oN" maxlength="30" placeholder="เช่น พี่ต้น" value="'+esc(dr.name!=null?dr.name:settings.name)+'"></div>'+
     '<div class="field"><label>เพศ</label>'+genderSeg('oG')+'</div>'+
     '<div class="row" style="border:0;padding:6px 0 14px"><div><div class="rl">แสดงตัวบนแผนที่</div><div class="rs">คนอื่นเห็นว่าคุณออนไลน์ ตำแหน่งแบบคร่าว ๆ ประมาณ 500 ม. เฉพาะตอนเปิดแอป ปิดได้ทุกเมื่อในตั้งค่า</div></div>'+tg('oS',settings.share)+'</div>'+
-    '<div class="stack"><button class="btn pri" id="oOk">เริ่มใช้งาน</button></div>');
+    '<div class="stack"><button class="btn pri" id="oOk">เริ่มใช้งาน</button><button class="btn ghost" id="oLogin">เคยใช้แล้ว? เข้าสู่ระบบเพื่อดึงข้อมูลเดิม</button></div>');
+  $('#oLogin').onclick=()=>{ if(!be||be.kind!=='firebase'||!fbAuth()){ toast('ยังเชื่อมฐานข้อมูลไม่ได้ ลองใหม่อีกครั้ง'); return; }
+    openAccount(()=>{ if(settings.name){ renderAvatars(); presenceTick(true); const t=obThen; obThen=null; if(t) t(); } else onboarding(); }); };
   if(dr.g){ const gs=$('#oG'); gs.dataset.v=dr.g; gs.querySelectorAll('[data-g]').forEach(x=>x.classList.toggle('on',x.dataset.g===dr.g)); }
   if(dr.s!=null) $('#oS').checked=dr.s;
   $('#oOk').onclick=()=>{ const n=$('#oN').value.trim(); if(!n){ toast('ใส่ชื่อเล่นก่อนนะครับ'); return; }
     settings.name=n.slice(0,30); settings.share=$('#oS').checked; settings.gender=$('#oG').dataset.v||settings.gender; saveSettings(); renderAvatars(); closeModal(); presenceTick(true); const t=obThen; obThen=null; if(t) t(); };
   wireGenderSeg('oG');
 }
+
+/* =================== account (Google / email) + cloud copy of rides & settings =================== */
+// Each user's own data lives at users/<uid>/ and only that signed-in account can read or write it (see database.rules.json).
+const SYNC_KEYS=['name','photo','avatar','gender','weight','wheel','sensorSpeed','autoPause','wakeLock','share','prec','phone','showOnImage','voice','voiceKm','autoEndH','goalWeek','goalMonth','navView','vidRatio','vidLen','vidLbl','vidTer','vidInfo'];
+const K_SYNC='pk_sync_v1';
+let syncSt=store.get(K_SYNC,{})||{}, syncBusy=null, profT=null;
+const fbAuth=()=>window.firebase&&firebase.auth?firebase.auth():null;
+function acctUser(){ const a=fbAuth(), u=a&&a.currentUser; return u&&!u.isAnonymous?u:null; }
+function acctLabel(u){ u=u||acctUser(); if(!u) return ''; const p=(u.providerData[0]||{}).providerId||''; return (p==='google.com'?'Google':p==='password'?'อีเมล':p)+' · '+(u.email||u.displayName||''); }
+const inAppBrowser=()=>/\bLine\/|FBAN|FBAV|Instagram|; wv\)/i.test(navigator.userAgent);
+function acctErr(e){ const c=e&&e.code||'';
+  return {'auth/popup-closed-by-user':'ปิดหน้าต่างเข้าสู่ระบบก่อนเสร็จ','auth/cancelled-popup-request':'ปิดหน้าต่างเข้าสู่ระบบก่อนเสร็จ','auth/network-request-failed':'ไม่มีอินเทอร์เน็ต ลองใหม่อีกครั้ง',
+    'auth/invalid-email':'รูปแบบอีเมลไม่ถูกต้อง','auth/weak-password':'รหัสผ่านต้องยาวอย่างน้อย 6 ตัว','auth/email-already-in-use':'อีเมลนี้สมัครไว้แล้ว ให้กด "เข้าสู่ระบบ" แทน',
+    'auth/invalid-credential':'อีเมลหรือรหัสผ่านไม่ถูกต้อง','auth/wrong-password':'อีเมลหรือรหัสผ่านไม่ถูกต้อง','auth/user-not-found':'ไม่พบบัญชีอีเมลนี้ ให้กด "สมัครใหม่"',
+    'auth/too-many-requests':'ลองหลายครั้งเกินไป รอสักครู่แล้วลองใหม่','auth/operation-not-allowed':'ผู้ดูแลระบบยังไม่ได้เปิดใช้วิธีเข้าสู่ระบบนี้',
+    'auth/unauthorized-domain':'ผู้ดูแลระบบยังไม่ได้อนุญาตเว็บนี้ให้เข้าสู่ระบบ','auth/web-storage-unsupported':'เบราว์เซอร์นี้ปิดการเก็บข้อมูลไว้ ลองเปิดด้วย Chrome หรือ Safari'}[c]||(e&&e.message)||String(e); }
+
+// run an auth change that may swap the signed-in uid, then reconnect the community data under the new identity
+async function acctSwitch(fn){ try{ if(be&&be.ok&&be.setPresence) await be.setPresence(null); }catch(e){}
+  await fn(); if(fbB){ fbB.uid=fbAuth().currentUser.uid; } unsubs.forEach(f=>{ try{ f(); }catch(e){} }); unsubs=[]; be=null; await switchBackend(); }
+async function acctGoogle(){ const a=fbAuth(); if(!a) throw new Error('ยังเชื่อมฐานข้อมูลไม่ได้');
+  const p=new firebase.auth.GoogleAuthProvider(); p.setCustomParameters({prompt:'select_account'}); const u=a.currentUser;
+  try{ if(u&&u.isAnonymous) await u.linkWithPopup(p); else await acctSwitch(()=>a.signInWithPopup(p)); }
+  catch(e){ if(e.code==='auth/credential-already-in-use'&&e.credential){ await acctSwitch(()=>a.signInWithCredential(e.credential)); }
+    else if(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment'){ sessionStorage.setItem('pk_auth_redirect','1'); if(u&&u.isAnonymous) await u.linkWithRedirect(p); else await a.signInWithRedirect(p); return; }
+    else throw e; }
+  await acctAfterSignIn(); }
+async function acctEmail(mode,email,pw){ const a=fbAuth(); if(!a) throw new Error('ยังเชื่อมฐานข้อมูลไม่ได้'); const u=a.currentUser;
+  if(mode==='up'){ const cred=firebase.auth.EmailAuthProvider.credential(email,pw); if(u&&u.isAnonymous) await u.linkWithCredential(cred); else await acctSwitch(()=>a.createUserWithEmailAndPassword(email,pw)); }
+  else await acctSwitch(()=>a.signInWithEmailAndPassword(email,pw));
+  await acctAfterSignIn(); }
+async function acctAfterSignIn(){ syncSt={}; store.set(K_SYNC,syncSt); toast('✅ เข้าสู่ระบบแล้ว กำลังซิงก์ข้อมูล…',3000); await cloudSync(true,true); acctRender(); }
+async function acctSignOut(){ const a=fbAuth(); if(!a) return; await acctSwitch(async()=>{ await a.signOut(); await a.signInAnonymously(); }); syncSt={}; store.set(K_SYNC,syncSt); acctRender(); toast('ออกจากระบบแล้ว ข้อมูลในเครื่องนี้ยังอยู่'); }
+
+const uref=p=>firebase.database().ref('users/'+acctUser().uid+(p?'/'+p:''));
+function settingsPick(){ const o={}; SYNC_KEYS.forEach(k=>{ if(settings[k]!==undefined) o[k]=settings[k]; }); return o; }
+function cloudProfSoon(){ clearTimeout(profT); profT=setTimeout(()=>{ if(acctUser()) uref('prof').set({s:JSON.stringify(settingsPick()),ts:settings.mt||Date.now()}).catch(e=>console.warn(e)); },1500); }
+function cloudPutRide(r){ if(!acctUser()||r.demo) return Promise.resolve(); const segs=store.get(K_TRK+r.id,[]), u={};
+  u['rides/'+r.id]={j:JSON.stringify(r),ts:Date.now()}; if(segs.length) u['trk/'+r.id]=JSON.stringify(segs); u['gone/'+r.id]=null;
+  return uref().update(u).catch(e=>console.warn('cloud ride',e)); }
+function cloudDelRide(id){ if(!acctUser()) return Promise.resolve(); return uref().update({['rides/'+id]:null,['trk/'+id]:null,['gone/'+id]:Date.now()}).catch(e=>console.warn(e)); }
+// track of a ride whose route did not fit in this browser's storage: fetch it when opened
+async function cloudTrack(id){ if(!acctUser()) return []; try{ const s=(await uref('trk/'+id).once('value')).val(); return s?JSON.parse(s):[]; }catch(e){ return []; } }
+
+// two-way merge: rides missing on either side are copied over, rides deleted on another device are removed here, newest settings win
+function cloudSync(loud,preferCloud){ if(syncBusy) return syncBusy; if(!acctUser()) return Promise.resolve();
+  syncBusy=(async()=>{ let up=0, down=0, gone=0;
+    try{ const [rs,gs,ps]=await Promise.all([uref('rides').once('value'),uref('gone').once('value'),uref('prof').once('value')]);
+      const cr=rs.val()||{}, cg=gs.val()||{}, cp=ps.val();
+      for(const r of rides.slice()){ if(r.demo) continue;
+        if(cg[r.id]&&!cr[r.id]){ rides=rides.filter(x=>x.id!==r.id); store.del(K_TRK+r.id); gone++; continue; }
+        if(!cr[r.id]){ await cloudPutRide(r); up++; } }
+      for(const [id,o] of Object.entries(cr)){ if(rides.some(x=>x.id===id)) continue; let r; try{ r=JSON.parse(o.j); }catch(e){ continue; } if(!r||r.id!==id) continue;
+        let segs=[]; try{ const t=(await uref('trk/'+id).once('value')).val(); segs=t?JSON.parse(t):[]; }catch(e){}
+        rides.push(r); if(segs.length&&!store.set(K_TRK+id,segs)) r.cloudTrk=1; down++; }
+      rides.sort((a,b)=>b.start-a.start); store.set(K_RIDES,rides);
+      if(cp&&cp.s&&(preferCloud||(cp.ts||0)>(settings.mt||0))){ try{ Object.assign(settings,JSON.parse(cp.s)); settings.mt=cp.ts; store.set(K_SET,settings); renderAvatars(); presenceTick(true); }catch(e){} }
+      else cloudProfSoon();
+      syncSt={t:Date.now(),uid:acctUser().uid}; store.set(K_SYNC,syncSt);
+      if(up||down||gone) renderHistory();
+      if(loud) toast('☁️ ซิงก์แล้ว'+(down?' · ดึงมา '+down+' ทริป':'')+(up?' · ส่งขึ้น '+up+' ทริป':'')+(gone?' · ลบตามเครื่องอื่น '+gone+' ทริป':''),3500);
+    }catch(e){ console.warn('sync',e); if(loud) toast('ซิงก์ไม่สำเร็จ: '+(e.code==='PERMISSION_DENIED'?'ผู้ดูแลระบบยังไม่ได้เปิดสิทธิ์เก็บข้อมูลบัญชี':acctErr(e)),5000); }
+    finally{ syncBusy=null; acctRender(); } })();
+  return syncBusy; }
+
+function acctBlockHTML(){ return '<div class="acct" id="acctBox"></div>'; }
+function acctRender(){ const box=document.getElementById('acctBox'); if(!box) return; const u=acctUser();
+  if(!fbAuth()||!be||be.kind!=='firebase'){ box.innerHTML='<div class="rl">บัญชีผู้ใช้</div><div class="rs">ต้องเชื่อมฐานข้อมูลชุมชนก่อนจึงจะเข้าสู่ระบบได้</div>'; return; }
+  if(u){ box.innerHTML='<div class="acct-h"><span class="acct-ok">☁️</span><div style="flex:1;min-width:0"><div class="rl">เข้าสู่ระบบแล้ว</div><div class="rs" style="overflow-wrap:anywhere">'+esc(acctLabel(u))+'</div>'+
+      '<div class="rs">'+(syncBusy?'กำลังซิงก์…':syncSt.t?'ซิงก์ล่าสุด '+new Date(syncSt.t).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+' น.':'ยังไม่ได้ซิงก์')+'</div></div></div>'+
+      '<div class="two" style="margin-top:8px"><button class="btn" id="acSync">🔄 ซิงก์ตอนนี้</button><button class="btn ghost" id="acOut">ออกจากระบบ</button></div>';
+    box.querySelector('#acSync').onclick=()=>cloudSync(true); box.querySelector('#acOut').onclick=()=>acctSignOut().catch(e=>toast(acctErr(e))); return; }
+  box.innerHTML='<div class="acct-h"><span class="acct-ok">🔐</span><div style="flex:1"><div class="rl">เก็บข้อมูลไว้กับบัญชี</div><div class="rs">เข้าสู่ระบบแล้วประวัติการปั่นและการตั้งค่าจะไม่หายเมื่อเปลี่ยนเครื่อง</div></div></div>'+
+    '<div class="stack" style="margin-top:8px"><button class="btn pri" id="acIn">เข้าสู่ระบบ / สมัครใช้งาน</button></div>';
+  box.querySelector('#acIn').onclick=openAccount; }
+
+const G_ICON='<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.5 13.6 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 2.9-2.2 5.4-4.7 7.1l7.6 5.9c4.4-4.1 6.9-10.1 6.9-17.5z"/><path fill="#FBBC05" d="M10.6 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.7 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.2 0-11.5-4.1-13.4-9.9l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>';
+function openAccount(back){
+  const wv=inAppBrowser(), ext=location.href.split('#')[0]+(location.search?'&':'?')+'openExternalBrowser=1';
+  openModal('<h3>เข้าสู่ระบบ / สมัครใช้งาน</h3><div class="sub">เก็บประวัติการปั่น ชื่อ รูปโปรไฟล์ และการตั้งค่าไว้กับบัญชี เปลี่ยนเครื่องหรือล้างเบราว์เซอร์ก็ดึงกลับมาได้</div>'+
+    (wv?'<div class="note warn" style="margin:8px 0">กำลังเปิดในแอปแชต (เช่น LINE) ซึ่ง Google ไม่อนุญาตให้เข้าสู่ระบบ ให้ <a href="'+esc(ext)+'">เปิดใน Chrome/Safari</a> หรือใช้อีเมลด้านล่าง</div>':'')+
+    '<div class="stack" style="margin-top:10px"><button class="btn gbtn" id="acG">'+G_ICON+' เข้าสู่ระบบด้วย Google</button></div>'+
+    '<div class="or"><span>หรือใช้อีเมล</span></div>'+
+    '<div class="seg" id="acMode"><button data-m="in" class="on">เข้าสู่ระบบ</button><button data-m="up">สมัครใหม่</button></div>'+
+    '<div class="field"><label>อีเมล</label><input class="txt" id="acE" type="email" autocomplete="email" inputmode="email" placeholder="name@example.com"></div>'+
+    '<div class="field"><label>รหัสผ่าน <small class="muted" id="acPwH"></small></label><input class="txt" id="acP" type="password" autocomplete="current-password" minlength="6"></div>'+
+    '<div class="stack"><button class="btn pri" id="acGo">เข้าสู่ระบบ</button><button class="btn ghost" id="acForgot" style="font-size:14px">ลืมรหัสผ่าน</button></div>'+
+    '<div class="note" style="margin-top:10px">ข้อมูลบัญชีเห็นได้เฉพาะคุณ อีเมลไม่แสดงให้นักปั่นคนอื่นเห็น · รูปที่ถ่ายระหว่างปั่นยังเก็บเฉพาะในเครื่อง</div>'+
+    '<div class="stack" style="margin-top:10px"><button class="btn ghost" id="acX">ปิด</button></div>');
+  let mode='in'; const busy=(b,on)=>{ b.disabled=on; };
+  $('#acMode').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; mode=b.dataset.m; $$('#acMode button').forEach(x=>x.classList.toggle('on',x===b));
+    $('#acGo').textContent=mode==='up'?'สมัครใหม่':'เข้าสู่ระบบ'; $('#acPwH').textContent=mode==='up'?'(อย่างน้อย 6 ตัว)':''; $('#acP').autocomplete=mode==='up'?'new-password':'current-password'; $('#acForgot').style.display=mode==='up'?'none':''; };
+  const done=()=>{ closeModal(); if(typeof back==='function') back(); };
+  $('#acG').onclick=async e=>{ const b=e.currentTarget; busy(b,true); try{ await acctGoogle(); if(acctUser()) done(); }catch(err){ toast(acctErr(err),4500); } finally{ busy(b,false); } };
+  $('#acGo').onclick=async e=>{ const b=e.currentTarget, em=$('#acE').value.trim(), pw=$('#acP').value; if(!em||!pw){ toast('ใส่อีเมลและรหัสผ่านก่อน'); return; } if(mode==='up'&&pw.length<6){ toast('รหัสผ่านต้องยาวอย่างน้อย 6 ตัว'); return; }
+    busy(b,true); try{ await acctEmail(mode,em,pw); done(); }catch(err){ toast(acctErr(err),4500); } finally{ busy(b,false); } };
+  $('#acForgot').onclick=async()=>{ const em=$('#acE').value.trim(); if(!em){ toast('ใส่อีเมลก่อน แล้วกดลืมรหัสผ่านอีกครั้ง'); return; }
+    try{ await fbAuth().sendPasswordResetEmail(em); toast('ส่งลิงก์ตั้งรหัสผ่านใหม่ไปที่ '+em+' แล้ว (ดูในกล่องจดหมายขยะด้วย)',5000); }catch(err){ toast(acctErr(err),4500); } };
+  $('#acX').onclick=done; }
 
 /* =================== live location beacon =================== */
 const K_BEACON='pk_beacon_v1';
@@ -3446,7 +3559,7 @@ window.addEventListener('beforeunload',()=>{ if(rec) saveLive(); });
 window.addEventListener('hashchange',()=>{ if(/^#b-/.test(location.hash)){ location.reload(); return; } if(!openHashRoute()){ hashDone=false; openHashGroup(); } });
 renderBeacon();
 }
-window.__pk={get be(){return be;},data,R,infra,get map(){return MAIN&&MAIN.m;},get nav(){return {navTargetPt,settings,turnsOf,R};},get vid(){return {openRideVideo,vidPrep,vidPlan,vidApply,vidFrameReady,vidCompose,cur:()=>vidCur};}};
+window.__pk={get be(){return be;},data,R,infra,get map(){return MAIN&&MAIN.m;},get nav(){return {navTargetPt,settings,turnsOf,R};},get acct(){return {acctUser,cloudSync,openAccount,acctGoogle,acctEmail,acctSignOut,openSettings,openRide,closeModal};},get vid(){return {openRideVideo,vidPrep,vidPlan,vidApply,vidFrameReady,vidCompose,cur:()=>vidCur};}};
 })();
 </script>
 </body>
