@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "ปั่นไกล — แผนที่นักปั่น",
+  "short_name": "ปั่นไกล",
+  "description": "บันทึกการปั่นด้วย GPS นำทางทีละจุดเลี้ยว แผนที่นักปั่นชุมชน และวิดีโอเส้นทาง 3 มิติ",
+  "lang": "th",
+  "dir": "ltr",
+  "start_url": "./?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#14705f",
+  "categories": ["sports", "navigation", "health", "fitness"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

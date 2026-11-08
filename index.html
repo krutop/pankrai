@@ -8,6 +8,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="ปั่นไกล">
 <title>ปั่นไกล — แผนที่นักปั่น</title>
+<meta name="description" content="บันทึกการปั่นด้วย GPS นำทางทีละจุดเลี้ยว แผนที่นักปั่นชุมชน และวิดีโอเส้นทาง 3 มิติ">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -46,6 +50,7 @@ window.PK_FIREBASE = {
   appId: "1:216927431660:web:905a9f863a0770e3ae2ec9"
 };
 window.PK_DONATE = null;
+if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')) window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(e=>console.warn('sw',e)); });
 </script>
 
 <style>
@@ -310,6 +315,8 @@ window.PK_DONATE = null;
   .acct{border:1px solid var(--line,#e3e8e5);border-radius:14px;padding:12px 14px;margin:4px 0 10px;background:#f7faf8}
   .acct-h{display:flex;gap:10px;align-items:flex-start} .acct-ok{font-size:22px;line-height:1.2}
   .acct .two{display:flex;gap:8px} .acct .two .btn{flex:1}
+  .acdel{display:block;margin:10px auto 0;border:0;background:none;color:var(--danger,#d92d20);font-size:13px;text-decoration:underline;padding:4px}
+  .acdel.sure{font-weight:700;text-decoration:none;background:#fdecea;border-radius:10px;padding:8px 10px}
   .gbtn{background:#fff;border:1px solid #d0d7d4;color:#1f2a27;display:flex;align-items:center;justify-content:center;gap:10px;font-weight:600}
   .or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;margin:14px 0 8px} .or::before,.or::after{content:"";flex:1;height:1px;background:#e0e6e3}
   /* ---------- ride flyover video ---------- */
@@ -3133,7 +3140,7 @@ function openSettings(){
     '<div class="row"><div><div class="rl">ฐานข้อมูลชุมชน</div><div class="rs" id="connStatus"></div></div></div>'+
     '<div class="row"><div><div class="rl">ลบประวัติการปั่นทั้งหมด</div><div class="rs">เฉพาะข้อมูลในเครื่องนี้ (ถ้าเข้าสู่ระบบอยู่ ข้อมูลในบัญชียังอยู่และจะซิงก์กลับมา)</div></div><button class="btn red" id="btnWipe" style="padding:9px 14px">ลบ</button></div>'+
     '<div class="tips" style="margin:12px 0"><b>เคล็ดลับ</b><br>• กดค้างบนแผนที่ (หรือคลิกขวา) เพื่อตั้งจุด A/B จุดแวะ หรือแจ้งเหตุ<br>• ลากหมุด A, B หรือจุดแวะบนแผนที่เพื่อปรับเส้นทาง<br>• เปิดแอปค้างไว้ระหว่างปั่น เบราว์เซอร์มือถือมักหยุด GPS เมื่อจอดับ<br>• กด แชร์ → เพิ่มไปยังหน้าจอหลัก เพื่อเปิดเหมือนแอป</div>'+
-    '<div class="tips" style="font-size:12px">แผนที่ © OpenStreetMap · เส้นทาง BRouter · ค้นหา Nominatim · ข้อมูลร้านและทางจักรยานจาก OpenStreetMap</div>'+
+    '<div class="tips" style="font-size:12px"><a href="privacy.html" target="_blank" rel="noopener">นโยบายความเป็นส่วนตัว</a> · แผนที่ © OpenStreetMap · เส้นทาง BRouter · ค้นหา Nominatim · ข้อมูลร้านและทางจักรยานจาก OpenStreetMap</div>'+
     '<div class="stack" style="margin-top:12px"><button class="btn ghost" id="setX">ปิด</button></div>');
   updateConnUI(); acctRender(); $('#setX').onclick=closeModal; wireProfileBlock();
   const precNote=()=>{ const v=settings.prec||'coarse'; $('#sPrecNote').textContent=v==='coarse'?'คนอื่นเห็นแค่ว่าคุณอยู่แถวไหน (ปัดเป็นช่องประมาณ 400 ม.) คนที่อยู่ใกล้กันจะเห็นหมุดเดียวกันในวงเส้นประ ปลอดภัยสำหรับการเปิดแอปที่บ้านหรือที่ทำงาน':
@@ -3377,6 +3384,15 @@ async function acctAfterSignIn(){ syncSt={}; store.set(K_SYNC,syncSt); toast('�
 async function acctSignOut(){ const a=fbAuth(); if(!a) return; await acctSwitch(async()=>{ await a.signOut(); await a.signInAnonymously(); }); syncSt={}; store.set(K_SYNC,syncSt); acctRender(); toast('ออกจากระบบแล้ว ข้อมูลในเครื่องนี้ยังอยู่'); }
 
 const uref=p=>firebase.database().ref('users/'+acctUser().uid+(p?'/'+p:''));
+// delete the account and everything stored under it; data saved on this phone stays (it can be deleted in settings)
+async function acctDelete(){ const a=fbAuth(), u=acctUser(); if(!u) return;
+  try{ await u.getIdToken(true); }catch(e){}
+  const t0=Math.floor(Date.now()/1000), last=u.metadata&&u.metadata.lastSignInTime?Date.parse(u.metadata.lastSignInTime)/1000:0;
+  if(!last||t0-last>270){ toast('เพื่อความปลอดภัย ให้กด "ออกจากระบบ" แล้วเข้าสู่ระบบใหม่ จากนั้นกดลบบัญชีอีกครั้ง',6000); return; }
+  await uref().remove();
+  try{ await acctSwitch(async()=>{ await u.delete(); await a.signInAnonymously(); }); }
+  catch(e){ if(e.code==='auth/requires-recent-login'){ toast('ลบข้อมูลในบัญชีแล้ว แต่ต้องเข้าสู่ระบบใหม่ก่อนลบตัวบัญชี: ออกจากระบบ เข้าใหม่ แล้วกดลบอีกครั้ง',7000); return; } throw e; }
+  syncSt={}; store.set(K_SYNC,syncSt); acctRender(); toast('ลบบัญชีและข้อมูลในบัญชีแล้ว ข้อมูลในเครื่องนี้ยังอยู่',5000); }
 function settingsPick(){ const o={}; SYNC_KEYS.forEach(k=>{ if(settings[k]!==undefined) o[k]=settings[k]; }); return o; }
 function cloudProfSoon(){ clearTimeout(profT); profT=setTimeout(()=>{ if(acctUser()) uref('prof').set({s:JSON.stringify(settingsPick()),ts:settings.mt||Date.now()}).catch(e=>console.warn(e)); },1500); }
 function cloudPutRide(r){ if(!acctUser()||r.demo) return Promise.resolve(); const segs=store.get(K_TRK+r.id,[]), u={};
@@ -3412,7 +3428,9 @@ function acctRender(){ const box=document.getElementById('acctBox'); if(!box) re
   if(!fbAuth()||!be||be.kind!=='firebase'){ box.innerHTML='<div class="rl">บัญชีผู้ใช้</div><div class="rs">ต้องเชื่อมฐานข้อมูลชุมชนก่อนจึงจะเข้าสู่ระบบได้</div>'; return; }
   if(u){ box.innerHTML='<div class="acct-h"><span class="acct-ok">☁️</span><div style="flex:1;min-width:0"><div class="rl">เข้าสู่ระบบแล้ว</div><div class="rs" style="overflow-wrap:anywhere">'+esc(acctLabel(u))+'</div>'+
       '<div class="rs">'+(syncBusy?'กำลังซิงก์…':syncSt.t?'ซิงก์ล่าสุด '+new Date(syncSt.t).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+' น.':'ยังไม่ได้ซิงก์')+'</div></div></div>'+
-      '<div class="two" style="margin-top:8px"><button class="btn" id="acSync">🔄 ซิงก์ตอนนี้</button><button class="btn ghost" id="acOut">ออกจากระบบ</button></div>';
+      '<div class="two" style="margin-top:8px"><button class="btn" id="acSync">🔄 ซิงก์ตอนนี้</button><button class="btn ghost" id="acOut">ออกจากระบบ</button></div>'+
+      '<button class="acdel" id="acDel">ลบบัญชีและข้อมูลในบัญชี</button>';
+    box.querySelector('#acDel').onclick=e=>{ const b=e.currentTarget; if(!b.dataset.sure){ b.dataset.sure=1; b.textContent='แตะอีกครั้งเพื่อยืนยัน: ลบบัญชีและข้อมูลในบัญชีถาวร'; b.classList.add('sure'); return; } b.disabled=true; acctDelete().catch(err=>toast(acctErr(err),5000)).finally(()=>acctRender()); };
     box.querySelector('#acSync').onclick=()=>cloudSync(true); box.querySelector('#acOut').onclick=()=>acctSignOut().catch(e=>toast(acctErr(e))); return; }
   box.innerHTML='<div class="acct-h"><span class="acct-ok">🔐</span><div style="flex:1"><div class="rl">เก็บข้อมูลไว้กับบัญชี</div><div class="rs">เข้าสู่ระบบแล้วประวัติการปั่นและการตั้งค่าจะไม่หายเมื่อเปลี่ยนเครื่อง</div></div></div>'+
     '<div class="stack" style="margin-top:8px"><button class="btn pri" id="acIn">เข้าสู่ระบบ / สมัครใช้งาน</button></div>';
@@ -3429,7 +3447,7 @@ function openAccount(back){
     '<div class="field"><label>อีเมล</label><input class="txt" id="acE" type="email" autocomplete="email" inputmode="email" placeholder="name@example.com"></div>'+
     '<div class="field"><label>รหัสผ่าน <small class="muted" id="acPwH"></small></label><input class="txt" id="acP" type="password" autocomplete="current-password" minlength="6"></div>'+
     '<div class="stack"><button class="btn pri" id="acGo">เข้าสู่ระบบ</button><button class="btn ghost" id="acForgot" style="font-size:14px">ลืมรหัสผ่าน</button></div>'+
-    '<div class="note" style="margin-top:10px">ข้อมูลบัญชีเห็นได้เฉพาะคุณ อีเมลไม่แสดงให้นักปั่นคนอื่นเห็น · รูปที่ถ่ายระหว่างปั่นยังเก็บเฉพาะในเครื่อง</div>'+
+    '<div class="note" style="margin-top:10px">ข้อมูลบัญชีเห็นได้เฉพาะคุณ อีเมลไม่แสดงให้นักปั่นคนอื่นเห็น · รูปที่ถ่ายระหว่างปั่นยังเก็บเฉพาะในเครื่อง · <a href="privacy.html" target="_blank" rel="noopener">นโยบายความเป็นส่วนตัว</a></div>'+
     '<div class="stack" style="margin-top:10px"><button class="btn ghost" id="acX">ปิด</button></div>');
   let mode='in'; const busy=(b,on)=>{ b.disabled=on; };
   $('#acMode').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; mode=b.dataset.m; $$('#acMode button').forEach(x=>x.classList.toggle('on',x===b));

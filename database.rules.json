@@ -1,0 +1,274 @@
+{
+  "rules": {
+    "presence": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['name', 'lat', 'lng', 'ts'])",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length <= 30"
+        },
+        "lat": {
+          ".validate": "newData.isNumber()"
+        },
+        "lng": {
+          ".validate": "newData.isNumber()"
+        },
+        "ts": {
+          ".validate": "newData.isNumber()"
+        },
+        "riding": {
+          ".validate": "newData.isBoolean()"
+        },
+        "ex": {
+          ".validate": "newData.isBoolean()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "groups": {
+      ".read": "auth != null",
+      ".indexOn": [
+        "when"
+      ],
+      "$id": {
+        ".write": "auth != null && ((!data.exists() && newData.child('owner').val() === auth.uid) || (data.child('owner').val() === auth.uid && (!newData.exists() || newData.child('owner').val() === auth.uid)))",
+        ".validate": "newData.hasChildren(['title', 'when', 'lat', 'lng', 'owner'])",
+        "title": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 80"
+        },
+        "when": {
+          ".validate": "newData.isNumber()"
+        },
+        "lat": {
+          ".validate": "newData.isNumber()"
+        },
+        "lng": {
+          ".validate": "newData.isNumber()"
+        },
+        "meetName": {
+          ".validate": "newData.isString() && newData.val().length <= 80"
+        },
+        "desc": {
+          ".validate": "newData.isString() && newData.val().length <= 500"
+        },
+        "contact": {
+          ".validate": "newData.isString() && newData.val().length <= 80"
+        },
+        "ownerName": {
+          ".validate": "newData.isString() && newData.val().length <= 30"
+        },
+        "members": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid",
+            ".validate": "newData.isString() && newData.val().length <= 30"
+          }
+        }
+      }
+    },
+    "incidents": {
+      ".read": "auth != null",
+      ".indexOn": [
+        "ts"
+      ],
+      "$id": {
+        ".write": "auth != null && ((!data.exists() && newData.child('uid').val() === auth.uid) || (data.child('uid').val() === auth.uid && (!newData.exists() || newData.child('uid').val() === auth.uid)))",
+        ".validate": "newData.hasChildren(['type', 'kind', 'lat', 'lng', 'uid', 'ts'])",
+        "type": {
+          ".validate": "newData.val() === 'hazard' || newData.val() === 'sos'"
+        },
+        "kind": {
+          ".validate": "newData.isString() && newData.val().length <= 20"
+        },
+        "note": {
+          ".validate": "newData.isString() && newData.val().length <= 300"
+        },
+        "phone": {
+          ".validate": "newData.isString() && newData.val().length <= 20"
+        },
+        "name": {
+          ".validate": "newData.isString() && newData.val().length <= 30"
+        },
+        "lat": {
+          ".validate": "newData.isNumber()"
+        },
+        "lng": {
+          ".validate": "newData.isNumber()"
+        },
+        "done": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid",
+            ".validate": "newData.isBoolean()"
+          }
+        }
+      }
+    },
+    "shops": {
+      ".read": "auth != null",
+      "$id": {
+        ".write": "auth != null && ((!data.exists() && newData.child('uid').val() === auth.uid) || (data.child('uid').val() === auth.uid && (!newData.exists() || newData.child('uid').val() === auth.uid)))",
+        ".validate": "newData.hasChildren(['name', 'lat', 'lng', 'uid'])",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 80"
+        },
+        "phone": {
+          ".validate": "newData.isString() && newData.val().length <= 20"
+        },
+        "note": {
+          ".validate": "newData.isString() && newData.val().length <= 120"
+        },
+        "by": {
+          ".validate": "newData.isString() && newData.val().length <= 30"
+        },
+        "lat": {
+          ".validate": "newData.isNumber()"
+        },
+        "lng": {
+          ".validate": "newData.isNumber()"
+        }
+      }
+    },
+    "beacons": {
+      "$id": {
+        ".read": "auth != null",
+        ".write": "auth != null && ((!data.exists() && newData.child('owner').val() === auth.uid) || (data.child('owner').val() === auth.uid && (!newData.exists() || newData.child('owner').val() === auth.uid)))",
+        ".validate": "newData.hasChildren(['owner', 'name', 'startTs', 'expires'])",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length <= 30"
+        },
+        "photo": {
+          ".validate": "newData.isString() && newData.val().length <= 30000"
+        },
+        "expires": {
+          ".validate": "newData.isNumber() && newData.val() <= now + 43260000"
+        },
+        "lat": {
+          ".validate": "newData.isNumber()"
+        },
+        "lng": {
+          ".validate": "newData.isNumber()"
+        },
+        "pts": {
+          "$p": {
+            ".validate": "newData.hasChildren(['lat', 'lng', 'ts'])"
+          }
+        }
+      }
+    },
+    "segments": {
+      ".read": "auth != null",
+      ".indexOn": [
+        "ts"
+      ],
+      "$id": {
+        ".write": "auth != null && ((!data.exists() && newData.child('owner').val() === auth.uid) || (data.child('owner').val() === auth.uid && (!newData.exists() || newData.child('owner').val() === auth.uid)))",
+        ".validate": "newData.hasChildren(['name', 'owner', 'dist', 'pts', 'lat', 'lng', 'ts'])",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 60"
+        },
+        "owner": {
+          ".validate": "newData.isString()"
+        },
+        "ownerName": {
+          ".validate": "newData.isString() && newData.val().length <= 30"
+        },
+        "dist": {
+          ".validate": "newData.isNumber() && newData.val() >= 200 && newData.val() <= 50000"
+        },
+        "gain": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 5000"
+        },
+        "pts": {
+          ".validate": "newData.isString() && newData.val().length <= 8000"
+        },
+        "lat": {
+          ".validate": "newData.isNumber()"
+        },
+        "lng": {
+          ".validate": "newData.isNumber()"
+        },
+        "ts": {
+          ".validate": "newData.isNumber() && newData.val() <= now + 60000"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "efforts": {
+      "$seg": {
+        ".read": "auth != null",
+        ".write": "auth != null && !newData.exists() && root.child('segments').child($seg).child('owner').val() === auth.uid",
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['name', 'time', 'ts']) && root.child('segments').child($seg).exists() && newData.child('time').val() >= root.child('segments').child($seg).child('dist').val() / 22",
+          "name": {
+            ".validate": "newData.isString() && newData.val().length <= 30"
+          },
+          "time": {
+            ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() < 86400"
+          },
+          "ts": {
+            ".validate": "newData.isNumber() && newData.val() <= now + 60000"
+          },
+          "kmh": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 80"
+          },
+          "g": {
+            ".validate": "newData.val() === 'm' || newData.val() === 'f'"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid && auth.token.firebase.sign_in_provider !== 'anonymous'",
+        "prof": {
+          ".validate": "newData.hasChildren(['s','ts'])",
+          "s": {
+            ".validate": "newData.isString() && newData.val().length <= 300000"
+          },
+          "ts": {
+            ".validate": "newData.isNumber()"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "rides": {
+          "$rid": {
+            ".validate": "$rid.matches(/^[A-Za-z0-9_-]{1,40}$/) && newData.hasChildren(['j','ts'])",
+            "j": {
+              ".validate": "newData.isString() && newData.val().length <= 20000"
+            },
+            "ts": {
+              ".validate": "newData.isNumber()"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "trk": {
+          "$rid": {
+            ".validate": "$rid.matches(/^[A-Za-z0-9_-]{1,40}$/) && newData.isString() && newData.val().length <= 3000000"
+          }
+        },
+        "gone": {
+          "$rid": {
+            ".validate": "$rid.matches(/^[A-Za-z0-9_-]{1,40}$/) && newData.isNumber()"
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    }
+  }
+}
