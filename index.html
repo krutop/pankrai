@@ -557,6 +557,86 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
     .big{font-size:54px}
     .leaflet-control-zoom{display:none}
   }
+  /* ---------- app shell: bottom nav + pages ---------- */
+  :root{--navH:calc(62px + var(--sab))}
+  .bnav{position:fixed;left:0;right:0;bottom:0;z-index:820;height:var(--navH);padding-bottom:var(--sab);background:#fff;border-top:1px solid var(--line);
+    display:flex;box-shadow:0 -2px 14px rgba(20,35,30,.08)}
+  .bnav button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#7d8784;font-size:12px;font-weight:600;position:relative;padding:6px 0 4px}
+  .bnav svg{width:25px;height:25px}
+  .bnav button.on{color:var(--pri)}
+  .bnav button.on svg{stroke-width:2.3}
+  .bnav .recdot{position:absolute;top:7px;left:calc(50% + 9px);width:10px;height:10px;border-radius:50%;background:var(--danger);border:2px solid #fff;display:none}
+  body.recording .bnav .recdot{display:block}
+  .pages{position:fixed;left:0;right:0;top:0;bottom:var(--navH);z-index:790;background:var(--page);overflow-y:auto;overscroll-behavior:contain;display:none;
+    padding:calc(10px + var(--sat)) 12px 18px;scrollbar-width:none}
+  .pages::-webkit-scrollbar{display:none}
+  body:not(.pg-route) .pages{display:block}
+  body:not(.pg-route) .panel, body:not(.pg-route) .fabs{display:none!important}
+  .pg{display:none;max-width:640px;margin:0 auto} .pg.on{display:block}
+  .hcard{background:#fff;border-radius:18px;padding:14px 14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(20,35,30,.06)}
+  .hcard>h4:first-child{margin-top:0}
+  .phd{display:flex;align-items:center;gap:10px;padding:6px 4px 12px}
+  .phd h2{margin:0;font-size:24px;font-weight:700;flex:1}
+  .hhead{display:flex;align-items:center;gap:8px;padding:4px 2px 12px}
+  .hhead .pill.me{padding:0;border:0;background:none;height:auto}
+  .hhi{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+  .hhi b{font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hhi small{font-size:13px;color:var(--muted)}
+  .hsum{background:linear-gradient(140deg,#14705f,#0f5b4d);color:#fff}
+  .hsum .hs-t{display:flex;justify-content:space-between;align-items:center;font-size:14px;opacity:.9}
+  .hsum .hs-t .seg{background:rgba(255,255,255,.14);padding:3px}
+  .hsum .hs-t .seg button{color:#fff;padding:4px 10px;font-size:13px;border:0;background:transparent;border-radius:10px}
+  .hsum .hs-t .seg button.on{background:#fff;color:var(--pri2);font-weight:700}
+  .hsum .hs-big{font-size:42px;font-weight:700;line-height:1.1;margin:8px 0 2px;font-variant-numeric:tabular-nums}
+  .hsum .hs-big small{font-size:16px;font-weight:500;opacity:.85;margin-left:4px}
+  .hsum .hs-row{display:flex;gap:18px;font-size:13.5px;opacity:.92}
+  .hsum .hs-row b{font-size:17px;display:block;opacity:1}
+  .hsum .meter{background:rgba(255,255,255,.25);margin-top:12px}
+  .hsum .meter i{background:#fbbf24}
+  .hsum .hs-g{font-size:13px;opacity:.92;display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .hsum .hs-g button{border:0;background:rgba(255,255,255,.18);color:#fff;border-radius:9px;padding:4px 10px;font-size:12.5px;font-weight:600}
+  .hsum .btn{width:100%;margin-top:12px;background:#f97316;color:#fff;font-size:17px}
+  .qgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .qbtn{border:0;background:var(--soft);border-radius:14px;padding:12px;display:grid;grid-template-columns:auto 1fr;column-gap:10px;text-align:left;align-items:center}
+  .qbtn span{grid-row:span 2;font-size:24px}
+  .qbtn b{font-size:14.5px} .qbtn small{font-size:12px;color:var(--muted)}
+  #tab-comm .tiles{margin-bottom:4px}
+  .livecard .hero .big{font-size:58px}
+  .mecard{display:flex;align-items:center;gap:14px;background:#fff;border-radius:18px;padding:16px 14px;margin:4px 0 12px;box-shadow:0 1px 3px rgba(20,35,30,.06)}
+  .mecard .mw{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .mecard .mw b{font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mecard .mw small{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mestat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+  .mestat div{background:#fff;border-radius:16px;padding:12px 8px;text-align:center;box-shadow:0 1px 3px rgba(20,35,30,.06)}
+  .mestat b{display:block;font-size:20px;font-variant-numeric:tabular-nums} .mestat small{font-size:12.5px;color:var(--muted)}
+  .menu{background:#fff;border-radius:18px;margin-bottom:12px;overflow:hidden;box-shadow:0 1px 3px rgba(20,35,30,.06)}
+  .mitem{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:13px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  .mitem:last-child{border-bottom:0}
+  .mitem .mic{width:36px;height:36px;border-radius:11px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
+  .mitem .mt{flex:1;min-width:0;display:flex;flex-direction:column}
+  .mitem .mt b{font-size:15.5px;font-weight:600} .mitem .mt small{font-size:12.5px;color:var(--muted)}
+  .mitem .chev{width:18px;height:18px;color:#a3aca9;flex:none}
+  .ptitle{flex:1;font-size:18px;font-weight:700}
+  .cmhint{font-size:13.5px;color:var(--muted);line-height:1.55;padding:2px 2px 10px}
+  #routeBox:not(:empty)+.cmhint{display:none}
+  .lyrbox{border-top:1px solid var(--line);padding-top:10px;margin-top:4px}
+  .lyrbox summary{font-weight:700;font-size:15px;cursor:pointer;padding:4px 0 8px;list-style-position:inside}
+  .lyrbox summary small{font-weight:400;color:var(--muted);font-size:12.5px;display:block;margin-left:18px}
+  body.ridemode .pages, body.ridemode .bnav, body.picking .pages, body.picking .bnav, body.viewer .pages, body.viewer .bnav{display:none!important}
+  body:not(.pg-route):not(.ridemode) .beacon-chip, body:not(.pg-route):not(.ridemode) .demo-chip{top:auto;bottom:calc(var(--navH) + 10px)}
+  body:not(.pg-route):not(.ridemode).demo .beacon-chip{bottom:calc(var(--navH) + 46px)}
+  @media (max-width:759px){
+    .panel{bottom:var(--navH);padding-bottom:0}
+    .fabs{bottom:calc(var(--sheetH) + var(--navH) + 14px)}
+    body.picking .pickbar.bottom{bottom:calc(16px + var(--sab))}
+  }
+  @media (min-width:760px){
+    .bnav{left:14px;right:auto;width:392px;bottom:14px;border-radius:18px;border:0;height:64px;padding:0;box-shadow:0 6px 26px rgba(20,35,30,.14)}
+    .panel{bottom:calc(14px + 64px + 10px)}
+    .pages{left:14px;right:auto;width:392px;top:14px;bottom:calc(14px + 64px + 10px);border-radius:20px;padding:12px 12px 6px;box-shadow:0 6px 26px rgba(20,35,30,.14);background:#eef1ef}
+    body:not(.pg-route) .beacon-chip, body:not(.pg-route) .demo-chip{top:calc(12px + var(--sat));bottom:auto}
+    body:not(.pg-route).demo .beacon-chip{top:calc(48px + var(--sat));bottom:auto}
+  }
 </style>
 </head>
 <body>
@@ -599,15 +679,7 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
 <aside class="panel" id="panel">
   <div class="ptop">
       <div class="handle" id="handle"><i></i></div>
-      <div class="phead" id="phead">
-        <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="16" r="3.5"/><circle cx="18.5" cy="16" r="3.5"/><path d="M5.5 16 9 8h6l3.5 8M9 8l3 8h6.5M14 4.5h3L15 8"/></svg></div>
-        <div class="brand">ปั่นไกล</div>
-        <button class="pill" id="pillOnline" title="นักปั่นออนไลน์"><span class="gdot"></span><span id="nOnline">0</span></button>
-        <button class="pill heart" id="pillDonate" title="สนับสนุน" style="display:none">♥</button>
-        <button class="pill sos" data-sos title="ขอความช่วยเหลือ">SOS</button>
-        <button class="pill me" id="pillMe" title="โปรไฟล์ของฉัน"><span class="avatar" id="hdrAvatar" style="width:30px;height:30px;font-size:13px"></span></button>
-        <button class="pill" id="pillSet" title="ตั้งค่า"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
-      </div>
+      <div class="phead" id="phead"><div class="ptitle">วางแผนเส้นทาง</div><button class="pill sos" data-sos title="ขอความช่วยเหลือ">SOS</button></div>
     </div>
   <div class="pcard" id="cardTop">
     <div class="conn" id="connNote"></div>
@@ -626,10 +698,68 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
 
   <div class="pcard" id="cardMain">
     <div id="routeBox"></div>
-    <div class="tabs" id="tabs"><button data-t="ride" class="on">ปั่น</button><button data-t="comm">ชุมชน</button><button data-t="layers">แผนที่</button></div>
+    <div class="cmhint" id="routeEmpty">ค้นหาปลายทางด้านบน กด 🔁 เส้นทางวน หรือ 📂 เปิดไฟล์ เพื่อวางเส้นทางปั่น</div>
+    <details class="lyrbox" id="tab-layers"><summary>🗂 ชั้นข้อมูลบนแผนที่ <small>ทางจักรยาน ร้าน จุดซ่อม เหตุที่แจ้ง</small></summary>
+      <label class="lyr"><input type="checkbox" id="lyMine"><span class="sw" style="background:#d9480f"></span><b>เส้นทางที่ฉันเคยปั่น</b><small id="cMine">—</small></label>
+      <label class="lyr"><input type="checkbox" data-ly="sep" checked><span class="sw" style="background:#16a34a"></span><b>ทางจักรยาน (แยกจากถนน)</b><small id="kmSep">—</small></label>
+      <label class="lyr"><input type="checkbox" data-ly="lane" checked><span class="sw" style="background:#2563eb"></span><b>เลนจักรยานบนถนน</b><small id="kmLane">—</small></label>
+      <label class="lyr"><input type="checkbox" data-ly="shared" checked><span class="sw dash"></span><b>เส้นทางร่วม/มีป้าย</b><small id="kmShared">—</small></label>
+      <label class="lyr"><input type="checkbox" data-ly="shops" checked><span class="sw dot" style="background:#1d9bd1"></span><b>ร้านจักรยาน</b><small id="cShops">—</small></label>
+      <label class="lyr"><input type="checkbox" data-ly="stations" checked><span class="sw dot" style="background:#0e7490"></span><b>จุดซ่อม/เติมลมสาธารณะ</b><small id="cStations">—</small></label>
+      <label class="lyr"><input type="checkbox" data-ly="incidents" checked><span class="sw dot" style="background:#ec4899"></span><b>เหตุที่แจ้ง</b><small id="cInc">0</small></label>
+      <label class="lyr"><input type="checkbox" data-ly="segs" checked><span class="sw" style="background:#c026d3"></span><b>ช่วงทางแข่งเวลา</b><small id="cSegs">0</small></label>
+      <label class="lyr"><input type="checkbox" data-ly="groups" checked><span class="sw dot" style="background:#f97316"></span><b>จุดนัดก๊วน</b><small id="cGroups">0</small></label>
+      <label class="lyr"><input type="checkbox" data-ly="riders" checked><span class="sw dot" style="background:#22c55e"></span><b>นักปั่นออนไลน์</b><small id="cRiders">0</small></label>
+      <div class="note" id="infraNote">ซูมเข้าใกล้ขึ้นเพื่อโหลดเส้นทางจักรยานและร้านในบริเวณนั้น</div>
+      <div class="note">ข้อมูลเส้นทางจักรยานและร้านมาจาก OpenStreetMap ซึ่งยังไม่ครบทุกพื้นที่ · ตัวเลข "รวม" นับเฉพาะพื้นที่ที่โหลดแล้ว</div>
+    </details>
+  </div>
+</aside>
 
-    <!-- ปั่น -->
-    <div class="tab on" id="tab-ride">
+<main class="pages" id="pages">
+  <!-- หน้าแรก -->
+  <section class="pg" id="pg-home">
+    <header class="hhead">
+      <button class="pill me" id="pillMe" title="โปรไฟล์ของฉัน"><span class="avatar" id="hdrAvatar" style="width:40px;height:40px;font-size:15px"></span></button>
+      <div class="hhi"><b id="homeHi">สวัสดี</b><small id="homeDate"></small></div>
+      <button class="pill" id="pillOnline" title="นักปั่นออนไลน์"><span class="gdot"></span><span id="nOnline">0</span></button>
+      <button class="pill heart" id="pillDonate" title="สนับสนุน" style="display:none">♥</button>
+      <button class="pill sos" data-sos title="ขอความช่วยเหลือ">SOS</button>
+      <button class="pill" id="pillSet" title="ตั้งค่า"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    </header>
+    <div class="hcard hsum" id="homeSum"></div>
+    <div class="hcard">
+      <h4>กิจกรรมล่าสุด <button class="mini" data-go="act">ดูทั้งหมด</button></h4>
+      <div id="homeRides"></div>
+    </div>
+    <div class="hcard">
+      <h4>ไปปั่นที่ไหนดี</h4>
+      <div class="qgrid">
+        <button class="qbtn" data-q="plan"><span>🧭</span><b>วางแผนเส้นทาง</b><small>ค้นหาปลายทาง</small></button>
+        <button class="qbtn" data-q="loop"><span>🔁</span><b>เส้นทางวน</b><small>ออกจากบ้าน วนกลับ</small></button>
+        <button class="qbtn" data-q="file"><span>📂</span><b>เปิดไฟล์เส้นทาง</b><small>GPX TCX FIT</small></button>
+        <button class="qbtn" data-q="mymap"><span>🗺</span><b>แผนที่ของฉัน</b><small>ทุกเส้นที่เคยปั่น</small></button>
+      </div>
+    </div>
+    <div class="hcard" id="tab-comm">
+      <h4>ชุมชนนักปั่น</h4>
+      <div class="tiles">
+        <button class="tile red" data-sos>🆘<span>ขอความ<br>ช่วยเหลือ</span></button>
+        <button class="tile" id="tReport">⚠️<span>แจ้งเหตุ</span></button>
+        <button class="tile" id="tGroup">👥<span>ตั้งก๊วน</span></button>
+        <button class="tile" data-act="shops">🔧<span>ร้านใกล้ฉัน</span></button>
+      </div>
+      <h4>ก๊วนที่กำลังจะปั่น <small id="nGroups">0</small></h4><div id="groupList"></div>
+      <h4>เหตุที่แจ้งไว้ <small id="nInc">0</small></h4><div id="incList"></div>
+      <h4>ช่วงทางแข่งเวลา <small id="nSegs">0</small></h4><div id="segList"></div>
+      <h4 id="ridersHead">นักปั่นออนไลน์ <small id="nRiders">0</small></h4><div id="riderList"></div>
+    </div>
+  </section>
+
+  <!-- กิจกรรม -->
+  <section class="pg" id="pg-act">
+    <header class="phd"><h2>กิจกรรม</h2></header>
+    <div class="hcard livecard" id="tab-ride">
       <div class="gps-line"><span class="dot" id="gpsDot"></span><span id="gpsText">กำลังค้นหาสัญญาณ GPS…</span><span class="badge" id="stateBadge">พร้อม</span></div>
       <div class="hero"><div class="label">ความเร็ว (กม./ชม.) <span id="spdSrc"></span></div><div class="big" id="vSpeed">0.0</div></div>
       <div class="grid">
@@ -647,10 +777,8 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
       </div>
       <div class="controls" id="controls"></div>
       <div class="routehint" id="routeHint"></div>
-      <h4>📡 แชร์ตำแหน่งสด <small>ให้ครอบครัวติดตาม</small></h4>
-      <div id="beaconBox"></div>
-      <h4>อุปกรณ์ <small>เซนเซอร์บลูทูธ</small></h4>
-      <div id="devList"></div>
+    </div>
+    <div class="hcard">
       <h4>ประวัติการปั่น <button class="mini" id="btnImport">⬆ นำเข้าไฟล์จากไมล์</button></h4>
       <input type="file" id="fileImport" accept=".fit,.gpx,.tcx" multiple hidden>
       <input type="file" id="filePhoto" accept="image/*" hidden>
@@ -663,38 +791,59 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
       <div class="two" style="margin-bottom:10px"><button class="btn ghost" id="btnStats">📊 สถิติ</button><button class="btn ghost" id="btnMyMap">🗺 แผนที่ของฉัน</button></div>
       <div id="rideList"></div>
     </div>
+  </section>
 
-    <!-- ชุมชน -->
-    <div class="tab" id="tab-comm">
-      <div class="tiles">
-        <button class="tile red" data-sos>🆘<span>ขอความ<br>ช่วยเหลือ</span></button>
-        <button class="tile" id="tReport">⚠️<span>แจ้งเหตุ</span></button>
-        <button class="tile" id="tGroup">👥<span>ตั้งก๊วน</span></button>
-        <button class="tile" data-act="shops">🔧<span>ร้านใกล้ฉัน</span></button>
-      </div>
-      <h4>ก๊วนที่กำลังจะปั่น <small id="nGroups">0</small></h4><div id="groupList"></div>
-      <h4>เหตุที่แจ้งไว้ <small id="nInc">0</small></h4><div id="incList"></div>
-      <h4>ช่วงทางแข่งเวลา <small id="nSegs">0</small></h4><div id="segList"></div>
-      <h4 id="ridersHead">นักปั่นออนไลน์ <small id="nRiders">0</small></h4><div id="riderList"></div>
+  <!-- อุปกรณ์ -->
+  <section class="pg" id="pg-dev">
+    <header class="phd"><h2>อุปกรณ์</h2></header>
+    <div class="hcard">
+      <h4>เซนเซอร์บลูทูธ <small>ชีพจร รอบขา ความเร็ว กำลัง</small></h4>
+      <div id="devList"></div>
     </div>
+    <div class="hcard">
+      <h4>ไมล์จักรยาน / นาฬิกา</h4>
+      <div class="note" style="margin-top:0">นำไฟล์กิจกรรม .fit .gpx หรือ .tcx ที่ส่งออกจากไมล์หรือนาฬิกา (เช่น iGPSPORT Garmin Wahoo) เข้ามาเก็บในประวัติการปั่น</div>
+      <button class="btn" id="devImport" style="width:100%;margin-top:10px">⬆ นำเข้าไฟล์กิจกรรม</button>
+    </div>
+    <div class="hcard">
+      <h4>GPS ของโทรศัพท์</h4>
+      <div class="gps-line" style="margin:0"><span class="dot" id="devGpsDot"></span><span id="devGpsText">—</span></div>
+    </div>
+  </section>
 
-    <!-- แผนที่ -->
-    <div class="tab" id="tab-layers">
-      <label class="lyr"><input type="checkbox" id="lyMine"><span class="sw" style="background:#d9480f"></span><b>เส้นทางที่ฉันเคยปั่น</b><small id="cMine">—</small></label>
-      <label class="lyr"><input type="checkbox" data-ly="sep" checked><span class="sw" style="background:#16a34a"></span><b>ทางจักรยาน (แยกจากถนน)</b><small id="kmSep">—</small></label>
-      <label class="lyr"><input type="checkbox" data-ly="lane" checked><span class="sw" style="background:#2563eb"></span><b>เลนจักรยานบนถนน</b><small id="kmLane">—</small></label>
-      <label class="lyr"><input type="checkbox" data-ly="shared" checked><span class="sw dash"></span><b>เส้นทางร่วม/มีป้าย</b><small id="kmShared">—</small></label>
-      <label class="lyr"><input type="checkbox" data-ly="shops" checked><span class="sw dot" style="background:#1d9bd1"></span><b>ร้านจักรยาน</b><small id="cShops">—</small></label>
-      <label class="lyr"><input type="checkbox" data-ly="stations" checked><span class="sw dot" style="background:#0e7490"></span><b>จุดซ่อม/เติมลมสาธารณะ</b><small id="cStations">—</small></label>
-      <label class="lyr"><input type="checkbox" data-ly="incidents" checked><span class="sw dot" style="background:#ec4899"></span><b>เหตุที่แจ้ง</b><small id="cInc">0</small></label>
-      <label class="lyr"><input type="checkbox" data-ly="segs" checked><span class="sw" style="background:#c026d3"></span><b>ช่วงทางแข่งเวลา</b><small id="cSegs">0</small></label>
-      <label class="lyr"><input type="checkbox" data-ly="groups" checked><span class="sw dot" style="background:#f97316"></span><b>จุดนัดก๊วน</b><small id="cGroups">0</small></label>
-      <label class="lyr"><input type="checkbox" data-ly="riders" checked><span class="sw dot" style="background:#22c55e"></span><b>นักปั่นออนไลน์</b><small id="cRiders">0</small></label>
-      <div class="note" id="infraNote">ซูมเข้าใกล้ขึ้นเพื่อโหลดเส้นทางจักรยานและร้านในบริเวณนั้น</div>
-      <div class="note">ข้อมูลเส้นทางจักรยานและร้านมาจาก OpenStreetMap ซึ่งยังไม่ครบทุกพื้นที่ · ตัวเลข "รวม" นับเฉพาะพื้นที่ที่โหลดแล้ว</div>
+  <!-- ฉัน -->
+  <section class="pg" id="pg-me">
+    <div class="mecard">
+      <span class="avatar" data-avatar style="width:68px;height:68px;font-size:26px"></span>
+      <div class="mw"><b id="meName">นักปั่น</b><small id="meAcct">ยังไม่ได้เข้าสู่ระบบ</small></div>
+      <button class="mini" data-m="profile">แก้ไข</button>
     </div>
-  </div>
-</aside>
+    <div class="mestat" id="meStat"></div>
+    <div class="menu">
+      <button class="mitem" data-m="acct"><span class="mic">👤</span><span class="mt"><b>บัญชีและการซิงก์</b><small>เข้าสู่ระบบเพื่อเก็บข้อมูลไว้ใช้ข้ามเครื่อง</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
+      <button class="mitem" data-m="stats"><span class="mic">📊</span><span class="mt"><b>สถิติและสถิติส่วนตัว</b><small>ระยะทางรายสัปดาห์ รายเดือน สถิติดีที่สุด</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
+      <button class="mitem" data-m="goal" id="meGoal"><span class="mic">🎯</span><span class="mt"><b>เป้าหมายรายเดือน</b></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
+      <button class="mitem" data-m="mymap"><span class="mic">🗺</span><span class="mt"><b>แผนที่การปั่นของฉัน</b><small>ทุกเส้นทางที่เคยปั่นบนแผนที่เดียว</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
+      <button class="mitem" data-m="settings"><span class="mic">⚙️</span><span class="mt"><b>ตั้งค่า</b><small>หยุดอัตโนมัติ เสียงแจ้ง หน้าจอ การแสดงตัว</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
+    </div>
+    <div class="hcard">
+      <h4>📡 แชร์ตำแหน่งสด <small>ให้ครอบครัวติดตาม</small></h4>
+      <div id="beaconBox"></div>
+    </div>
+    <div class="menu">
+      <button class="mitem" data-m="donate" id="meDonate" style="display:none"><span class="mic">♥</span><span class="mt"><b>สนับสนุนค่าเซิร์ฟเวอร์</b></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
+      <button class="mitem" data-m="privacy"><span class="mic">🔒</span><span class="mt"><b>นโยบายความเป็นส่วนตัว</b></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
+    </div>
+  </section>
+</main>
+
+<nav class="bnav" id="bnav" aria-label="เมนูหลัก">
+  <button data-pg="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h4.5v-5.5h4V20h4.5V9.5"/></svg><span>หน้าแรก</span></button>
+  <button data-pg="route"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M8.2 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.8"/></svg><span>เส้นทาง</span></button>
+  <button data-pg="act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="16.5" r="3.5"/><circle cx="18.5" cy="16.5" r="3.5"/><path d="M5.5 16.5 9 9h5l4.5 7.5M9 9l3 7.5h6.5"/><circle cx="15" cy="4.5" r="1.4"/><path d="M11 9 13 6l2.5 2.5H18"/></svg><span>กิจกรรม</span><i class="recdot"></i></button>
+  <button data-pg="dev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="5" width="11" height="14" rx="3"/><path d="M9.5 5V2.5h5V5M9.5 19v2.5h5V19M9.5 10.5h5M9.5 13.5h3"/></svg><span>อุปกรณ์</span></button>
+  <button data-pg="me"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.2-4.2 4.3-6.3 8-6.3s6.8 2.1 8 6.3"/></svg><span>ฉัน</span></button>
+</nav>
 
 <div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
 <div class="toast" id="toast"></div>
@@ -713,7 +862,7 @@ const store={
 const K_RIDES='pk_rides_v1', K_SET='pk_settings_v1', K_LIVE='pk_live_v1', K_TRK='pk_trk_', K_LOCAL='pk_local_db_v1', K_LUID='pk_local_uid';
 const settings=Object.assign({weight:60,autoPause:true,wakeLock:true,name:'',share:true,phone:'',wheel:2105,sensorSpeed:true,gender:'x',photo:'',showOnImage:true,voice:false,voiceKm:1,autoEndH:2,prec:'coarse',navView:'head'},store.get(K_SET,{}));
 let rides=store.get(K_RIDES,[]); if(!Array.isArray(rides)) rides=[];
-function saveSettings(){ settings.mt=Date.now(); store.set(K_SET,settings); if(typeof acctUser==='function'&&acctUser()) cloudProfSoon(); }
+function saveSettings(){ settings.mt=Date.now(); store.set(K_SET,settings); setTimeout(()=>{ if(page==='home') renderHome(); if(page==='me') renderMe(); },0); if(typeof acctUser==='function'&&acctUser()) cloudProfSoon(); }
 
 /* =================== helpers =================== */
 function hav(a,b,c,d){ const R=6371000,r=Math.PI/180,dLa=(c-a)*r,dLo=(d-b)*r;
@@ -784,12 +933,14 @@ async function shareOut(title,text,url){
 }
 
 /* =================== sheet (mobile) =================== */
+const PAGES=['home','route','act','dev','me']; let page='home', homePer='week';
 const panel=$('#panel');
 const isMobile=()=>window.innerWidth<760;
 let sheetState='peek';
 function snapH(s){ const vh=window.innerHeight;
   if(s==='peek') return Math.min($('.ptop').offsetHeight+$('#cardTop').offsetHeight+2, Math.round(vh*0.55));
-  if(s==='mid') return Math.round(vh*0.6); return vh-60-(parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat'))||0); }
+  if(s==='mid') return Math.round((vh-navPx())*0.62); return vh-navPx()-60-(parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat'))||0); }
+function navPx(){ const n=document.getElementById('bnav'); return n&&n.offsetParent!==null&&isMobile()?n.offsetHeight:0; }
 function setSheet(s){ sheetState=s;
   if(!isMobile()){ document.documentElement.style.setProperty('--sheetH','0px'); panel.style.height=''; return; }
   const h=snapH(s); document.documentElement.style.setProperty('--sheetH',h+'px'); }
@@ -797,7 +948,7 @@ function setSheet(s){ sheetState=s;
   let y0=0,h0=0,moved=false,active=false;
   const start=e=>{ if(!isMobile()||e.target.closest('button')) return; active=true; moved=false; y0=e.clientY; h0=panel.offsetHeight; panel.classList.add('drag'); try{ e.target.setPointerCapture(e.pointerId); }catch(_){} };
   const move=e=>{ if(!active) return; const dy=e.clientY-y0; if(Math.abs(dy)>4) moved=true;
-    const h=Math.max(120,Math.min(window.innerHeight-50,h0-dy)); document.documentElement.style.setProperty('--sheetH',h+'px'); };
+    const h=Math.max(120,Math.min(window.innerHeight-navPx()-50,h0-dy)); document.documentElement.style.setProperty('--sheetH',h+'px'); };
   const end=()=>{ if(!active) return; active=false; panel.classList.remove('drag');
     if(!moved){ setSheet(sheetState==='peek'?'mid':sheetState==='mid'?'max':'peek'); return; }
     const h=panel.offsetHeight, opts=['peek','mid','max'].map(s=>[s,Math.abs(snapH(s)-h)]).sort((a,b)=>a[1]-b[1]); setSheet(opts[0][0]); };
@@ -805,7 +956,7 @@ function setSheet(s){ sheetState=s;
 })();
 window.addEventListener('resize',debounce(()=>{ setSheet(sheetState); if(MAIN) MAIN.m.invalidateSize(); },150));
 function sheetPx(){ return parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sheetH'))||0; }
-function fitPad(){ return isMobile()?{paddingTopLeft:[30,70],paddingBottomRight:[30,sheetPx()+30]}:{paddingTopLeft:[430,40],paddingBottomRight:[70,40]}; }
+function fitPad(){ return isMobile()?{paddingTopLeft:[30,70],paddingBottomRight:[30,sheetPx()+navPx()+30]}:{paddingTopLeft:[430,40],paddingBottomRight:[70,40]}; }
 
 /* =================== map =================== */
 const hasL=typeof window.L!=='undefined';
@@ -828,7 +979,7 @@ function setPos(v,lat,lng,acc,pan){
 }
 function centerOn(lat,lng,zoom,anim){ if(!MAIN) return; const m=MAIN.m, z=zoom==null?m.getZoom():zoom;
   if(rideMode){ if(z!==m.getZoom()) m.setView(m.getCenter(),z,{animate:false}); placeAt(lat,lng); return; }
-  const off=document.body.classList.contains('ridemode')?[0,Math.round(((document.getElementById('rcard')||{}).offsetHeight||300)/2-30)]:isMobile()?[0,sheetPx()/2]:[-205,0]; const c=m.unproject(m.project([lat,lng],z).add(off),z); m.setView(c,z,{animate:!!anim}); }
+  const off=document.body.classList.contains('ridemode')?[0,Math.round(((document.getElementById('rcard')||{}).offsetHeight||300)/2-30)]:isMobile()?[0,(sheetPx()+navPx())/2]:[-205,0]; const c=m.unproject(m.project([lat,lng],z).add(off),z); m.setView(c,z,{animate:!!anim}); }
 const div=(html,size,anchor)=>L.divIcon({className:'pinwrap',html,iconSize:size,iconAnchor:anchor||[size[0]/2,size[1]/2],popupAnchor:[0,-(anchor?anchor[1]:size[1]/2)]});
 const ePin=(emoji,cls,label)=>div('<div class="epin '+cls+'">'+emoji+'</div>'+(label?'<div class="pin-l">'+esc(label)+'</div>':''),cls==='group'?[38,38]:cls==='sos'?[34,34]:[28,28]);
 const dotPin=cls=>div('<div class="dotpin '+cls+'"></div>',[16,16]);
@@ -855,7 +1006,7 @@ function updHeading(c,lat,lng,acc,now){
   const diff=((cand-lastHeading+540)%360)-180; lastHeading=(lastHeading+diff*(Math.abs(diff)>60?0.35:0.6)+360)%360;
 }
 function bearing(a,b,c,d){ const r=Math.PI/180, y=Math.sin((d-b)*r)*Math.cos(c*r), x=Math.cos(a*r)*Math.sin(c*r)-Math.sin(a*r)*Math.cos(c*r)*Math.cos((d-b)*r); return (Math.atan2(y,x)/r+360)%360; }
-function setGps(cls,text){ $('#gpsDot').className='dot'+(cls?' '+cls:''); $('#gpsText').textContent=text; }
+function setGps(cls,text){ $('#gpsDot').className='dot'+(cls?' '+cls:''); $('#gpsText').textContent=text; const d=$('#devGpsDot'); if(d){ d.className='dot'+(cls?' '+cls:''); $('#devGpsText').textContent=text; } }
 function startGeo(){
   if(!window.isSecureContext){ setGps('bad','ต้องเปิดหน้านี้ผ่านลิงก์ https:// จึงจะใช้ GPS ได้'); return; }
   if(!('geolocation' in navigator)){ setGps('bad','เบราว์เซอร์นี้ไม่รองรับ GPS'); return; }
@@ -1103,7 +1254,7 @@ document.addEventListener('click',e=>{
   else if(a==='seg'){ openSeg(id); }
   else if(a==='addshop'){ addShopFlow(); }
   else if(a==='reporthere'){ reportFlow({lat,lng}); }
-  else if(a==='fly'){ if(!MAIN) return; closeModal(); if(isMobile()) setSheet('peek'); setTimeout(()=>centerOn(lat,lng,16),isMobile()?260:0);
+  else if(a==='fly'){ if(!MAIN) return; closeModal(); goPage('route'); if(isMobile()) setSheet('peek'); setTimeout(()=>centerOn(lat,lng,16),isMobile()?260:0);
     const m=mk[t.dataset.key]; if(m) setTimeout(()=>m.openPopup(),350); }
 },true);
 
@@ -1590,6 +1741,7 @@ function render(){
   else c.innerHTML='<button class="btn pri" data-a="resume">▶ ปั่นต่อ</button><button class="btn red" data-a="stop">■ จบ</button><button class="btn" data-a="ui" title="เปิดหน้าจอปั่น">⛶</button>';
   renderRideCtl();
   updateStats();
+  document.body.classList.toggle('recording',!!rec); if(page==='home') renderHome();
 }
 $('#controls').addEventListener('click',e=>{ const a=e.target.closest('[data-a]'); if(!a) return; ({start:startRide,pause:pauseRide,resume:resumeRide,stop:askFinish,ui:enterRideMode})[a.dataset.a](); });
 function statGrid(o){ return '<div class="grid" style="margin-bottom:12px">'+
@@ -2343,7 +2495,7 @@ async function makeLoop(opt){
   let dir=LOOP_DIRS[opt.dir]&&LOOP_DIRS[opt.dir][1]; if(dir==null) dir=Math.floor(Math.random()*360); else dir=(dir+[0,30,-30][(opt.variant||0)%3]+360)%360;
   const token={}; R.loopJob=token;
   R.b={lat:start.lat,lng:start.lng,name:'กลับจุดเริ่ม'}; R.a={lat:start.lat,lng:start.lng,name:start.name}; R.vias=[]; R.res=null; R.error=null; R.alt=0; R.loading=true;
-  syncInputs(); setTab('ride'); if(isMobile()) setSheet('mid');
+  syncInputs(); goPage('route'); if(isMobile()) setSheet('mid');
   const box=$('#routeBox'); const say=t=>{ if(R.loopJob===token) box.innerHTML='<div class="skel">'+t+'</div>'; };
   let r=target/7.3, best=null, tries=0, fails=0;
   while(tries<5){
@@ -2382,7 +2534,7 @@ function useTrack(t){
   R.track={name:String(t.name||'เส้นทาง').slice(0,60),coords:c,ele:e,src:t.src,rideId:t.rideId||null,avg:t.avg||null,rev:false};
   R.vias=[]; R.alt=0; R.follow=null;
   store.set(K_TRACK,R.track); applyTrack(true); approachTo();
-  setTab('ride'); if(isMobile()) setSheet('mid'); setTimeout(()=>panel.scrollTo({top:Math.max(0,$('#cardMain').offsetTop-(isMobile()?$('.ptop').offsetHeight:0)-4),behavior:'smooth'}),300);
+  goPage('route'); if(isMobile()) setSheet('mid'); setTimeout(()=>panel.scrollTo({top:Math.max(0,$('#cardMain').offsetTop-(isMobile()?$('.ptop').offsetHeight:0)-4),behavior:'smooth'}),300);
   toast('🧭 ตั้งเป็นเส้นทางแล้ว — กด ▶ เริ่มปั่น เมื่อพร้อม',3500); return true;
 }
 function applyTrack(fit){
@@ -2542,7 +2694,7 @@ let period='week';
 function periodStart(p){ const d=new Date(); d.setHours(0,0,0,0);
   if(p==='week'){ d.setDate(d.getDate()-(d.getDay()+6)%7); return d.getTime(); } if(p==='month'){ d.setDate(1); return d.getTime(); } return 0; }
 function renderHistory(){
-  myRefresh();
+  myRefresh(); if(page==='home') renderHome(); if(page==='me') renderMe();
   const from=periodStart(period), list=rides.filter(r=>r.start>=from);
   $('#tDist').textContent=(list.reduce((a,r)=>a+r.dist,0)/1000).toFixed(1); $('#tCount').textContent=list.length; $('#tTime').textContent=fmtHM(list.reduce((a,r)=>a+r.moving,0));
   $('#rideList').innerHTML=rides.length?rides.slice(0,50).map(r=>'<button class="item" data-rid="'+r.id+'"><div class="ico">🚴</div>'+
@@ -3083,7 +3235,7 @@ function myHighlight(id){
   MY.hi=id; if(MY.lines[id]) MY.lines[id].forEach(l=>{ l.setStyle(MY_HI); l.bringToFront(); });
 }
 function openMyMap(p){
-  MY.on=true; if(p) MY.period=p; document.body.classList.add('mymap'); $('#lyMine').checked=true;
+  goPage('route'); MY.on=true; if(p) MY.period=p; document.body.classList.add('mymap'); $('#lyMine').checked=true;
   closeModal(); if(isMobile()) setSheet('peek');
   drawMyMap(true);
   if(MY.data&&!MY.data.items.length) toast(MY.data.list.length?'การปั่นช่วงนี้ไม่มีข้อมูลเส้นทาง':'ยังไม่มีการปั่นในช่วงนี้ — ลองเลือก "ทั้งหมด"',3500);
@@ -3118,11 +3270,64 @@ $('#myImg').onclick=()=>{ const d=MY.data||myData(MY.period); if(!d.items.length
     note:'รูปนี้รวมทุกเส้นทาง จึงอาจเห็นได้ว่าบ้านหรือที่ทำงานคุณอยู่แถวไหน ตรวจดูก่อนโพสต์สาธารณะ'}); };
 
 /* =================== tabs, settings, donate =================== */
-function scrollToTabs(){ const t=$('#tabs'), top=$('.ptop'); panel.scrollTo({top:Math.max(0,t.offsetTop-(isMobile()?top.offsetHeight:0)-8),behavior:'smooth'}); }
-function setTab(t){ $$('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t)); $$('.tab').forEach(x=>x.classList.toggle('on',x.id==='tab-'+t));
-  if(t==='ride') renderHistory(); if(t==='layers') loadInfra(); if(isMobile()&&sheetState==='peek') setSheet('mid'); }
-$('#tabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setTab(b.dataset.t); });
-$('#pillOnline').onclick=()=>{ setTab('comm'); setTimeout(()=>$('#ridersHead').scrollIntoView({behavior:'smooth',block:'start'}),60); };
+/* ---------- pages (bottom navigation) ---------- */
+function goPage(p,opt){ opt=opt||{}; if(!PAGES.includes(p)) p='home'; const prev=page; page=p;
+  if(p!=='route'&&typeof MY!=='undefined'&&MY.on) closeMyMap();
+  PAGES.forEach(x=>document.body.classList.toggle('pg-'+x,x===p));
+  $$('#bnav button').forEach(b=>b.classList.toggle('on',b.dataset.pg===p));
+  $$('.pg').forEach(x=>x.classList.toggle('on',x.id==='pg-'+p));
+  try{ sessionStorage.setItem('pk_page',p); }catch(e){}
+  if(p==='home') renderHome(); if(p==='act') renderHistory(); if(p==='me') renderMe(); if(p==='dev') renderDevs();
+  if(p==='route'){ loadInfra(); setSheet(sheetState); if(MAIN) setTimeout(()=>MAIN.m.invalidateSize(),30); }
+  if(prev!==p&&!opt.keep){ const pg=$('#pages'); if(pg) pg.scrollTop=0; } }
+function scrollToTabs(){ goPage('act'); }
+function setTab(t){ goPage({ride:'act',comm:'home',layers:'route'}[t]||t); }
+$('#bnav').addEventListener('click',e=>{ const b=e.target.closest('[data-pg]'); if(b) goPage(b.dataset.pg); });
+$('#pages').addEventListener('click',e=>{ const g=e.target.closest('[data-go]'); if(g){ goPage(g.dataset.go); return; }
+  const q=e.target.closest('[data-q]');
+  if(q){ const k=q.dataset.q;
+    if(k==='plan'){ goPage('route'); setTimeout(()=>{ const i=$('#inB'); if(i) i.focus(); },120); }
+    else if(k==='loop'){ goPage('route'); $('#btnLoop').click(); }
+    else if(k==='file'){ $('#fileRoute').click(); }
+    else if(k==='mymap'){ openMyMap(); }
+    return; }
+  const m=e.target.closest('[data-m]');
+  if(m){ const k=m.dataset.m;
+    if(k==='acct') openAccount(); else if(k==='profile'){ if(!settings.name) onboarding(); else openSettings(); }
+    else if(k==='settings') openSettings(); else if(k==='stats'){ ST.sel=null; openStats(); }
+    else if(k==='goal') openGoal('month'); else if(k==='mymap') openMyMap(period);
+    else if(k==='donate') $('#pillDonate').click();
+    else if(k==='privacy') window.open('privacy.html','_blank','noopener');
+  } });
+$('#devImport').onclick=()=>$('#fileImport').click();
+function sumOf(list){ return {dist:list.reduce((a,r)=>a+r.dist,0),moving:list.reduce((a,r)=>a+r.moving,0),gain:list.reduce((a,r)=>a+(r.gain||0),0),count:list.length}; }
+function renderHome(){ const el=$('#homeSum'); if(!el) return;
+  const h=new Date().getHours(), nm=(settings.name||'').trim();
+  $('#homeHi').textContent=(h<11?'อรุณสวัสดิ์':h<16?'สวัสดีตอนบ่าย':'สวัสดีตอนเย็น')+(nm?' '+nm:'');
+  $('#homeDate').textContent=new Date().toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long'});
+  const from=periodStart(homePer), cur=sumOf(rides.filter(r=>r.start>=from)), goal=homePer==='week'?+settings.goalWeek||0:+settings.goalMonth||0, pl=homePer==='week'?'สัปดาห์':'เดือน';
+  el.innerHTML='<div class="hs-t"><span>สรุป'+pl+'นี้</span><div class="seg" id="hsPer"><button data-p="week"'+(homePer==='week'?' class="on"':'')+'>สัปดาห์</button><button data-p="month"'+(homePer==='month'?' class="on"':'')+'>เดือน</button></div></div>'+
+    '<div class="hs-big">'+(cur.dist/1000).toFixed(1)+'<small>กม.</small></div>'+
+    '<div class="hs-row"><span><b>'+cur.count+'</b>ครั้ง</span><span><b>'+fmtHM(cur.moving)+'</b>ชม.:นาที</span><span><b>'+Math.round(cur.gain)+'</b>ไต่ระดับ ม.</span></div>'+
+    (goal?'<div class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="'+goal+'" aria-valuenow="'+(cur.dist/1000).toFixed(1)+'"><i style="width:'+Math.min(100,cur.dist/10/goal).toFixed(1)+'%"></i></div>'+
+      '<div class="hs-g"><span>🎯 เป้าหมาย '+goal+' กม. · '+(cur.dist/1000>=goal?'ถึงเป้าแล้ว 🎉':'เหลือ '+Math.max(0,goal-cur.dist/1000).toFixed(1)+' กม.')+'</span><button id="hsGoal">แก้ไข</button></div>'
+      :'<div class="hs-g" style="margin-top:10px"><span>ยังไม่ได้ตั้งเป้าหมายราย'+pl+'</span><button id="hsGoal">ตั้งเป้าหมาย</button></div>')+
+    '<button class="btn" id="hsGo">'+(rec?'⛶ กลับไปหน้าจอปั่น':'▶ เริ่มปั่น')+'</button>';
+  $('#hsPer').onclick=e=>{ const b=e.target.closest('[data-p]'); if(b){ homePer=b.dataset.p; renderHome(); } };
+  $('#hsGoal').onclick=()=>openGoal(homePer);
+  $('#hsGo').onclick=()=>{ if(rec) enterRideMode(); else { goPage('act'); startRide(); } };
+  const last=rides.slice(0,3);
+  $('#homeRides').innerHTML=last.length?last.map(r=>'<button class="item" data-rid="'+r.id+'"><div class="ico">🚴</div><div class="main"><div class="t">'+esc(r.name)+'</div><div class="s">'+fmtDate(r.start)+' · '+fmtDur(r.moving)+'</div></div><div class="km">'+(r.dist/1000).toFixed(2)+'<br><small>กม.</small></div></button>').join('')
+    :'<div class="empty">ยังไม่มีกิจกรรม — กด ▶ เริ่มปั่น หรือนำเข้าไฟล์จากไมล์ที่หน้า อุปกรณ์</div>';
+}
+$('#homeRides').addEventListener('click',e=>{ const b=e.target.closest('[data-rid]'); if(b) openRide(b.dataset.rid); });
+function renderMe(){ if(!$('#meName')) return; $('#meName').textContent=(settings.name||'').trim()||'นักปั่น';
+  const u=typeof acctUser==='function'?acctUser():null; $('#meAcct').textContent=u?'☁️ '+acctLabel(u):'ยังไม่ได้เข้าสู่ระบบ · ข้อมูลอยู่ในเครื่องนี้เท่านั้น';
+  const y=new Date(); y.setMonth(0,1); y.setHours(0,0,0,0); const t=sumOf(rides.filter(r=>r.start>=y.getTime())), all=sumOf(rides);
+  $('#meStat').innerHTML='<div><b>'+(t.dist/1000).toFixed(0)+'</b><small>กม. ปีนี้</small></div><div><b>'+t.count+'</b><small>ครั้ง ปีนี้</small></div><div><b>'+(all.dist/1000).toFixed(0)+'</b><small>กม. ทั้งหมด</small></div>';
+  const g=+settings.goalMonth||0, gm=$('#meGoal small')||null; const gb=$('#meGoal .mt');
+  if(gb){ let sm=gb.querySelector('small'); if(!sm){ sm=document.createElement('small'); gb.appendChild(sm); } sm.textContent=g?'เดือนละ '+g+' กม.':'ยังไม่ได้ตั้ง'; }
+  renderAvatars(true); }
 function tg(id,on){ return '<label class="tg"><input type="checkbox" id="'+id+'"'+(on?' checked':'')+'><span></span></label>'; }
 function openSettings(){
   openModal('<h3>ตั้งค่า</h3>'+acctBlockHTML()+profileBlockHTML()+
@@ -3160,7 +3365,7 @@ function openSettings(){
     rides.forEach(r=>store.del(K_TRK+r.id)); rides=[]; store.set(K_RIDES,rides); renderHistory(); b.textContent='ลบแล้ว'; b.disabled=true; };
 }
 $('#pillSet').onclick=openSettings;
-if(window.PK_DONATE){ const D=window.PK_DONATE; $('#pillDonate').style.display='';
+if(window.PK_DONATE){ const D=window.PK_DONATE; $('#pillDonate').style.display=''; $('#meDonate').style.display='';
   $('#pillDonate').onclick=()=>{ openModal('<h3>♥ สนับสนุนค่าเซิร์ฟเวอร์</h3><div class="sub">'+esc(D.text||'')+'</div>'+
     (D.qrImage?'<img src="'+esc(D.qrImage)+'" alt="QR พร้อมเพย์" style="width:100%;max-width:260px;display:block;margin:0 auto 12px;border-radius:12px">':'')+
     (D.promptpay?'<div class="info" style="text-align:center;font-size:18px;font-weight:600">พร้อมเพย์: '+esc(D.promptpay)+'</div>':'')+
@@ -3171,7 +3376,7 @@ const GENDER={m:'ชาย',f:'หญิง',x:'ไม่ระบุ'};
 function initials(n){ n=(n||'').trim(); if(!n) return '🙂'; const w=n.replace(/^(พี่|น้อง|ลุง|ป้า|น้า|อา|ครู)\s*/,''); return (w||n).slice(0,1).toUpperCase(); }
 function avatarHTML(size){ const st='width:'+size+'px;height:'+size+'px;font-size:'+Math.round(size*0.38)+'px';
   return '<span class="avatar" data-avatar style="'+st+'">'+(settings.photo?'<img alt="รูปโปรไฟล์" src="'+settings.photo+'">':esc(initials(settings.name)))+'</span>'; }
-function renderAvatars(){ $('#hdrAvatar').innerHTML=settings.photo?'<img alt="" src="'+settings.photo+'">':esc(initials(settings.name));
+function renderAvatars(noMe){ if(!noMe&&page==='me') renderMe(); $('#hdrAvatar').innerHTML=settings.photo?'<img alt="" src="'+settings.photo+'">':esc(initials(settings.name));
   $$('[data-avatar]').forEach(el=>{ el.innerHTML=settings.photo?'<img alt="รูปโปรไฟล์" src="'+settings.photo+'">':esc(initials(settings.name)); }); }
 function genderSeg(id){ return '<div class="gseg" id="'+id+'" data-v="'+settings.gender+'">'+Object.entries(GENDER).map(([k,l])=>'<button type="button" data-g="'+k+'" class="'+(settings.gender===k?'on':'')+'">'+l+'</button>').join('')+'</div>'; }
 function wireGenderSeg(id,onChange){ const el=$('#'+id); if(!el) return; el.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{ el.dataset.v=b.dataset.g;
@@ -3424,7 +3629,7 @@ function cloudSync(loud,preferCloud){ if(syncBusy) return syncBusy; if(!acctUser
   return syncBusy; }
 
 function acctBlockHTML(){ return '<div class="acct" id="acctBox"></div>'; }
-function acctRender(){ const box=document.getElementById('acctBox'); if(!box) return; const u=acctUser();
+function acctRender(){ if(page==='me') renderMe(); const box=document.getElementById('acctBox'); if(!box) return; const u=acctUser();
   if(!fbAuth()||!be||be.kind!=='firebase'){ box.innerHTML='<div class="rl">บัญชีผู้ใช้</div><div class="rs">ต้องเชื่อมฐานข้อมูลชุมชนก่อนจึงจะเข้าสู่ระบบได้</div>'; return; }
   if(u){ box.innerHTML='<div class="acct-h"><span class="acct-ok">☁️</span><div style="flex:1;min-width:0"><div class="rl">เข้าสู่ระบบแล้ว</div><div class="rs" style="overflow-wrap:anywhere">'+esc(acctLabel(u))+'</div>'+
       '<div class="rs">'+(syncBusy?'กำลังซิงก์…':syncSt.t?'ซิงก์ล่าสุด '+new Date(syncSt.t).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+' น.':'ยังไม่ได้ซิงก์')+'</div></div></div>'+
@@ -3515,7 +3720,7 @@ function renderBeacon(){
   $('#bShare').onclick=shareBeacon;
   $('#bStop').onclick=e=>{ const b=e.currentTarget; if(!b.dataset.sure){ b.dataset.sure=1; b.textContent='แตะอีกครั้งเพื่อหยุด'; return; } stopBeacon(); };
 }
-$('#beaconChip').onclick=()=>{ setTab('ride'); setTimeout(()=>{ const t=$('#beaconBox'); if(t) t.scrollIntoView({behavior:'smooth',block:'center'}); },80); };
+$('#beaconChip').onclick=()=>{ goPage('me'); setTimeout(()=>{ const t=$('#beaconBox'); if(t) t.scrollIntoView({behavior:'smooth',block:'center'}); },80); };
 
 /* ----- viewer page (#b-<id>) ----- */
 function beaconViewer(id){
@@ -3562,7 +3767,7 @@ function beaconViewer(id){
 const bMatch=location.hash.match(/^#b-([0-9a-f]{16,40})$/);
 if(bMatch){ beaconViewer(bMatch[1]); }
 else {
-render(); renderHistory(); renderGroups(); renderIncidents(); renderPresence(); renderShops(); renderDevs(); renderAvatars(); syncInputs(); setSheet('peek');
+render(); renderHistory(); renderGroups(); renderIncidents(); renderPresence(); renderShops(); renderDevs(); renderAvatars(); syncInputs(); setSheet('peek'); (function(){ let p='home'; try{ p=sessionStorage.getItem('pk_page')||'home'; }catch(e){} goPage(p); })();
 startGeo(); switchBackend();
 const live=store.get(K_LIVE,null);
 if(live&&live.start&&Array.isArray(live.segs)){
