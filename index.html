@@ -639,6 +639,76 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
     body:not(.pg-route) .beacon-chip, body:not(.pg-route) .demo-chip{top:calc(12px + var(--sat));bottom:auto}
     body:not(.pg-route).demo .beacon-chip{top:calc(48px + var(--sat));bottom:auto}
   }
+  /* ---------- ride plan ---------- */
+  .planv{position:fixed;inset:0;z-index:950;background:var(--page);overflow-y:auto;overscroll-behavior:contain;display:none}
+  .planv.show{display:block}
+  .pl-wrap{max-width:680px;margin:0 auto;padding:calc(8px + var(--sat)) 12px calc(20px + var(--sab))}
+  .pl-top{display:flex;align-items:center;gap:10px;padding:4px 2px 12px;position:sticky;top:0;z-index:2;background:var(--page)}
+  .pl-back{width:44px;height:44px;border-radius:50%;border:0;background:#fff;font-size:18px;box-shadow:0 1px 3px rgba(20,35,30,.12);flex:none}
+  .pl-tt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+  .pl-tt b{font-size:19px} .pl-tt small{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pl-card{background:#fff;border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(20,35,30,.06)}
+  .pl-mute{font-size:13px;color:var(--muted);line-height:1.55;margin:8px 0 0}
+  .pl-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .pl-f{flex:1 1 140px;min-width:0;display:flex;flex-direction:column;gap:4px}
+  .pl-f>span{font-size:13px;color:var(--muted)}
+  .pl-strat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .pl-strat button{border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:10px 8px;text-align:left;display:flex;flex-direction:column;gap:3px;min-height:44px}
+  .pl-strat button b{font-size:14px} .pl-strat button small{font-size:12px;color:var(--muted);line-height:1.4}
+  .pl-strat button.on{border-color:var(--pri);box-shadow:0 0 0 1px var(--pri) inset;background:#eef7f4}
+  .pl-step{display:flex;align-items:center;gap:6px;background:var(--soft);border-radius:12px;padding:4px;align-self:flex-start}
+  .pl-step button{width:40px;height:40px;border:0;border-radius:10px;background:#fff;font-size:20px;font-weight:700}
+  .pl-step b{min-width:34px;text-align:center;font-size:18px}
+  .pl-asm{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+  .pl-asm summary{font-weight:700;font-size:15px;cursor:pointer}
+  .pl-asm summary small{font-weight:400;color:var(--muted);font-size:12.5px;margin-left:4px}
+  .pl-sum{background:linear-gradient(150deg,#14705f,#0f5b4d);color:#fff}
+  .pl-big{display:flex;gap:10px} .pl-big>div{flex:1;display:flex;flex-direction:column}
+  .pl-big span{font-size:13px;opacity:.9} .pl-big b{font-size:32px;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums}
+  .pl-kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+  .pl-kv div{background:rgba(255,255,255,.12);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column}
+  .pl-kv b{font-size:18px;font-variant-numeric:tabular-nums} .pl-kv small{font-size:12px;opacity:.88}
+  .pl-sum .pl-note.warn{background:#fff7ed;color:#9a3412}
+  .pl-note{font-size:13.5px;line-height:1.55;background:var(--soft);border-radius:12px;padding:10px 12px;margin-top:10px}
+  .pl-note.warn{background:#fff7ed;color:#9a3412}
+  .pl-chart{margin:6px -4px 0}
+  .pl-svg{width:100%;height:auto;display:block;touch-action:pan-y}
+  .pl-svg text{font-size:11px;fill:#5b6663;font-family:inherit}
+  .pl-svg .pl-cn{font-size:12px;font-weight:700;fill:#7c2d12}
+  .pl-read{font-size:13.5px;color:var(--muted);min-height:20px;margin-top:4px}
+  .pl-read b{color:var(--text)}
+  .pl-cl{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)}
+  .pl-cl:last-of-type{border-bottom:0}
+  .pl-cn2{width:28px;height:28px;border-radius:50%;color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex:none}
+  .pl-cm{display:flex;flex-direction:column;gap:2px;min-width:0} .pl-cm b{font-size:14.5px} .pl-cm small{font-size:12.5px;color:var(--muted);line-height:1.5}
+  .pl-tbl{overflow-x:auto;margin:0 -4px}
+  .pl-tbl table{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
+  .pl-tbl th{font-size:12px;color:var(--muted);font-weight:600;text-align:right;padding:6px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+  .pl-tbl td{text-align:right;padding:7px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+  .pl-tbl th:first-child,.pl-tbl td:first-child{text-align:left}
+  .pl-fuel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .pl-fuel div{background:#eff6ff;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+  .pl-fuel b{font-size:19px;color:#1e3a8a} .pl-fuel small{font-size:12.5px;color:#334155;line-height:1.45}
+  .pl-leg{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .pl-leg em{flex-basis:100%;font-style:normal;font-size:12.5px;color:#b45309}
+  .pl-eat{display:flex;flex-wrap:wrap;gap:6px}
+  .pl-eat span{background:#fef3c7;color:#713f12;border-radius:999px;padding:5px 10px;font-size:13px;font-variant-numeric:tabular-nums}
+  .pl-pt{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+  .pl-pt .ic{width:34px;height:34px;border-radius:10px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:17px;flex:none}
+  .pl-pt .m{flex:1;min-width:0;display:flex;flex-direction:column} .pl-pt .m b{font-size:14.5px} .pl-pt .m small{font-size:12.5px;color:var(--muted);line-height:1.5}
+  .pl-pt .ok{color:#15803d;font-weight:600} .pl-pt .bad{color:#b91c1c;font-weight:600}
+  .pl-del{width:40px;height:40px;border:0;background:none;color:var(--muted);font-size:16px;flex:none}
+  .pl-add{display:grid;grid-template-columns:80px minmax(0,1fr);gap:8px;margin-top:10px}
+  .pl-add #paName{grid-column:1/-1} .pl-add #paCut{grid-column:1/2} .pl-add .btn{grid-column:2/3}
+  .pl-tog{display:flex;gap:12px;align-items:flex-start;padding:8px 0}
+  .pl-tog input{width:22px;height:22px;margin-top:2px;accent-color:var(--pri);flex:none}
+  .pl-tog span{display:flex;flex-direction:column} .pl-tog b{font-size:15px} .pl-tog small{font-size:12.5px;color:var(--muted);line-height:1.45}
+  .btn.pl-open{width:100%;margin-top:10px;justify-content:flex-start;gap:12px;background:#eef7f4;text-align:left}
+  .btn.pl-open>span:first-child{font-size:22px}
+  .btn.pl-open b{display:block;font-size:15.5px;color:var(--pri2)} .btn.pl-open small{display:block;font-size:12.5px;color:var(--muted);font-weight:400}
+  .wptmk span{display:flex;width:26px;height:26px;border-radius:50%;background:#fff;align-items:center;justify-content:center;font-size:14px;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+  body.planon .bnav{display:none}
+  @media (max-width:420px){ .pl-strat{grid-template-columns:1fr} .pl-big b{font-size:28px} }
 </style>
 </head>
 <body>
@@ -740,7 +810,7 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
         <button class="qbtn" data-q="plan"><span>🧭</span><b>วางแผนเส้นทาง</b><small>ค้นหาปลายทาง</small></button>
         <button class="qbtn" data-q="loop"><span>🔁</span><b>เส้นทางวน</b><small>ออกจากบ้าน วนกลับ</small></button>
         <button class="qbtn" data-q="file"><span>📂</span><b>เปิดไฟล์เส้นทาง</b><small>GPX TCX FIT</small></button>
-        <button class="qbtn" data-q="mymap"><span>🗺</span><b>แผนที่ของฉัน</b><small>ทุกเส้นที่เคยปั่น</small></button>
+        <button class="qbtn" data-q="rplan"><span>📋</span><b>วางแผนการปั่น</b><small>เวลา เนิน จุดให้น้ำ</small></button>
       </div>
     </div>
     <div class="hcard" id="tab-comm">
@@ -838,6 +908,8 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
     </div>
   </section>
 </main>
+
+<div class="planv" id="planView" role="dialog" aria-modal="true" aria-label="วางแผนการปั่น"></div>
 
 <nav class="bnav" id="bnav" aria-label="เมนูหลัก">
   <button data-pg="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h4.5v-5.5h4V20h4.5V9.5"/></svg><span>หน้าแรก</span></button>
@@ -1354,6 +1426,8 @@ function drawRoute(fit){
   const a=ptOf(R.a), b=ptOf(R.b);
   if(R.res){ L.polyline(R.res.coords,{color:'#fff',weight:10,opacity:.95}).addTo(layers.route);
     L.polyline(R.res.coords,{color:'#7c3aed',weight:6}).addTo(layers.route); }
+  if(R.track&&R.track.wpts) R.track.wpts.forEach(w=>{ const k=PL_KIND[w.kind]||PL_KIND.poi;
+    L.marker([w.lat,w.lng],{icon:L.divIcon({className:'wptmk',html:'<span>'+k[0]+'</span>',iconSize:[26,26],iconAnchor:[13,13]}),keyboard:false,zIndexOffset:500}).bindTooltip(esc(w.name||k[1])).addTo(layers.route); });
   if(R.track&&R.track.appr) L.polyline(R.track.appr,{color:'#7c3aed',weight:5,opacity:.85,dashArray:'2 10',lineCap:'round'}).addTo(layers.route);
   const addMk=(p,icon,set)=>{ const m=L.marker([p.lat,p.lng],{icon,draggable:!R.track,zIndexOffset:900,autoPan:true}).addTo(layers.route);
     m.on('dragend',()=>{ const ll=m.getLatLng(); set({lat:ll.lat,lng:ll.lng,name:'จุดบนแผนที่'}); syncInputs(); computeRoute(false); }); };
@@ -1377,14 +1451,14 @@ function renderRoute(){
     (r.fallback?'<div class="note warn">ใช้บริการเส้นทางสำรอง อาจไม่หลบถนนใหญ่เท่าโหมดปลอดภัย และไม่มีข้อมูลประเภทถนน</div>':'')+
     (r.fallback?'':'<div class="alts">'+[0,1,2].map(i=>'<button data-alt="'+i+'" class="'+(R.alt===i?'on':'')+'">เส้นทาง '+(i+1)+'</button>').join('')+'</div>')+
     (R.loop&&R.b===R.loop.b?'<div class="loopinfo"><b>🔁 เส้นทางวน · เป้าหมาย '+R.loop.target+' กม. · ได้ '+km.toFixed(1)+' กม.</b><button id="lpAgain">🎲 แบบอื่น</button></div>':'')+
-    '<div class="acts" style="'+(r.fallback?'margin-top:12px':'')+'"><button class="btn pri" id="rGo">▶ เริ่มปั่น</button><button class="btn" id="rGpx">GPX</button><button class="btn" id="rShare">แชร์</button><button class="btn" id="rClear">ล้าง</button></div>'+
+    '<div class="acts" style="'+(r.fallback?'margin-top:12px':'')+'"><button class="btn pri" id="rGo">▶ เริ่มปั่น</button><button class="btn" id="rGpx">GPX</button><button class="btn" id="rShare">แชร์</button><button class="btn" id="rClear">ล้าง</button></div>'+'<button class="btn pl-open" id="rPlan"><span>📋</span><span><b>วางแผนการปั่น</b><small>เวลาถึง เนินที่ต้องระวัง จุดให้น้ำ แผนกินดื่ม</small></span></button>'+
     (r.segs&&r.segs.length?'<details class="steps"><summary>เส้นทางทีละช่วง <small class="muted" style="font-weight:400">('+r.segs.length+' ช่วง)</small></summary>'+
       (()=>{ let acc=0; return r.segs.map((s,i)=>{ const a0=acc; acc+=s.d; const c=CATC[s.cat];
         return '<button class="stp" data-seg="'+i+'"><em style="background:'+c[2]+'"></em><b>'+c[1]+(s.cat==='major'?' ⚠️':'')+'</b><small>'+fmtKm(s.d/1000)+' · กม. '+(a0/1000).toFixed(1)+'–'+(acc/1000).toFixed(1)+'</small></button>'; }).join(''); })()+
       '<div class="note">ประเภทถนนมาจากข้อมูล OpenStreetMap ควรสังเกตป้ายจราจรและสภาพถนนจริงเสมอ</div></details>':'');
   $$('#routeBox [data-alt]').forEach(b=>b.onclick=()=>{ const n=+b.dataset.alt; if(n!==R.alt){ R.alt=n; computeRoute(true); } });
   $('#rGo').onclick=()=>{ setTab('ride'); if(!rec) startRide(); else toast('กำลังบันทึกการปั่นอยู่แล้ว'); };
-  $('#rGpx').onclick=exportRouteGpx;
+  $('#rGpx').onclick=exportRouteGpx; $('#rPlan').onclick=openPlan;
   $('#rShare').onclick=shareRoute;
   $('#rClear').onclick=clearRoute;
   const lpa=$('#lpAgain'); if(lpa) lpa.onclick=()=>makeLoop(Object.assign({},R.loop.opt,{variant:(R.loop.opt.variant||0)+1}));
@@ -2075,6 +2149,7 @@ function wireLock(btn){ let t=null, t0=0, raf=null; const ring=btn.querySelector
   btn.onclick=()=>{ if(document.body.classList.contains('locked')){ toast('กดค้างที่ปุ่มกุญแจเพื่อปลดล็อก'); return; } document.body.classList.add('locked'); renderRideCtl(); toast('🔒 ล็อกหน้าจอแล้ว — กดค้างที่ปุ่มกุญแจเพื่อปลดล็อก',3000); }; }
 $('#ruLockLayer').addEventListener('click',()=>toast('หน้าจอล็อกอยู่ — กดค้างที่ปุ่มกุญแจเพื่อปลดล็อก'));
 function rideTick(now){
+  plRideTick();
   if(rec&&rec.state==='rec'&&settings.voice&&rec.dist>0){ const step=(+settings.voiceKm||1)*1000, n=Math.floor(rec.dist/step);
     if(n>(rec.spoken||0)){ rec.spoken=n; const km=n*step/1000, mv=Math.floor(rec.moving/60);
       const left=R.follow&&R.follow.started&&!R.follow.off&&R.res?Math.max(0,R.res.dist-(R.follow.res.cum?R.follow.res.cum[R.follow.idx]:0)):null;
@@ -2533,7 +2608,7 @@ function useTrack(t){
   if(c.length>6000){ const k=Math.ceil(c.length/6000); const c2=[],e2=[]; c.forEach((p,i)=>{ if(i%k===0||i===c.length-1){ c2.push(p); e2.push(e[i]); } }); c=c2; e=e2; }
   if(MY.on) closeMyMap(); closeModal();
   R.loop=null;
-  R.track={name:String(t.name||'เส้นทาง').slice(0,60),coords:c,ele:e,src:t.src,rideId:t.rideId||null,avg:t.avg||null,rev:false};
+  R.track={name:String(t.name||'เส้นทาง').slice(0,60),coords:c,ele:e,src:t.src,rideId:t.rideId||null,avg:t.avg||null,rev:false,wpts:(t.wpts||[]).slice(0,200)};
   R.vias=[]; R.alt=0; R.follow=null;
   store.set(K_TRACK,R.track); applyTrack(true); approachTo();
   goPage('route'); if(isMobile()) setSheet('mid'); setTimeout(()=>panel.scrollTo({top:Math.max(0,$('#cardMain').offsetTop-(isMobile()?$('.ptop').offsetHeight:0)-4),behavior:'smooth'}),300);
@@ -2578,12 +2653,310 @@ function renderTrackBox(r){
     '<div class="rs-top"><div class="rs-main"><div class="rs-big">'+km.toFixed(1)+' กม. · ~'+fmtMin(km/sp*60)+'</div>'+
     '<div class="rs-sub">'+esc(t.name)+' · '+(r.ascend!=null?'ขึ้นเนิน '+Math.round(r.ascend)+' ม. · ':'')+(loop?'วนกลับจุดเดิม':'ทางเดียว')+' · ~'+sp.toFixed(0)+' กม./ชม.'+(t.avg?' (ความเร็วเฉลี่ยทริปเดิม)':'')+'</div></div></div>'+
     (ap?'<div class="appr">'+ap+'</div>':'')+
-    '<div class="acts" style="margin-top:10px"><button class="btn pri" id="rGo">▶ เริ่มปั่น</button><button class="btn" id="tRev">⇄ กลับทิศ</button><button class="btn" id="rGpx">GPX</button><button class="btn" id="rClear">ล้าง</button></div>'+
+    '<div class="acts" style="margin-top:10px"><button class="btn pri" id="rGo">▶ เริ่มปั่น</button><button class="btn" id="tRev">⇄ กลับทิศ</button><button class="btn" id="rGpx">GPX</button><button class="btn" id="rClear">ล้าง</button></div>'+'<button class="btn pl-open" id="rPlan"><span>📋</span><span><b>วางแผนการปั่น</b><small>เวลาถึง เนินที่ต้องระวัง จุดให้น้ำ แผนกินดื่ม</small></span></button>'+
     '<div class="note">ระหว่างบันทึกการปั่น แอปจะบอกระยะที่เหลือ และเตือนเมื่อออกนอกเส้นทาง · เส้นทางมาจาก GPS ของทริปเดิม ควรดูป้ายจราจรและสภาพถนนจริงเสมอ</div>';
   $('#rGo').onclick=()=>{ setTab('ride'); if(!rec) startRide(); else toast('กำลังบันทึกการปั่นอยู่แล้ว'); };
-  $('#tRev').onclick=reverseTrack; $('#rGpx').onclick=exportRouteGpx; $('#rClear').onclick=clearRoute;
+  $('#tRev').onclick=reverseTrack; $('#rGpx').onclick=exportRouteGpx; $('#rPlan').onclick=openPlan; $('#rClear').onclick=clearRoute;
   $('#routeHint').textContent='แสดงเส้นทาง "'+t.name+'" ('+km.toFixed(1)+' กม.) เป็นเส้นสีม่วงบนแผนที่';
 }
+/* =================== ride plan (วางแผนการปั่น) =================== */
+// The plan is computed from the route line: elevation profile (from the route/GPX, or Copernicus DEM via Open-Meteo),
+// a simple cycling power model (aero drag + rolling resistance + gravity), the rider's target and strategy.
+// Every assumption is shown to the rider and can be changed.
+const K_PLAN='pk_plan_v1', PL_G=9.81, PL_RHO=1.18, PL_VMAX=50/3.6;
+const PL_STRAT={even:['แรงสม่ำเสมอ','แรงคงที่ เพิ่มเล็กน้อยตอนขึ้นเนิน ผ่อนตอนลง'],easy:['ออกตัวระมัดระวัง','25% แรกผ่อนแรงลง แล้วค่อยเพิ่ม'],neg:['ครึ่งหลังแรงกว่า','เก็บแรงครึ่งแรก ไปเร่งครึ่งหลัง']};
+const PL_POS={hood:['นั่งจับแฮนด์ปกติ',0.40],drop:['ก้มต่ำ / จับดรอป',0.32],upright:['นั่งตัวตรง (จักรยานทั่วไป)',0.55]};
+const PL_ROAD={good:['ถนนลาดยางเรียบ',0.005],fair:['ถนนทั่วไป',0.007],rough:['ถนนขรุขระ / ลูกรัง',0.012]};
+const PL_KIND={water:['💧','จุดให้น้ำ'],food:['🍌','จุดอาหาร'],rest:['☕','จุดพัก'],med:['➕','จุดปฐมพยาบาล'],check:['⏱','จุดเช็คอิน / cut-off'],poi:['📍','จุดสำคัญ']};
+let PL=null, PLR=null; // PL: planner being viewed; PLR: plan used while riding
+function plKey(r){ const c=r.coords, f=c[0], l=c[c.length-1];
+  return (R.track?'t:'+R.track.name+(R.track.rev?':r':''):'r')+':'+Math.round(r.dist)+':'+f[0].toFixed(3)+','+f[1].toFixed(3)+':'+l[0].toFixed(3)+','+l[1].toFixed(3); }
+function plAll(){ const o=store.get(K_PLAN,{}); return o&&typeof o==='object'?o:{}; }
+function plSave(key,cfg){ const all=plAll(); cfg.ts=Date.now(); all[key]=cfg;
+  const ks=Object.keys(all).sort((a,b)=>(all[b].ts||0)-(all[a].ts||0)); ks.slice(8).forEach(k=>delete all[k]);
+  try{ store.set(K_PLAN,all); }catch(e){ delete cfg.elev; try{ store.set(K_PLAN,all); }catch(e2){} } }
+function plDefaults(r){ const km=r.dist/1000, sp=R.track&&R.track.avg&&R.track.avg>8?Math.round(R.track.avg):20;
+  return {mode:'speed',speed:sp,target:Math.round(km/sp*3600/300)*300||3600,start:'06:00',strat:'even',stops:km>=60?Math.floor(km/40):0,stopMin:5,
+    mass:+settings.weight||65,bike:10,pos:'hood',road:'fair',pts:[],remind:true,active:true}; }
+// project GPX waypoints onto the route
+function plWpts(r){ const w=R.track&&R.track.wpts; if(!w||!w.length) return [];
+  const c=r.coords, cum=r.cum||cumOf(c), out=[];
+  w.forEach(p=>{ let bd=Infinity, bi=0; for(let i=0;i<c.length;i++){ const d=hav(p.lat,p.lng,c[i][0],c[i][1]); if(d<bd){ bd=d; bi=i; } }
+    if(bd<=250) out.push({at:cum[bi],name:p.name||PL_KIND[p.kind][1],kind:p.kind,cut:p.cut||null,src:'gpx'}); });
+  return out.sort((a,b)=>a.at-b.at); }
+function plKindOf(s){ s=String(s||'').toLowerCase();
+  if(/ปฐม|พยาบาล|medic|first.?aid|ambulance/.test(s)) return 'med';
+  if(/อาหาร|food|feed|กิน|lunch|snack/.test(s)) return 'food';
+  if(/น้ำ|water|drink|aid|refresh|hydrat|bottle/.test(s)) return 'water';
+  if(/cut.?off|check|เช็ค|cp\d|\bcp\b|ตรวจ|time ?station/.test(s)) return 'check';
+  if(/พัก|rest|break|cafe|coffee|กาแฟ/.test(s)) return 'rest';
+  return 'poi'; }
+// elevation profile sampled every 50 m, lightly smoothed
+function plProfile(r,elev){
+  const cum=r.cum||(r.cum=cumOf(r.coords)), D=cum[cum.length-1]; if(!(D>0)) return null;
+  let d=[], e=[], src;
+  if(elev&&elev.vals&&elev.vals.length>=2&&Math.abs(elev.D-D)<5){ elev.vals.forEach((v,i)=>{ d.push(Math.min(D,i*elev.step)); e.push(v); }); src='dem'; }
+  else { const ev=r.ele||[]; const n=ev.filter(v=>v!=null&&isFinite(v)).length; if(n<Math.max(2,r.coords.length*0.6)) return null;
+    const xs=[], ys=[]; ev.forEach((v,i)=>{ if(v!=null&&isFinite(v)){ xs.push(cum[i]); ys.push(+v); } });
+    let j=0; for(let x=0;;x+=50){ const X=Math.min(x,D); while(j<xs.length-2&&xs[j+1]<X) j++;
+      const t=xs[j+1]>xs[j]?(X-xs[j])/(xs[j+1]-xs[j]):0; d.push(X); e.push(ys[j]+(ys[j+1]-ys[j])*Math.max(0,Math.min(1,t))); if(X>=D) break; }
+    src='route'; }
+  const w=src==='dem'?1:3, s=e.map((_,i)=>{ let a=0,n=0; for(let k=i-w;k<=i+w;k++) if(k>=0&&k<e.length){ a+=e[k]; n++; } return a/n; });
+  return {d,e:s,raw:e,src,D}; }
+function plEleAt(pf,x){ const d=pf.d; let lo=0, hi=d.length-1; if(x<=d[0]) return pf.e[0]; if(x>=d[hi]) return pf.e[hi];
+  while(hi-lo>1){ const m=(lo+hi)>>1; if(d[m]<=x) lo=m; else hi=m; } const t=(x-d[lo])/((d[hi]-d[lo])||1); return pf.e[lo]+(pf.e[hi]-pf.e[lo])*t; }
+function plPow(v,g,m,cda,crr){ const th=Math.atan(g); return v*(m*PL_G*(crr*Math.cos(th)+Math.sin(th))+0.5*PL_RHO*cda*v*v); }
+function plVel(P,g,m,cda,crr){ if(plPow(PL_VMAX,g,m,cda,crr)<=P) return PL_VMAX; let lo=0.6, hi=PL_VMAX; if(plPow(lo,g,m,cda,crr)>=P) return lo;
+  for(let k=0;k<44;k++){ const mid=(lo+hi)/2; if(plPow(mid,g,m,cda,crr)<P) lo=mid; else hi=mid; } return (lo+hi)/2; }
+// climbs (gain ≥ 15 m, ≥ 300 m long, ≥ 3% average) and steep descents
+function plClimbs(pf){ if(!pf) return {up:[],down:[]}; const d=pf.d, e=pf.e, up=[], down=[];
+  const scan=(sign,out,minG)=>{ let s=0, m=0;
+    for(let i=1;i<e.length;i++){ const v=sign*e[i];
+      if(v>sign*e[m]){ m=i; continue; }
+      const gain=sign*(e[m]-e[s]);
+      if(sign*(e[m]-e[i])>Math.max(5,gain*0.12)||i===e.length-1){
+        if(m>s) push(s,m,sign,out,minG); s=i; m=i; }
+      else if(sign*e[i]<sign*e[s]){ s=i; m=i; } }
+    if(m>s) push(s,m,sign,out,minG); };
+  const push=(s,m,sign,out,minG)=>{ while(s<m-1&&sign*(e[s+1]-e[s])<0.6) s++; while(m>s+1&&sign*(e[m]-e[m-1])<0.6) m--;
+    const gain=sign*(e[m]-e[s]), len=d[m]-d[s]; if(len<300||gain<minG||gain/len<0.03) return; if(out.some(c=>c.i1>=s)) return;
+    let mx=0; for(let i=s;i+2<=m;i++){ const gg=sign*(e[i+2]-e[i])/((d[i+2]-d[i])||1); if(gg>mx) mx=gg; }
+    const g=gain/len; out.push({i0:s,i1:m,d0:d[s],d1:d[m],len,gain:Math.round(gain),g,max:Math.max(mx,g),e0:Math.round(e[s]),e1:Math.round(e[m]),
+      lvl:g>=0.07||gain>=150?3:g>=0.05||gain>=60?2:1}); };
+  scan(1,up,15); scan(-1,down,20);
+  return {up,down:down.filter(c=>c.g>=0.05)}; }
+function plPtsAll(r,cfg){ return plWpts(r).concat((cfg.pts||[]).map(p=>Object.assign({},p,{src:'me'}))).filter(p=>p.at>=0&&p.at<=r.dist+50).sort((a,b)=>a.at-b.at); }
+function plParseHM(s){ s=String(s||'').trim(); let m=s.match(/^(\d{1,2})\s*[:.]\s*(\d{1,2})$/); if(m) return (+m[1])*3600+(+m[2])*60;
+  m=s.match(/^(\d+(?:\.\d+)?)$/); if(m) return Math.round(parseFloat(m[1])*3600); return null; }
+function plClockOf(start,sec){ const m=String(start||'06:00').match(/^(\d{1,2}):(\d{2})/); const base=m?(+m[1])*3600+(+m[2])*60:21600, t=base+sec;
+  const dd=Math.floor(t/86400), x=((t%86400)+86400)%86400; return pad(Math.floor(x/3600))+':'+pad(Math.floor(x%3600/60))+(dd>0?' (+'+dd+' วัน)':''); }
+function plCompute(r,cfg){
+  const cum=r.cum||(r.cum=cumOf(r.coords)), D=cum[cum.length-1], pf=plProfile(r,cfg.elev), m=(+cfg.mass||65)+(+cfg.bike||10);
+  const cda=(PL_POS[cfg.pos]||PL_POS.hood)[1], crr=(PL_ROAD[cfg.road]||PL_ROAD.fair)[1];
+  const n=Math.max(1,Math.ceil(D/100)), segs=[];
+  for(let i=0;i<n;i++){ const d0=i*100, d1=Math.min(D,(i+1)*100); if(d1<=d0) break;
+    let g=pf?(plEleAt(pf,d1)-plEleAt(pf,d0))/(d1-d0):0; g=Math.max(-0.15,Math.min(0.15,g)); const x=(d0+d1)/2/D;
+    const fg=g>0?1+Math.min(0.25,g*3):Math.max(0.35,1+g*6); // a little harder uphill, ease off downhill
+    const f=fg*(cfg.strat==='easy'?(x<0.25?0.9:1):cfg.strat==='neg'?(x<0.5?0.95:1.05):1); segs.push({d0,d1,g,f}); }
+  const pts=plPtsAll(r,cfg);
+  // planned stops: placed on water/food/rest points when there are any, else spread evenly
+  const nS=Math.max(0,Math.min(30,Math.round(+cfg.stops||0))), sMin=Math.max(0,+cfg.stopMin||0);
+  const cand=pts.filter(p=>/water|food|rest/.test(p.kind)&&p.at>200&&p.at<D-200).map(p=>p.at);
+  let stopAt=[]; if(nS){ if(cand.length){ if(cand.length<=nS) stopAt=cand.slice(); else for(let k=0;k<nS;k++) stopAt.push(cand[Math.round((k+0.5)*cand.length/nS-0.5)]); }
+    else for(let k=1;k<=nS;k++) stopAt.push(D*k/(nS+1)); }
+  const stopT=nS*sMin*60; let mov;
+  if(cfg.mode==='time'){ mov=(+cfg.target||0)-stopT; } else mov=D/((+cfg.speed||18)/3.6);
+  const warn=[];
+  if(!(mov>60)){ warn.push('เวลาเป้าหมายน้อยกว่าเวลาแวะพักที่ตั้งไว้'); mov=Math.max(60,D/(18/3.6)); }
+  const timeFor=P=>segs.reduce((a,s)=>a+(s.d1-s.d0)/plVel(P*s.f,s.g,m,cda,crr),0);
+  let lo=5, hi=2000; for(let k=0;k<60;k++){ const mid=(lo+hi)/2; if(timeFor(mid)>mov) lo=mid; else hi=mid; } const P0=(lo+hi)/2;
+  let T=0, eW=0; segs.forEach(s=>{ s.v=plVel(P0*s.f,s.g,m,cda,crr); s.t=(s.d1-s.d0)/s.v; s.T0=T; T+=s.t; eW+=Math.max(0,plPow(s.v,s.g,m,cda,crr))*s.t; });
+  if(Math.abs(T-mov)>Math.max(30,mov*0.01)) warn.push('เป้าหมายเร็วมากเกินกว่าแบบจำลองจะคำนวณได้ ลองลดความเร็วหรือเพิ่มเวลา');
+  const avgP=eW/T, wkg=avgP/(+cfg.mass||65);
+  if(wkg>4.2) warn.push('เป้าหมายนี้ต้องใช้แรงสูงมาก (~'+wkg.toFixed(1)+' วัตต์/กก.) ระดับนักแข่งที่ฝึกมาเฉพาะ ลองตั้งเป้าที่ช้าลง');
+  const tAt=x=>{ if(x<=0) return 0; if(x>=D) return T; const i=Math.min(segs.length-1,Math.floor(x/100)), s=segs[i]; return s.T0+(x-s.d0)/s.v; };
+  const dAtT=t=>{ if(t<=0) return 0; if(t>=T) return D; let lo2=0,hi2=segs.length-1; while(lo2<hi2){ const md=(lo2+hi2+1)>>1; if(segs[md].T0<=t) lo2=md; else hi2=md-1; } const s=segs[lo2]; return Math.min(D,s.d0+(t-s.T0)*s.v); };
+  const stopsBefore=x=>stopAt.filter(a=>a<x-1).length*sMin*60;
+  const eta=x=>tAt(x)+stopsBefore(x);
+  const cl=plClimbs(pf); cl.up.forEach(c=>{ c.t=tAt(c.d1)-tAt(c.d0); c.v=c.len/c.t*3.6; });
+  // splits
+  const ch=D<=20000?2000:D<=60000?5000:D<=150000?10000:20000, splits=[];
+  for(let x=0;x<D-1;x+=ch){ const x1=Math.min(D,x+ch); let up=0,dn=0; segs.forEach(s=>{ if(s.d0>=x&&s.d1<=x1+1){ const dh=s.g*(s.d1-s.d0); if(dh>0) up+=dh; else dn-=dh; } });
+    const t=tAt(x1)-tAt(x); splits.push({x0:x,x1,t,v:(x1-x)/t*3.6,up:Math.round(up),dn:Math.round(dn),eta:eta(x1)}); }
+  // fueling: general sports-nutrition ranges, scaled by moving time
+  const H=T/3600, carb=H<1?[0,0]:H<=2.5?[30,60]:[60,90];
+  const refill=[0].concat(pts.filter(p=>p.kind==='water'||p.kind==='food').map(p=>p.at).filter(a=>a>500&&a<D-500)).concat([D]);
+  const legs=[]; for(let i=1;i<refill.length;i++){ const a=refill[i-1], b=refill[i]; if(b-a<300) continue; const t=tAt(b)-tAt(a); legs.push({a,b,t,ml:Math.round(t/3600*600/50)*50}); }
+  const eats=[]; if(T>75*60) for(let t=45*60;t<T-10*60;t+=40*60) eats.push({t,at:dAtT(t)});
+  pts.forEach(p=>{ p.eta=eta(p.at); if(p.cut){ const m2=String(p.cut).match(/^(\d{1,2}):(\d{2})/), s0=String(cfg.start||'06:00').match(/^(\d{1,2}):(\d{2})/);
+      if(m2&&s0){ let lim=(+m2[1])*3600+(+m2[2])*60-((+s0[1])*3600+(+s0[2])*60); if(lim<0) lim+=86400; p.slack=lim-p.eta; } } });
+  return {D,pf,segs,T,stopT:stopAt.length*sMin*60,stopAt,P0,avgP,wkg,mass:m,climbs:cl.up,desc:cl.down,splits,pts,carb,H,legs,eats,warn,tAt,dAtT,eta,cda,crr}; }
+
+/* ---- planner UI ---- */
+function openPlan(){
+  const r=R.res; const v=$('#planView');
+  if(!r||!r.coords||r.coords.length<2){
+    v.innerHTML='<div class="pl-wrap"><div class="pl-top"><button class="pl-back" id="plX" aria-label="ปิด">✕</button><b>วางแผนการปั่น</b></div>'+
+      '<div class="pl-card"><p style="margin:0 0 6px;font-size:16px;font-weight:700">เลือกเส้นทางก่อน</p><p class="pl-mute" style="margin:0 0 14px">แผนคำนวณจากเส้นทางที่จะปั่น เปิดไฟล์ GPX ของงานปั่น วางเส้นทางเอง หรือใช้เส้นทางจากทริปเก่าก็ได้</p>'+
+      '<div class="stack"><button class="btn pri" id="plF">📂 เปิดไฟล์เส้นทางของงาน (GPX TCX FIT)</button><button class="btn" id="plR">🧭 วางเส้นทางเอง</button><button class="btn" id="plH">🕘 ใช้เส้นทางจากทริปเก่า</button></div></div></div>';
+    v.classList.add('show'); document.body.classList.add('planon');
+    $('#plX').onclick=closePlan; $('#plF').onclick=()=>{ closePlan(); $('#fileRoute').click(); };
+    $('#plR').onclick=()=>{ closePlan(); goPage('route'); setTimeout(()=>{ const i=$('#inB'); if(i) i.focus(); },150); };
+    $('#plH').onclick=()=>{ closePlan(); goPage('act'); toast('เปิดทริปที่ต้องการ แล้วกด 🧭 ใช้เป็นเส้นทาง',4000); };
+    return; }
+  const key=plKey(r), saved=plAll()[key];
+  PL={key,r,cfg:Object.assign(plDefaults(r),saved||{})};
+  v.classList.add('show'); document.body.classList.add('planon'); renderPlan();
+  if(!plProfile(r,PL.cfg.elev)) plFetchEle(true);
+}
+function closePlan(){ $('#planView').classList.remove('show'); document.body.classList.remove('planon'); }
+function plSaveNow(){ if(!PL) return; plSave(PL.key,PL.cfg); plArm(); }
+function plArm(){ PLR=null; if(!R.res||!R.res.coords||R.res.coords.length<2) return; const key=plKey(R.res), cfg=plAll()[key];
+  if(!cfg||cfg.active===false){ PLR={key,none:true}; return; }
+  try{ PLR={key,cfg,res:plCompute(R.res,cfg)}; }catch(e){ PLR={key,none:true}; } }
+function plLive(){ if(!R.res||!R.res.coords||R.res.coords.length<2) return null; const key=plKey(R.res); if(!PLR||PLR.key!==key) plArm(); return PLR&&!PLR.none?PLR:null; }
+async function plFetchEle(auto){
+  if(!PL) return; const r=PL.r, cum=r.cum||(r.cum=cumOf(r.coords)), D=cum[cum.length-1];
+  const step=Math.max(100,Math.ceil(D/1500/50)*50), xs=[]; for(let x=0;x<D;x+=step) xs.push(x); xs.push(D);
+  const pts=xs.map(x=>{ let i=cum.findIndex(c=>c>=x); if(i<=0) return r.coords[0]; const t=(x-cum[i-1])/((cum[i]-cum[i-1])||1);
+    return [r.coords[i-1][0]+(r.coords[i][0]-r.coords[i-1][0])*t, r.coords[i-1][1]+(r.coords[i][1]-r.coords[i-1][1])*t]; });
+  PL.eleBusy=true; PL.eleErr=null; renderPlanOut(); const job=PL;
+  try{ const vals=[];
+    for(let i=0;i<pts.length;i+=100){ const ch=pts.slice(i,i+100);
+      const u='https://api.open-meteo.com/v1/elevation?latitude='+ch.map(p=>p[0].toFixed(5)).join(',')+'&longitude='+ch.map(p=>p[1].toFixed(5)).join(',');
+      const res=await fetch(u); if(!res.ok) throw new Error('HTTP '+res.status); const j=await res.json();
+      if(!j||!Array.isArray(j.elevation)||j.elevation.length!==ch.length) throw new Error('ข้อมูลไม่ครบ'); vals.push(...j.elevation.map(Number)); }
+    if(PL!==job) return; PL.cfg.elev={step,vals:vals.map(v=>Math.round(v*10)/10),D,src:'om'}; PL.eleBusy=false; plSaveNow(); renderPlanOut();
+  }catch(e){ if(PL!==job) return; PL.eleBusy=false; PL.eleErr=navigator.onLine===false?'ไม่มีอินเทอร์เน็ต':'ดึงข้อมูลความสูงไม่สำเร็จ ('+(e.message||e)+')'; renderPlanOut(); }
+}
+function renderPlan(){
+  const c=PL.cfg, r=PL.r, km=r.dist/1000, nm=R.track?R.track.name:(($('#inA').value||'จุดเริ่ม')+' → '+($('#inB').value||'ปลายทาง'));
+  const opts=(o,sel)=>Object.entries(o).map(([k,v])=>'<option value="'+k+'"'+(k===sel?' selected':'')+'>'+v[0]+'</option>').join('');
+  $('#planView').innerHTML='<div class="pl-wrap">'+
+    '<div class="pl-top"><button class="pl-back" id="plX" aria-label="ปิด">✕</button><div class="pl-tt"><b>วางแผนการปั่น</b><small>'+esc(nm)+' · '+km.toFixed(1)+' กม.</small></div><button class="btn" id="plShare">แชร์แผน</button></div>'+
+    '<div id="plSumBox"></div>'+
+    '<div class="pl-card"><h4 style="margin-top:0">เป้าหมาย</h4>'+
+      '<div class="seg" id="plMode"><button data-m="speed"'+(c.mode==='speed'?' class="on"':'')+'>ความเร็วเฉลี่ย</button><button data-m="time"'+(c.mode==='time'?' class="on"':'')+'>เวลาจบ</button></div>'+
+      '<div class="pl-row">'+(c.mode==='speed'?'<label class="pl-f"><span>ความเร็วเฉลี่ยขณะปั่น (กม./ชม.)</span><input class="txt" id="plSpd" type="number" inputmode="decimal" min="5" max="60" step="0.5" value="'+c.speed+'"></label>'
+        :'<label class="pl-f"><span>เวลาทั้งหมดถึงเส้นชัย (ชม.:นาที)</span><input class="txt" id="plTgt" inputmode="numeric" placeholder="4:30" value="'+fmtHM(c.target)+'"></label>')+
+      '<label class="pl-f"><span>เวลาออกตัว</span><input class="txt" id="plStart" type="time" value="'+esc(c.start)+'"></label></div>'+
+      '<h4>แผนการออกแรง</h4><div class="pl-strat" id="plStrat">'+Object.entries(PL_STRAT).map(([k,v])=>'<button data-s="'+k+'"'+(c.strat===k?' class="on"':'')+'><b>'+v[0]+'</b><small>'+v[1]+'</small></button>').join('')+'</div>'+
+      '<h4>แวะพัก</h4><div class="pl-row"><div class="pl-f"><span>จำนวนครั้งที่แวะ</span><div class="pl-step"><button data-st="stops:-1" aria-label="ลด">−</button><b id="plStops">'+c.stops+'</b><button data-st="stops:1" aria-label="เพิ่ม">+</button></div></div>'+
+      '<div class="pl-f"><span>นาทีต่อครั้ง</span><div class="pl-step"><button data-st="stopMin:-1" aria-label="ลด">−</button><b id="plStopMin">'+c.stopMin+'</b><button data-st="stopMin:1" aria-label="เพิ่ม">+</button></div></div></div>'+
+      '<details class="pl-asm"><summary>สมมติฐานในการคำนวณ <small>น้ำหนัก ท่านั่ง สภาพถนน</small></summary><div class="pl-row">'+
+        '<label class="pl-f"><span>น้ำหนักตัว (กก.)</span><input class="txt" id="plMass" type="number" inputmode="decimal" min="25" max="200" value="'+c.mass+'"></label>'+
+        '<label class="pl-f"><span>จักรยาน + ของ (กก.)</span><input class="txt" id="plBike" type="number" inputmode="decimal" min="5" max="40" value="'+c.bike+'"></label></div>'+
+        '<div class="pl-row"><label class="pl-f"><span>ท่าปั่น</span><select class="txt" id="plPos">'+opts(PL_POS,c.pos)+'</select></label>'+
+        '<label class="pl-f"><span>สภาพถนน</span><select class="txt" id="plRoad">'+opts(PL_ROAD,c.road)+'</select></label></div>'+
+        '<p class="pl-mute">ใช้แบบจำลองแรงต้านลม แรงเสียดทานยาง และแรงโน้มถ่วงตามความชัน ไม่คิดลมและการจราจร ความเร็วลงเนินจำกัดไว้ที่ 50 กม./ชม.</p></details>'+
+    '</div>'+
+    '<div id="plOut"></div>'+
+    '<div class="pl-card"><h4 style="margin-top:0">จุดสำคัญบนเส้นทาง <small>จุดให้น้ำ จุดพัก cut-off</small></h4><div id="plPts"></div>'+
+      '<div class="pl-add"><input class="txt" id="paKm" type="number" inputmode="decimal" min="0" step="0.1" placeholder="กม." aria-label="กิโลเมตรที่"><select class="txt" id="paKind" aria-label="ประเภทจุด">'+Object.entries(PL_KIND).map(([k,v])=>'<option value="'+k+'">'+v[0]+' '+v[1]+'</option>').join('')+'</select>'+
+      '<input class="txt" id="paName" maxlength="40" placeholder="ชื่อจุด (ไม่ใส่ก็ได้)" aria-label="ชื่อจุด"><input class="txt" id="paCut" type="time" aria-label="เวลา cut-off (ถ้ามี)" title="เวลา cut-off (ถ้ามี)"><button class="btn pri" id="paAdd">เพิ่มจุด</button></div>'+
+      '<p class="pl-mute">ใส่ระยะ กม. ตามที่ผู้จัดงานประกาศ ช่อง cut-off ใส่เมื่อมีเวลาปิดจุด · จุดที่มีในไฟล์ GPX จะขึ้นให้เอง</p></div>'+
+    '<div class="pl-card"><label class="pl-tog"><input type="checkbox" id="plAct"'+(c.active!==false?' checked':'')+'><span><b>ใช้แผนนี้ระหว่างปั่น</b><small>บอกว่าเร็วหรือช้ากว่าแผน เตือนก่อนถึงเนินและจุดให้น้ำ</small></span></label>'+
+      '<label class="pl-tog"><input type="checkbox" id="plRem"'+(c.remind!==false?' checked':'')+'><span><b>เตือนจิบน้ำและเติมพลังงาน</b><small>จิบน้ำทุก 15 นาที · เติมพลังงานทุก 40 นาทีเมื่อปั่นเกิน 75 นาที</small></span></label>'+
+      '<button class="btn pri" id="plGo" style="width:100%;margin-top:12px">▶ เริ่มปั่นตามแผน</button></div>'+
+    '<p class="pl-mute" style="padding:0 6px 24px">แผนนี้เป็นค่าประมาณจากแบบจำลอง ไม่ใช่คำแนะนำทางการแพทย์ ปรับตามร่างกาย อากาศ และสภาพถนนจริง</p></div>';
+  const upd=()=>{ plSaveNow(); renderPlanOut(); };
+  $('#plX').onclick=closePlan;
+  $('#plMode').onclick=e=>{ const b=e.target.closest('[data-m]'); if(!b||b.dataset.m===c.mode) return;
+    const res=plCompute(r,c); if(b.dataset.m==='time'){ c.target=Math.round((res.T+res.stopT)/60)*60; } else { c.speed=Math.round(r.dist/res.T*3.6*2)/2; }
+    c.mode=b.dataset.m; plSaveNow(); renderPlan(); };
+  const num=(id,k,mn,mx)=>{ const el=$('#'+id); if(el) el.onchange=()=>{ const x=parseFloat(el.value); if(isFinite(x)&&x>=mn&&x<=mx){ c[k]=x; upd(); } else el.value=c[k]; }; };
+  num('plSpd','speed',5,60); num('plMass','mass',25,200); num('plBike','bike',5,40);
+  const tg=$('#plTgt'); if(tg) tg.onchange=()=>{ const s=plParseHM(tg.value); if(s&&s>=600&&s<=72*3600){ c.target=s; upd(); } else { tg.value=fmtHM(c.target); toast('ใส่เวลาเป็น ชม.:นาที เช่น 4:30'); } };
+  $('#plStart').onchange=e=>{ if(/^\d{2}:\d{2}/.test(e.target.value)){ c.start=e.target.value.slice(0,5); upd(); } };
+  $('#plPos').onchange=e=>{ c.pos=e.target.value; upd(); }; $('#plRoad').onchange=e=>{ c.road=e.target.value; upd(); };
+  $('#plStrat').onclick=e=>{ const b=e.target.closest('[data-s]'); if(!b) return; c.strat=b.dataset.s; $$('#plStrat button').forEach(x=>x.classList.toggle('on',x===b)); upd(); };
+  $$('#planView [data-st]').forEach(b=>b.onclick=()=>{ const [k,d]=b.dataset.st.split(':'); const mx=k==='stops'?30:60; c[k]=Math.max(0,Math.min(mx,(+c[k]||0)+(+d))); $('#'+(k==='stops'?'plStops':'plStopMin')).textContent=c[k]; upd(); });
+  $('#plAct').onchange=e=>{ c.active=e.target.checked; plSaveNow(); };
+  $('#plRem').onchange=e=>{ c.remind=e.target.checked; plSaveNow(); };
+  $('#paAdd').onclick=()=>{ const k=parseFloat($('#paKm').value); if(!isFinite(k)||k<0||k>r.dist/1000+0.05){ toast('ใส่ระยะ กม. ระหว่าง 0 ถึง '+(r.dist/1000).toFixed(1)); return; }
+    const kind=$('#paKind').value, cut=$('#paCut').value||null; (c.pts=c.pts||[]).push({at:Math.round(k*1000),kind,name:($('#paName').value||'').trim().slice(0,40)||PL_KIND[kind][1],cut:cut?cut.slice(0,5):null});
+    if(c.pts.length>60) c.pts.shift(); $('#paKm').value=''; $('#paName').value=''; $('#paCut').value=''; upd(); };
+  $('#plGo').onclick=()=>{ c.active=true; plSaveNow(); closePlan(); setTab('ride'); if(!rec) startRide(); else toast('กำลังบันทึกการปั่นอยู่แล้ว'); };
+  $('#plShare').onclick=()=>{ const res=plCompute(r,c); shareOut('แผนการปั่น',plText(res,c,nm),location.origin+location.pathname); };
+  renderPlanOut();
+}
+function plSvgProfile(res){
+  const W=640, H=180, pl=34, pr=8, pt=14, pb=24, pf=res.pf, D=res.D, X=x=>pl+(W-pl-pr)*x/D;
+  if(!pf) return '';
+  let mn=Math.min(...pf.e), mx=Math.max(...pf.e); if(mx-mn<20){ const mid=(mx+mn)/2; mn=mid-10; mx=mid+10; } const pad2=(mx-mn)*0.12; mn-=pad2; mx+=pad2;
+  const Y=v=>pt+(H-pt-pb)*(1-(v-mn)/(mx-mn));
+  let p='M'+X(0)+' '+(H-pb); pf.d.forEach((d,i)=>{ p+=' L'+X(d).toFixed(1)+' '+Y(pf.e[i]).toFixed(1); }); p+=' L'+X(D)+' '+(H-pb)+' Z';
+  let line=''; pf.d.forEach((d,i)=>{ line+=(i?' L':'M')+X(d).toFixed(1)+' '+Y(pf.e[i]).toFixed(1); });
+  const tick=D<=15000?2000:D<=40000?5000:D<=100000?10000:D<=250000?25000:50000; let ax='';
+  for(let x=0;x<=D+1;x+=tick) ax+='<text x="'+X(x).toFixed(1)+'" y="'+(H-6)+'" text-anchor="middle">'+(x/1000)+'</text>';
+  const cl=res.climbs.map((c,i)=>{ let s=''; for(let k=c.i0;k<=c.i1;k++) s+=(k===c.i0?'M':' L')+X(pf.d[k]).toFixed(1)+' '+Y(pf.e[k]).toFixed(1);
+    s+=' L'+X(c.d1).toFixed(1)+' '+(H-pb)+' L'+X(c.d0).toFixed(1)+' '+(H-pb)+' Z';
+    return '<path d="'+s+'" fill="'+(c.lvl===3?'#dc2626':c.lvl===2?'#ea580c':'#f59e0b')+'" opacity=".55"/><text x="'+((X(c.d0)+X(c.d1))/2).toFixed(1)+'" y="'+(Y(c.e1)-5).toFixed(1)+'" text-anchor="middle" class="pl-cn">'+(i+1)+'</text>'; }).join('');
+  const pts=res.pts.map(q=>'<text x="'+X(q.at).toFixed(1)+'" y="12" text-anchor="middle" font-size="12">'+PL_KIND[q.kind][0]+'</text>').join('');
+  return '<svg viewBox="0 0 '+W+' '+H+'" class="pl-svg" role="img" aria-label="กราฟความสูงของเส้นทาง จุดต่ำสุด '+Math.round(Math.min(...pf.e))+' เมตร สูงสุด '+Math.round(Math.max(...pf.e))+' เมตร">'+
+    '<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+(H-pb)+'" y2="'+(H-pb)+'" stroke="#cbd5d1"/>'+
+    '<text x="2" y="'+(Y(mx-pad2)+4).toFixed(1)+'">'+Math.round(mx-pad2)+'</text><text x="2" y="'+(Y(mn+pad2)+4).toFixed(1)+'">'+Math.round(mn+pad2)+'</text>'+
+    '<path d="'+p+'" fill="#d6ebe5"/>'+cl+'<path d="'+line+'" fill="none" stroke="#14705f" stroke-width="2"/>'+pts+ax+
+    '<line id="plCur" x1="0" x2="0" y1="'+pt+'" y2="'+(H-pb)+'" stroke="#17211e" stroke-width="1.2" stroke-dasharray="3 3" visibility="hidden"/></svg>'; }
+function plSvgSpeed(res){
+  const W=640, H=120, pl=34, pr=8, pt=8, pb=22, D=res.D, X=x=>pl+(W-pl-pr)*x/D, bin=Math.max(500,Math.ceil(D/80/100)*100), bars=[];
+  for(let x=0;x<D;x+=bin){ const x1=Math.min(D,x+bin); bars.push({x,x1,v:(x1-x)/(res.tAt(x1)-res.tAt(x))*3.6}); }
+  const mx=Math.max(...bars.map(b=>b.v))*1.08, avg=res.D/res.T*3.6, Y=v=>pt+(H-pt-pb)*(1-v/mx);
+  return '<svg viewBox="0 0 '+W+' '+H+'" class="pl-svg" role="img" aria-label="กราฟความเร็วตามแผน เฉลี่ย '+avg.toFixed(1)+' กิโลเมตรต่อชั่วโมง">'+
+    bars.map(b=>'<rect x="'+(X(b.x)+0.5).toFixed(1)+'" y="'+Y(b.v).toFixed(1)+'" width="'+Math.max(1,X(b.x1)-X(b.x)-1).toFixed(1)+'" height="'+(H-pb-Y(b.v)).toFixed(1)+'" fill="'+(b.v<avg*0.8?'#ea580c':b.v>avg*1.2?'#0ea5e9':'#14705f')+'" opacity=".85"/>').join('')+
+    '<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(avg).toFixed(1)+'" y2="'+Y(avg).toFixed(1)+'" stroke="#17211e" stroke-dasharray="4 4"/>'+
+    '<text x="2" y="'+(Y(avg)+4).toFixed(1)+'">'+avg.toFixed(0)+'</text><text x="2" y="'+(pt+8)+'">'+mx.toFixed(0)+'</text>'+
+    '<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+(H-pb)+'" y2="'+(H-pb)+'" stroke="#cbd5d1"/><text x="'+pl+'" y="'+(H-6)+'">0</text><text x="'+(W-pr)+'" y="'+(H-6)+'" text-anchor="end">'+(D/1000).toFixed(1)+' กม.</text></svg>'; }
+function renderPlanOut(){
+  if(!PL) return; const c=PL.cfg, r=PL.r, res=plCompute(r,c), out=$('#plOut'); if(!out) return; PL.res=res;
+  const total=res.T+res.stopT, avg=res.D/res.T*3.6;
+  const lvl=['','เบา','ปานกลาง','หนัก'], lvc=['','#b45309','#c2410c','#b91c1c'];
+  let eleNote='';
+  if(PL.eleBusy) eleNote='<div class="pl-note">⏳ กำลังดึงข้อมูลความสูงของเส้นทาง…</div>';
+  else if(!res.pf) eleNote='<div class="pl-note warn">เส้นทางนี้ยังไม่มีข้อมูลความสูง แผนด้านล่างคิดแบบทางราบ'+(PL.eleErr?' — '+esc(PL.eleErr):'')+' <button class="btn" id="plEle" style="margin-top:8px;width:100%">⛰ ดึงข้อมูลความสูง</button></div>';
+  $('#plSumBox').innerHTML='<div class="pl-card pl-sum">'+
+      '<div class="pl-big"><div><span>ถึงเส้นชัยประมาณ</span><b>'+plClockOf(c.start,total)+'</b></div><div><span>เวลาทั้งหมด</span><b>'+fmtHM(total)+'</b></div></div>'+
+      '<div class="pl-kv"><div><b>'+fmtHM(res.T)+'</b><small>เวลาปั่น ชม.:นาที</small></div><div><b>'+avg.toFixed(1)+'</b><small>เฉลี่ย กม./ชม.</small></div><div><b>'+(res.stopT?fmtHM(res.stopT):'0:00')+'</b><small>แวะพัก</small></div>'+
+      '<div><b>~'+Math.round(res.avgP)+'</b><small>วัตต์ (ประมาณ)</small></div><div><b>'+res.wkg.toFixed(1)+'</b><small>วัตต์/กก.</small></div><div><b>'+(res.pf?Math.round(res.climbs.reduce((a,x)=>a+x.gain,0)+0):'–')+'</b><small>ขึ้นเนินหลัก ม.</small></div></div>'+
+      res.warn.map(w=>'<div class="pl-note warn">'+esc(w)+'</div>').join('')+'</div>';
+  out.innerHTML='<div class="pl-card"><h4 style="margin-top:0">ความสูงของเส้นทาง <small>'+(res.pf?(res.pf.src==='dem'?'Copernicus DEM ผ่าน Open-Meteo':'จากไฟล์ / บริการเส้นทาง'):'')+'</small></h4>'+eleNote+
+      (res.pf?'<div class="pl-chart" id="plCh">'+plSvgProfile(res)+'</div><div class="pl-read" id="plRead">แตะกราฟเพื่อดูความสูง ความชัน และเวลาที่จุดนั้น</div>'+
+        (res.pf.src==='dem'?'<p class="pl-mute">ข้อมูลความสูงละเอียดราว 90 ม. สะพานและทางยกระดับอาจไม่แสดงเป็นเนิน</p>':''):'')+
+      '<h4>ความเร็วตามแผน <small>ส้ม = ช้ากว่าเฉลี่ยมาก (ขึ้นเนิน) · ฟ้า = เร็วกว่ามาก</small></h4><div class="pl-chart">'+plSvgSpeed(res)+'</div></div>'+
+    (res.pf?'<div class="pl-card"><h4 style="margin-top:0">⛰ เนินที่ต้องระวัง <small>'+res.climbs.length+' เนิน</small></h4>'+
+      (res.climbs.length?res.climbs.map((x,i)=>'<div class="pl-cl"><span class="pl-cn2" style="background:'+lvc[x.lvl]+'">'+(i+1)+'</span><div class="pl-cm"><b>กม. '+(x.d0/1000).toFixed(1)+'–'+(x.d1/1000).toFixed(1)+' · ยาว '+fmtKm(x.len/1000)+' · ชันเฉลี่ย '+(x.g*100).toFixed(1)+'%</b>'+
+        '<small>ขึ้น '+x.gain+' ม. · ช่วงชันสุด ~'+(x.max*100).toFixed(0)+'% · ระดับ'+lvl[x.lvl]+' · ใช้เวลา ~'+fmtMin(x.t/60)+' ที่ ~'+x.v.toFixed(0)+' กม./ชม. · ถึงตีนเนิน '+plClockOf(c.start,res.eta(x.d0))+'</small></div></div>').join('')+
+        '<p class="pl-mute">ลดเกียร์ก่อนถึงตีนเนิน ออกแรงสม่ำเสมอ อย่าเร่งตามคนอื่นช่วงต้นเนิน</p>'
+        :'<p class="pl-mute" style="margin:0">ไม่พบเนินที่ยาวเกิน 300 ม. ชันเกิน 3% และสูงเกิน 15 ม.</p>')+
+      (res.desc.length?'<h4>ลงเนินชัน</h4>'+res.desc.map(x=>'<div class="pl-cl"><span class="pl-cn2" style="background:#0369a1">↘</span><div class="pl-cm"><b>กม. '+(x.d0/1000).toFixed(1)+'–'+(x.d1/1000).toFixed(1)+' · ลง '+x.gain+' ม. · ชันเฉลี่ย '+(x.g*100).toFixed(1)+'%</b><small>คุมความเร็ว เบรกก่อนเข้าโค้ง</small></div></div>').join(''):'')+'</div>':'')+
+    '<div class="pl-card"><h4 style="margin-top:0">ตารางเวลาแต่ละช่วง</h4><div class="pl-tbl"><table><thead><tr><th>กม.</th><th>ขึ้น/ลง ม.</th><th>กม./ชม.</th><th>เวลา</th><th>ถึงเวลา</th></tr></thead><tbody>'+
+      res.splits.map(s=>'<tr><td>'+(s.x0/1000).toFixed(0)+'–'+(s.x1/1000).toFixed(s.x1%1000?1:0)+'</td><td>+'+s.up+' / −'+s.dn+'</td><td>'+s.v.toFixed(1)+'</td><td>'+fmtHM(s.t)+'</td><td>'+plClockOf(c.start,s.eta)+'</td></tr>').join('')+'</tbody></table></div>'+
+      (res.stopAt.length?'<p class="pl-mute">รวมเวลาแวะ '+res.stopAt.length+' ครั้ง ครั้งละ '+c.stopMin+' นาที (ที่ กม. '+res.stopAt.map(a=>(a/1000).toFixed(1)).join(', ')+')</p>':'')+'</div>'+
+    '<div class="pl-card"><h4 style="margin-top:0">💧 น้ำและพลังงาน</h4>'+
+      '<div class="pl-fuel"><div><b>~600 มล.</b><small>น้ำต่อชั่วโมง (ช่วงทั่วไป 400–800 มล. อากาศร้อนใช้มากขึ้น)</small></div>'+
+      '<div><b>'+(res.carb[1]?res.carb[0]+'–'+res.carb[1]+' ก.':'น้ำเปล่าพอ')+'</b><small>'+(res.carb[1]?'คาร์โบไฮเดรตต่อชั่วโมง (เจล กล้วย ขนม)':'ปั่นไม่ถึง 1 ชม. ไม่จำเป็นต้องกินระหว่างทาง')+'</small></div></div>'+
+      (res.H>=2?'<p class="pl-mute">ปั่นเกิน 2 ชม. หรืออากาศร้อน ควรมีเกลือแร่ผสมในน้ำบางขวด</p>':'')+
+      '<h4>น้ำที่ต้องพกแต่ละช่วง <small>ขวด 600 มล.</small></h4>'+res.legs.map(l=>{ const b=Math.max(1,Math.ceil(l.ml/600));
+        return '<div class="pl-leg"><span>กม. '+(l.a/1000).toFixed(1)+'–'+(l.b/1000).toFixed(1)+' · '+fmtHM(l.t)+' ชม.</span><b>~'+(l.ml/1000).toFixed(1)+' ล. · '+b+' ขวด</b>'+(b>2?'<em>เกิน 2 ขวด ควรหาจุดเติมน้ำระหว่างทาง</em>':'')+'</div>'; }).join('')+
+      (res.eats.length?'<h4>เวลาเติมพลังงาน</h4><div class="pl-eat">'+res.eats.map(x=>'<span>'+plClockOf(c.start,res.eta(x.at))+' · กม. '+(x.at/1000).toFixed(0)+'</span>').join('')+'</div>':'')+
+      '<p class="pl-mute">ตัวเลขเป็นแนวทางทั่วไปด้านโภชนาการการกีฬา ไม่ใช่คำแนะนำทางการแพทย์ ลองกินของที่จะใช้วันจริงตอนซ้อมก่อน</p></div>';
+  // points list
+  const ptsBox=$('#plPts'); if(ptsBox) ptsBox.innerHTML=res.pts.length?res.pts.map(p=>{ const i=(c.pts||[]).findIndex(q=>q.at===p.at&&q.name===p.name&&q.kind===p.kind);
+      return '<div class="pl-pt"><span class="ic">'+PL_KIND[p.kind][0]+'</span><div class="m"><b>กม. '+(p.at/1000).toFixed(1)+' · '+esc(p.name)+'</b><small>ถึงประมาณ '+plClockOf(c.start,p.eta)+(p.src==='gpx'?' · จากไฟล์ GPX':'')+
+        (p.slack!=null?(p.slack>=0?' · <span class="ok">ทัน cut-off '+p.cut+' (เหลือ '+fmtHM(p.slack)+')</span>':' · <span class="bad">ไม่ทัน cut-off '+p.cut+' (ช้าไป '+fmtHM(-p.slack)+')</span>'):'')+'</small></div>'+
+        (p.src==='me'&&i>=0?'<button class="pl-del" data-del="'+i+'" aria-label="ลบจุดนี้">✕</button>':'')+'</div>'; }).join('')
+    :'<p class="pl-mute" style="margin:0 0 8px">ยังไม่มีจุด เพิ่มจุดให้น้ำหรือจุด cut-off ตามที่ผู้จัดงานประกาศได้ด้านล่าง</p>';
+  $$('#plPts [data-del]').forEach(b=>b.onclick=()=>{ c.pts.splice(+b.dataset.del,1); plSaveNow(); renderPlanOut(); });
+  const eb=$('#plEle'); if(eb) eb.onclick=()=>plFetchEle(false);
+  const ch=$('#plCh'); if(ch&&res.pf){ const svg=ch.querySelector('svg'), cur=svg.querySelector('#plCur');
+    const pick=ev=>{ const bb=svg.getBoundingClientRect(), x=(ev.clientX-bb.left)/bb.width*640, d=Math.max(0,Math.min(res.D,(x-34)/(640-42)*res.D));
+      const e0=plEleAt(res.pf,d), g=(plEleAt(res.pf,Math.min(res.D,d+100))-plEleAt(res.pf,Math.max(0,d-100)))/(Math.min(res.D,d+100)-Math.max(0,d-100))*100;
+      const s=res.segs[Math.min(res.segs.length-1,Math.floor(d/100))];
+      cur.setAttribute('x1',x); cur.setAttribute('x2',x); cur.setAttribute('visibility','visible');
+      $('#plRead').innerHTML='<b>กม. '+(d/1000).toFixed(1)+'</b> · สูง '+Math.round(e0)+' ม. · ชัน '+g.toFixed(1)+'% · ~'+(s.v*3.6).toFixed(0)+' กม./ชม. · ถึง '+plClockOf(c.start,res.eta(d)); };
+    svg.addEventListener('pointerdown',pick); svg.addEventListener('pointermove',ev=>{ if(ev.buttons||ev.pointerType==='mouse') pick(ev); }); }
+}
+function plText(res,c,nm){ const L2=[];
+  L2.push('🚴 แผนการปั่น: '+nm); L2.push('ระยะ '+(res.D/1000).toFixed(1)+' กม. · ออกตัว '+c.start+' · ถึงประมาณ '+plClockOf(c.start,res.T+res.stopT));
+  L2.push('เวลาปั่น '+fmtHM(res.T)+' · เฉลี่ย '+(res.D/res.T*3.6).toFixed(1)+' กม./ชม. · แผน: '+PL_STRAT[c.strat][0]);
+  if(res.climbs.length){ L2.push(''); L2.push('⛰ เนินที่ต้องระวัง'); res.climbs.forEach((x,i)=>L2.push((i+1)+'. กม. '+(x.d0/1000).toFixed(1)+'–'+(x.d1/1000).toFixed(1)+' ชัน '+(x.g*100).toFixed(1)+'% ขึ้น '+x.gain+' ม.')); }
+  if(res.pts.length){ L2.push(''); L2.push('📍 จุดสำคัญ'); res.pts.forEach(p=>L2.push('กม. '+(p.at/1000).toFixed(1)+' '+p.name+' ~'+plClockOf(c.start,p.eta)+(p.cut?' (cut-off '+p.cut+')':''))); }
+  L2.push(''); L2.push('⏱ เวลาแต่ละช่วง'); res.splits.forEach(s=>L2.push('กม. '+(s.x0/1000).toFixed(0)+'–'+(s.x1/1000).toFixed(s.x1%1000?1:0)+': '+s.v.toFixed(1)+' กม./ชม. ถึง '+plClockOf(c.start,s.eta)));
+  L2.push(''); L2.push('💧 น้ำ ~600 มล./ชม.'+(res.carb[1]?' · คาร์บ '+res.carb[0]+'–'+res.carb[1]+' ก./ชม.':''));
+  L2.push('(ค่าประมาณจากแอปปั่นไกล)'); return L2.join('\n'); }
+/* ---- while riding ---- */
+function plTick(f){ f.planDt=null; if(!rec||rec.state!=='rec'||!f||!f.started) return; const L=plLive(); if(!L) return;
+  const p=L.res, along=f.along||0, w=rec.plW||(rec.plW={});
+  if(f.mv0==null){ f.mv0=rec.moving; f.a0=along; }
+  const dt=Math.round(((rec.moving-f.mv0)-(p.tAt(along)-p.tAt(f.a0)))/60); f.planDt=f.off?null:dt;
+  p.climbs.forEach((x,i)=>{ const k='c'+i; if(!w[k]&&along>=x.d0-450&&along<x.d0){ w[k]=1; const t='อีก '+Math.round((x.d0-along)/50)*50+' เมตร เริ่มขึ้นเนิน ยาว '+(x.len/1000).toFixed(1)+' กิโลเมตร ชันเฉลี่ย '+(x.g*100).toFixed(0)+' เปอร์เซ็นต์';
+      toast('⛰ '+t,5000); say(t); } });
+  p.pts.forEach((q,i)=>{ const k='p'+i; if(!w[k]&&along>=q.at-1000&&along<q.at-100){ w[k]=1; const t='อีก '+((q.at-along)/1000).toFixed(1)+' กิโลเมตร ถึง'+q.name; toast(PL_KIND[q.kind][0]+' '+t,5000); say(t); } });
+}
+function plRideTick(){ if(!rec||rec.state!=='rec') return; const L=plLive(); if(!L||L.cfg.remind===false) return;
+  const mv=rec.moving, nD=Math.floor(mv/900), nE=L.res.T>75*60&&mv>=45*60?1+Math.floor((mv-45*60)/2400):0;
+  if(nD>(rec.plD||0)){ rec.plD=nD; if(!(nE>(rec.plE||0))){ toast('💧 ถึงเวลาจิบน้ำ',3500); say('ถึงเวลาจิบน้ำ'); } }
+  if(nE>(rec.plE||0)){ rec.plE=nE; toast('🍌 ถึงเวลาเติมพลังงาน และจิบน้ำ',4500); say('ถึงเวลาเติมพลังงาน และจิบน้ำ'); } }
 // progress + off-route warning while recording (works for planned routes and track routes)
 /* ---- turn-by-turn: turns are derived from the shape of the route line (works for planned routes, loops, past rides and GPX files) ---- */
 function turnsOf(r){ const c=r.coords; if(!c||c.length<3) return [];
@@ -2668,17 +3041,22 @@ function followRoute(lat,lng,acc){
   else if(f.off) el.textContent='⚠️ ออกนอกเส้นทาง ~'+fmtKm(b.d/1000)+' — กลับเข้าเส้นสีม่วง';
   else if(left<60&&pct>90){ el.textContent='🏁 ถึงปลายทางของเส้นทางแล้ว'; if(!f.done){ f.done=true; toast('🏁 ถึงปลายทางแล้ว กด ■ จบ เพื่อบันทึก',4000); say('ถึงปลายทางแล้ว'); } }
   else el.textContent='🧭 ตามเส้นทาง: เหลือ '+fmtKm(left/1000)+' · ทำได้ '+pct+'%';
-  f.along=along; f.dOff=b.d; f.left=left; navBanner();
+  f.along=along; f.dOff=b.d; f.left=left; plTick(f);
+  if(f.planDt!=null&&f.started&&!f.off&&!(left<60&&pct>90)) el.textContent+=' · '+(f.planDt>0?'ช้ากว่าแผน '+f.planDt+' นาที':f.planDt<0?'เร็วกว่าแผน '+(-f.planDt)+' นาที':'ตรงตามแผน');
+  navBanner();
 }
 function trackFromFile(p,fname){
   const pts=(p.pts||[]).filter(q=>q.lat!=null&&q.lng!=null&&isFinite(q.lat)&&isFinite(q.lng)&&!(q.lat===0&&q.lng===0));
   if(pts.length<2) throw new Error('ไม่พบจุดเส้นทางในไฟล์');
-  return {name:(p.name||String(fname).replace(/\.(gpx|tcx|fit)$/i,'')).slice(0,60),coords:pts.map(q=>[q.lat,q.lng]),ele:pts.map(q=>q.alt!=null?q.alt:null),src:'file'};
+  return {name:(p.name||String(fname).replace(/\.(gpx|tcx|fit)$/i,'')).slice(0,60),coords:pts.map(q=>[q.lat,q.lng]),ele:pts.map(q=>q.alt!=null?q.alt:null),src:'file',wpts:p.wpts||[]};
 }
 function parseGPXRoute(txt){
   const x=parseXML(txt); const nm=x.getElementsByTagName('name')[0];
   let els=[...x.getElementsByTagName('trkpt')]; if(!els.length) els=[...x.getElementsByTagName('rtept')]; if(!els.length) els=[...x.getElementsByTagName('wpt')];
-  return {name:nm?nm.textContent.trim():'',pts:els.map(e=>({lat:parseFloat(e.getAttribute('lat')),lng:parseFloat(e.getAttribute('lon')),alt:xnum(e,'ele')}))};
+  const isW=els.length&&els[0].tagName.toLowerCase()==='wpt', tx=(e,t)=>{ const n=e.getElementsByTagName(t)[0]; return n?n.textContent.trim():''; };
+  const wpts=isW?[]:[...x.getElementsByTagName('wpt')].slice(0,200).map(e=>{ const n=tx(e,'name'), d=tx(e,'desc')||tx(e,'cmt');
+    return {lat:parseFloat(e.getAttribute('lat')),lng:parseFloat(e.getAttribute('lon')),name:(n||d).slice(0,40),kind:plKindOf(n+' '+d+' '+tx(e,'sym')+' '+tx(e,'type'))}; }).filter(w=>isFinite(w.lat)&&isFinite(w.lng));
+  return {name:nm?nm.textContent.trim():'',pts:els.map(e=>({lat:parseFloat(e.getAttribute('lat')),lng:parseFloat(e.getAttribute('lon')),alt:xnum(e,'ele')})),wpts};
 }
 $('#btnRouteFile').onclick=()=>$('#fileRoute').click();
 $('#fileRoute').addEventListener('change',async e=>{
@@ -3273,7 +3651,7 @@ $('#myImg').onclick=()=>{ const d=MY.data||myData(MY.period); if(!d.items.length
 
 /* =================== tabs, settings, donate =================== */
 /* ---------- pages (bottom navigation) ---------- */
-function goPage(p,opt){ opt=opt||{}; if(!PAGES.includes(p)) p='home'; const prev=page; page=p;
+function goPage(p,opt){ opt=opt||{}; if(document.body.classList.contains('planon')) closePlan(); if(!PAGES.includes(p)) p='home'; const prev=page; page=p;
   if(p!=='route'&&typeof MY!=='undefined'&&MY.on) closeMyMap();
   PAGES.forEach(x=>document.body.classList.toggle('pg-'+x,x===p));
   $$('#bnav button').forEach(b=>b.classList.toggle('on',b.dataset.pg===p));
@@ -3292,6 +3670,7 @@ $('#pages').addEventListener('click',e=>{ const g=e.target.closest('[data-go]');
     else if(k==='loop'){ goPage('route'); $('#btnLoop').click(); }
     else if(k==='file'){ $('#fileRoute').click(); }
     else if(k==='mymap'){ openMyMap(); }
+    else if(k==='rplan'){ openPlan(); }
     return; }
   const m=e.target.closest('[data-m]');
   if(m){ const k=m.dataset.m;
@@ -3784,7 +4163,7 @@ window.addEventListener('beforeunload',()=>{ if(rec) saveLive(); });
 window.addEventListener('hashchange',()=>{ if(/^#b-/.test(location.hash)){ location.reload(); return; } if(!openHashRoute()){ hashDone=false; openHashGroup(); } });
 renderBeacon();
 }
-window.__pk={get be(){return be;},data,R,infra,get map(){return MAIN&&MAIN.m;},get nav(){return {navTargetPt,settings,turnsOf,R};},get acct(){return {acctUser,cloudSync,openAccount,acctGoogle,acctEmail,acctSignOut,openSettings,openRide,closeModal};},get vid(){return {openRideVideo,vidPrep,vidPlan,vidApply,vidFrameReady,vidCompose,cur:()=>vidCur};}};
+window.__pk={get be(){return be;},data,R,infra,get map(){return MAIN&&MAIN.m;},get nav(){return {navTargetPt,settings,turnsOf,R};},get acct(){return {acctUser,cloudSync,openAccount,acctGoogle,acctEmail,acctSignOut,openSettings,openRide,closeModal};},get vid(){return {openRideVideo,vidPrep,vidPlan,vidApply,vidFrameReady,vidCompose,cur:()=>vidCur};},get plan(){return {openPlan,closePlan,plCompute,plProfile,plKey,plAll,get PL(){return PL;},get PLR(){return PLR;},get rec(){return rec;}};}};
 })();
 </script>
 </body>
