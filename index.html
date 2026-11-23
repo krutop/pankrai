@@ -52,7 +52,7 @@ window.PK_FIREBASE = {
 window.PK_DONATE = null;
 // Strava: set after registering a Strava API application and deploying tools/strava-worker.js, e.g.
 // window.PK_STRAVA = { clientId: '123456', worker: 'https://pankrai-strava.example.workers.dev' };
-window.PK_STRAVA = null;
+window.PK_STRAVA = { clientId: '299989', worker: 'https://pankrai-strava.ksomsar.workers.dev' };
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')) window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(e=>console.warn('sw',e)); });
 </script>
 
