@@ -50,6 +50,9 @@ window.PK_FIREBASE = {
   appId: "1:216927431660:web:905a9f863a0770e3ae2ec9"
 };
 window.PK_DONATE = null;
+// Strava: set after registering a Strava API application and deploying tools/strava-worker.js, e.g.
+// window.PK_STRAVA = { clientId: '123456', worker: 'https://pankrai-strava.example.workers.dev' };
+window.PK_STRAVA = null;
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')) window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(e=>console.warn('sw',e)); });
 </script>
 
@@ -721,6 +724,19 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
   #hudRec i{width:22px;height:22px;border-radius:50%;background:#ef4444;border:3px solid #fff;box-sizing:border-box;transition:.15s}
   #hudRec.on i{border-radius:5px;width:20px;height:20px;border:0}
   body.hudon .toast{top:calc(var(--sat) + 58px)}
+  /* ---------- bike computers / Strava ---------- */
+  .bc-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .bc-guide{margin-top:8px;background:var(--soft);border-radius:14px;border:0}
+  .bc-chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
+  .bc-chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font-size:13.5px;font-weight:600;min-height:36px}
+  .bc-chip.on{border-color:var(--pri);background:#eef7f4;color:var(--pri2)}
+  .bc-sec{font-size:14px;color:var(--muted);margin-bottom:2px}
+  .bc-ol{margin:4px 0 6px;padding-left:20px;font-size:14px;line-height:1.6}
+  .bc-ol li{margin-bottom:4px}
+  .sv-logo{display:inline-block;background:#FC5200;color:#fff;font-weight:800;font-size:12px;letter-spacing:.5px;padding:2px 7px;border-radius:5px;vertical-align:2px;margin-right:4px}
+  .btn.sv-btn{width:100%;background:#FC5200;color:#fff;font-weight:700}
+  .sv-on{display:flex;flex-direction:column;gap:2px} .sv-on small{font-size:12.5px;color:var(--muted)}
+  .sv-link{color:#FC5200;font-weight:700}
 </style>
 </head>
 <body>
@@ -894,8 +910,13 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
     </div>
     <div class="hcard">
       <h4>ไมล์จักรยาน / นาฬิกา</h4>
-      <div class="note" style="margin-top:0">นำไฟล์กิจกรรม .fit .gpx หรือ .tcx ที่ส่งออกจากไมล์หรือนาฬิกา (เช่น iGPSPORT Garmin Wahoo) เข้ามาเก็บในประวัติการปั่น</div>
-      <button class="btn" id="devImport" style="width:100%;margin-top:10px">⬆ นำเข้าไฟล์กิจกรรม</button>
+      <div class="note" style="margin-top:0">ไมล์จักรยานเชื่อมกับแอปของยี่ห้อตัวเอง ปั่นไกลจึงรับกิจกรรมเป็นไฟล์ .fit .gpx .tcx หรือผ่าน Strava และส่งเส้นทางไปนำทางบนไมล์เป็นไฟล์</div>
+      <div class="bc-acts"><button class="btn" id="devImport">📥 นำเข้าไฟล์กิจกรรม</button><button class="btn" id="devSend">📤 ส่งเส้นทางไปไมล์</button></div>
+      <button class="mitem bc-guide" id="devGuide"><span class="mic">📖</span><span class="mt"><b>คู่มือเชื่อมไมล์แต่ละยี่ห้อ</b><small>iGPSPORT · Garmin · Wahoo · XOSS · ROCKBROS · Bryton · Magene · Strava</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
+    </div>
+    <div class="hcard">
+      <h4><span class="sv-logo">STRAVA</span> ดึงกิจกรรมอัตโนมัติ</h4>
+      <div id="svBox"></div>
     </div>
     <div class="hcard">
       <h4>GPS ของโทรศัพท์</h4>
@@ -1471,14 +1492,14 @@ function renderRoute(){
     (r.fallback?'<div class="note warn">ใช้บริการเส้นทางสำรอง อาจไม่หลบถนนใหญ่เท่าโหมดปลอดภัย และไม่มีข้อมูลประเภทถนน</div>':'')+
     (r.fallback?'':'<div class="alts">'+[0,1,2].map(i=>'<button data-alt="'+i+'" class="'+(R.alt===i?'on':'')+'">เส้นทาง '+(i+1)+'</button>').join('')+'</div>')+
     (R.loop&&R.b===R.loop.b?'<div class="loopinfo"><b>🔁 เส้นทางวน · เป้าหมาย '+R.loop.target+' กม. · ได้ '+km.toFixed(1)+' กม.</b><button id="lpAgain">🎲 แบบอื่น</button></div>':'')+
-    '<div class="acts" style="'+(r.fallback?'margin-top:12px':'')+'"><button class="btn pri" id="rGo">▶ เริ่มปั่น</button><button class="btn" id="rGpx">GPX</button><button class="btn" id="rShare">แชร์</button><button class="btn" id="rClear">ล้าง</button></div>'+'<button class="btn pl-open" id="rPlan"><span>📋</span><span><b>วางแผนการปั่น</b><small>เวลาถึง เนินที่ต้องระวัง จุดให้น้ำ แผนกินดื่ม</small></span></button>'+
+    '<div class="acts" style="'+(r.fallback?'margin-top:12px':'')+'"><button class="btn pri" id="rGo">▶ เริ่มปั่น</button><button class="btn" id="rGpx">ส่งไฟล์</button><button class="btn" id="rShare">แชร์</button><button class="btn" id="rClear">ล้าง</button></div>'+'<button class="btn pl-open" id="rPlan"><span>📋</span><span><b>วางแผนการปั่น</b><small>เวลาถึง เนินที่ต้องระวัง จุดให้น้ำ แผนกินดื่ม</small></span></button>'+
     (r.segs&&r.segs.length?'<details class="steps"><summary>เส้นทางทีละช่วง <small class="muted" style="font-weight:400">('+r.segs.length+' ช่วง)</small></summary>'+
       (()=>{ let acc=0; return r.segs.map((s,i)=>{ const a0=acc; acc+=s.d; const c=CATC[s.cat];
         return '<button class="stp" data-seg="'+i+'"><em style="background:'+c[2]+'"></em><b>'+c[1]+(s.cat==='major'?' ⚠️':'')+'</b><small>'+fmtKm(s.d/1000)+' · กม. '+(a0/1000).toFixed(1)+'–'+(acc/1000).toFixed(1)+'</small></button>'; }).join(''); })()+
       '<div class="note">ประเภทถนนมาจากข้อมูล OpenStreetMap ควรสังเกตป้ายจราจรและสภาพถนนจริงเสมอ</div></details>':'');
   $$('#routeBox [data-alt]').forEach(b=>b.onclick=()=>{ const n=+b.dataset.alt; if(n!==R.alt){ R.alt=n; computeRoute(true); } });
   $('#rGo').onclick=()=>{ setTab('ride'); if(!rec) startRide(); else toast('กำลังบันทึกการปั่นอยู่แล้ว'); };
-  $('#rGpx').onclick=exportRouteGpx; $('#rPlan').onclick=openPlan;
+  $('#rGpx').onclick=openSendRoute; $('#rPlan').onclick=openPlan;
   $('#rShare').onclick=shareRoute;
   $('#rClear').onclick=clearRoute;
   const lpa=$('#lpAgain'); if(lpa) lpa.onclick=()=>makeLoop(Object.assign({},R.loop.opt,{variant:(R.loop.opt.variant||0)+1}));
@@ -2084,7 +2105,7 @@ function buildImported(p,fname){
   const sm=p.summary||{};
   const dist=sm.dist>0?sm.dist:acc.dist, moving=sm.timer>0?sm.timer:acc.moving, gain=sm.ascent!=null&&sm.ascent>=0?sm.ascent:acc.gain;
   const ride=Object.assign({id,name:(p.name||defaultName(start)).slice(0,60),start,end,dist:Math.round(dist),moving:Math.round(moving),elapsed:Math.round((end-start)/1000),
-    max:+acc.max.toFixed(1),gain:Math.round(gain),kcal:Math.round(kcal(dist,moving,settings.weight)),src:'import',file:String(fname).slice(0,80)},sensorSummary(acc));
+    max:+acc.max.toFixed(1),gain:Math.round(gain),kcal:Math.round(kcal(dist,moving,settings.weight)),src:p.strava?'strava':'import',file:String(fname).slice(0,80)},p.strava?{strava:String(p.strava)}:{},sensorSummary(acc));
   const r=storeRide(ride,segs.filter(s=>s.length>1).map(thin)); if(r===false) throw new Error('พื้นที่ในเบราว์เซอร์เต็ม');
   return ride;
 }
@@ -2674,10 +2695,10 @@ function renderTrackBox(r){
     '<div class="rs-top"><div class="rs-main"><div class="rs-big">'+km.toFixed(1)+' กม. · ~'+fmtMin(km/sp*60)+'</div>'+
     '<div class="rs-sub">'+esc(t.name)+' · '+(r.ascend!=null?'ขึ้นเนิน '+Math.round(r.ascend)+' ม. · ':'')+(loop?'วนกลับจุดเดิม':'ทางเดียว')+' · ~'+sp.toFixed(0)+' กม./ชม.'+(t.avg?' (ความเร็วเฉลี่ยทริปเดิม)':'')+'</div></div></div>'+
     (ap?'<div class="appr">'+ap+'</div>':'')+
-    '<div class="acts" style="margin-top:10px"><button class="btn pri" id="rGo">▶ เริ่มปั่น</button><button class="btn" id="tRev">⇄ กลับทิศ</button><button class="btn" id="rGpx">GPX</button><button class="btn" id="rClear">ล้าง</button></div>'+'<button class="btn pl-open" id="rPlan"><span>📋</span><span><b>วางแผนการปั่น</b><small>เวลาถึง เนินที่ต้องระวัง จุดให้น้ำ แผนกินดื่ม</small></span></button>'+
+    '<div class="acts" style="margin-top:10px"><button class="btn pri" id="rGo">▶ เริ่มปั่น</button><button class="btn" id="tRev">⇄ กลับทิศ</button><button class="btn" id="rGpx">ส่งไฟล์</button><button class="btn" id="rClear">ล้าง</button></div>'+'<button class="btn pl-open" id="rPlan"><span>📋</span><span><b>วางแผนการปั่น</b><small>เวลาถึง เนินที่ต้องระวัง จุดให้น้ำ แผนกินดื่ม</small></span></button>'+
     '<div class="note">ระหว่างบันทึกการปั่น แอปจะบอกระยะที่เหลือ และเตือนเมื่อออกนอกเส้นทาง · เส้นทางมาจาก GPS ของทริปเดิม ควรดูป้ายจราจรและสภาพถนนจริงเสมอ</div>';
   $('#rGo').onclick=()=>{ setTab('ride'); if(!rec) startRide(); else toast('กำลังบันทึกการปั่นอยู่แล้ว'); };
-  $('#tRev').onclick=reverseTrack; $('#rGpx').onclick=exportRouteGpx; $('#rPlan').onclick=openPlan; $('#rClear').onclick=clearRoute;
+  $('#tRev').onclick=reverseTrack; $('#rGpx').onclick=openSendRoute; $('#rPlan').onclick=openPlan; $('#rClear').onclick=clearRoute;
   $('#routeHint').textContent='แสดงเส้นทาง "'+t.name+'" ('+km.toFixed(1)+' กม.) เป็นเส้นสีม่วงบนแผนที่';
 }
 /* =================== ride plan (วางแผนการปั่น) =================== */
@@ -2965,6 +2986,164 @@ function plText(res,c,nm){ const L2=[];
   L2.push(''); L2.push('⏱ เวลาแต่ละช่วง'); res.splits.forEach(s=>L2.push('กม. '+(s.x0/1000).toFixed(0)+'–'+(s.x1/1000).toFixed(s.x1%1000?1:0)+': '+s.v.toFixed(1)+' กม./ชม. ถึง '+plClockOf(c.start,s.eta)));
   L2.push(''); L2.push('💧 น้ำ ~600 มล./ชม.'+(res.carb[1]?' · คาร์บ '+res.carb[0]+'–'+res.carb[1]+' ก./ชม.':''));
   L2.push('(ค่าประมาณจากแอปปั่นไกล)'); return L2.join('\n'); }
+/* =================== bike computers (ไมล์จักรยาน) =================== */
+// Bike computers talk only to their own brand apps, so ปั่นไกล links to them through files and Strava:
+// routes go out as GPX / TCX course files, rides come in as shared files or from Strava.
+function bcRouteName(){ return R.track?R.track.name+(R.track.rev?' (กลับทิศ)':''):'ปั่นไกล '+($('#inA').value||'A')+' - '+($('#inB').value||'B'); }
+function bcAt(r,cum,x){ let i=cum.findIndex(c=>c>=x); if(i<=0) return r.coords[Math.max(0,i)]; const t=(x-cum[i-1])/((cum[i]-cum[i-1])||1);
+  return [r.coords[i-1][0]+(r.coords[i][0]-r.coords[i-1][0])*t, r.coords[i-1][1]+(r.coords[i][1]-r.coords[i-1][1])*t]; }
+// course points: turns, the plan's points (water, food…) and the tops of climbs
+function bcPoints(r){ const out=[];
+  try{ turnsOf(r).forEach(t=>{ if(t.kind==='fin'||t.kind==='slight') return; const u=t.kind==='u';
+    out.push({at:t.at,type:u?'Generic':t.dir==='R'?'Right':'Left',name:u?'U-turn':t.dir==='R'?(t.kind==='sharp'?'Sharp R':'Right'):(t.kind==='sharp'?'Sharp L':'Left'),
+      note:u?'กลับรถ':(t.kind==='sharp'?'เลี้ยวหักศอก':'เลี้ยว')+(t.dir==='R'?'ขวา':'ซ้าย')}); }); }catch(e){}
+  let cfg=null; try{ cfg=plAll()[plKey(r)]||null; }catch(e){}
+  const TY={water:['Water','Water'],food:['Food','Food'],med:['First Aid','Aid'],check:['Generic','Checkpoint'],rest:['Generic','Rest'],poi:['Generic','POI']};
+  try{ plPtsAll(r,cfg||{pts:[]}).forEach(p=>{ const k=TY[p.kind]||TY.poi; out.push({at:p.at,type:k[0],name:k[1],note:p.name+(p.cut?' cut-off '+p.cut:''),wpt:true,kind:p.kind}); }); }catch(e){}
+  try{ const pf=plProfile(r,cfg&&cfg.elev); plClimbs(pf).up.forEach(c=>out.push({at:c.d1,type:'Summit',name:'Summit',note:'ยอดเนิน ขึ้น '+c.gain+' ม. ชัน '+(c.g*100).toFixed(1)+'%'})); }catch(e){}
+  return out.filter(p=>p.at>=0&&p.at<=r.dist+1).sort((a,b)=>a.at-b.at); }
+function bcGpx(r){ const cum=r.cum||(r.cum=cumOf(r.coords)), nm=bcRouteName(), pts=bcPoints(r).filter(p=>p.wpt);
+  let g='<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Pankrai" xmlns="http://www.topografix.com/GPX/1/1">\n<metadata><name>'+esc(nm)+'</name></metadata>\n';
+  pts.forEach(p=>{ const c=bcAt(r,cum,p.at); g+='<wpt lat="'+c[0].toFixed(6)+'" lon="'+c[1].toFixed(6)+'"><name>'+esc(p.note)+'</name><type>'+p.name+'</type></wpt>\n'; });
+  g+='<trk><name>'+esc(nm)+'</name><type>cycling</type><trkseg>\n';
+  r.coords.forEach((c,i)=>{ g+='<trkpt lat="'+c[0].toFixed(6)+'" lon="'+c[1].toFixed(6)+'">'+(r.ele&&r.ele[i]!=null?'<ele>'+(+r.ele[i]).toFixed(1)+'</ele>':'')+'</trkpt>\n'; });
+  return g+'</trkseg></trk>\n</gpx>\n'; }
+function bcTcx(r){ const cum=r.cum||(r.cum=cumOf(r.coords)), D=cum[cum.length-1];
+  let v=20/3.6; try{ const cfg=plAll()[plKey(r)]; if(cfg){ const res=plCompute(r,cfg); v=res.D/res.T; } }catch(e){}
+  const t0=Date.now(), T=x=>new Date(t0+x/v*1000).toISOString(), nm0=bcRouteName().replace(/[^\x20-\x7e]/g,'').replace(/\s+/g,' ').trim(), nm=(nm0.length>=4?nm0:'Pankrai '+(D/1000).toFixed(0)+'km').slice(0,15);
+  const P=c=>'<Position><LatitudeDegrees>'+c[0].toFixed(6)+'</LatitudeDegrees><LongitudeDegrees>'+c[1].toFixed(6)+'</LongitudeDegrees></Position>';
+  let x='<?xml version="1.0" encoding="UTF-8"?>\n<TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2">\n<Courses><Course><Name>'+esc(nm)+'</Name>\n'+
+    '<Lap><TotalTimeSeconds>'+Math.round(D/v)+'</TotalTimeSeconds><DistanceMeters>'+D.toFixed(1)+'</DistanceMeters><BeginPosition><LatitudeDegrees>'+r.coords[0][0].toFixed(6)+'</LatitudeDegrees><LongitudeDegrees>'+r.coords[0][1].toFixed(6)+'</LongitudeDegrees></BeginPosition>'+
+    '<EndPosition><LatitudeDegrees>'+r.coords[r.coords.length-1][0].toFixed(6)+'</LatitudeDegrees><LongitudeDegrees>'+r.coords[r.coords.length-1][1].toFixed(6)+'</LongitudeDegrees></EndPosition><Intensity>Active</Intensity></Lap>\n<Track>\n';
+  r.coords.forEach((c,i)=>{ x+='<Trackpoint><Time>'+T(cum[i])+'</Time>'+P(c)+(r.ele&&r.ele[i]!=null?'<AltitudeMeters>'+(+r.ele[i]).toFixed(1)+'</AltitudeMeters>':'')+'<DistanceMeters>'+cum[i].toFixed(1)+'</DistanceMeters></Trackpoint>\n'; });
+  x+='</Track>\n';
+  bcPoints(r).forEach(p=>{ x+='<CoursePoint><Name>'+esc(p.name.slice(0,10))+'</Name><Time>'+T(p.at)+'</Time>'+P(bcAt(r,cum,p.at))+'<PointType>'+p.type+'</PointType><Notes>'+esc(p.note)+'</Notes></CoursePoint>\n'; });
+  return x+'</Course></Courses>\n</TrainingCenterDatabase>\n'; }
+async function bcSendFile(text,name,type){ const file=new File([text],name,{type});
+  try{ if(navigator.canShare&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:name}); return; } }catch(e){ if(e&&e.name==='AbortError') return; }
+  download(name,text,type); toast('บันทึกไฟล์ '+name+' แล้ว — เปิดไฟล์นี้ด้วยแอปของไมล์',4500); }
+function openSendRoute(){ const r=R.res;
+  if(!r||!r.coords||r.coords.length<2){ openModal('<h3>ส่งเส้นทางไปไมล์</h3><div class="sub">ยังไม่มีเส้นทาง วางเส้นทาง หรือเปิดไฟล์เส้นทางที่หน้า เส้นทาง ก่อน</div><div class="stack"><button class="btn pri" id="bcGo">ไปหน้าเส้นทาง</button><button class="btn" id="bcX">ปิด</button></div>');
+    $('#bcGo').onclick=()=>{ closeModal(); goPage('route'); }; $('#bcX').onclick=closeModal; return; }
+  const n=bcPoints(r).length, km=(r.dist/1000).toFixed(1), base='pankrai-'+km+'km';
+  openModal('<h3>ส่งเส้นทางไปไมล์</h3><div class="sub">'+esc(bcRouteName())+' · '+km+' กม. · จุดเลี้ยวและจุดสำคัญ '+n+' จุด</div>'+
+    '<div class="stack"><button class="btn pri" id="bcGpx"><b>ไฟล์ GPX</b> — ใช้ได้กับไมล์เกือบทุกยี่ห้อ</button><button class="btn" id="bcTcx"><b>ไฟล์ TCX พร้อมจุดเลี้ยว</b> — Garmin, Wahoo</button></div>'+
+    '<div class="sub" style="margin-top:12px">กดแล้วเลือกแอปของไมล์ในหน้าต่างแชร์ หรือบันทึกไฟล์ไว้แล้วนำเข้าในแอปของไมล์ · วิธีของแต่ละยี่ห้อดูที่ <a href="#" id="bcHow">คู่มือเชื่อมไมล์</a></div>'+
+    '<div class="stack"><button class="btn" id="bcX">ปิด</button></div>');
+  $('#bcGpx').onclick=()=>bcSendFile(bcGpx(r),base+'.gpx','application/gpx+xml');
+  $('#bcTcx').onclick=()=>bcSendFile(bcTcx(r),base+'.tcx','application/vnd.garmin.tcx+xml');
+  $('#bcHow').onclick=e=>{ e.preventDefault(); openBrandGuide(); }; $('#bcX').onclick=closeModal; }
+
+/* ---- brand guide (facts from each maker's own help pages and app listings; menus can differ by app version) ---- */
+const BC_BRANDS=[
+  ['igpsport','iGPSPORT',{app:'แอป iGPSPORT',
+    out:['ในแอป iGPSPORT ไปที่หน้า Me แล้วเลือก Link Other Apps เพื่อผูก Strava (มี TrainingPeaks และ Komoot ด้วย)','กิจกรรมจะขึ้น Strava เอง แล้วปั่นไกลดึงจาก Strava ให้ (การ์ด Strava ด้านล่าง)'],
+    in:['ในปั่นไกลกด ส่งเส้นทางไปไมล์ → ไฟล์ GPX','นำไฟล์ GPX เข้าแอป iGPSPORT เป็นเส้นทางนำทาง แล้วส่งเข้าไมล์']}],
+  ['garmin','Garmin',{app:'Garmin Connect',
+    out:['ผูก Garmin Connect กับ Strava แล้วให้ปั่นไกลดึงจาก Strava','หรือเปิดกิจกรรมบนเว็บ Garmin Connect แล้วส่งออกเป็นไฟล์ GPX หรือ TCX มานำเข้าในปั่นไกล'],
+    in:['ในปั่นไกลกด ส่งเส้นทางไปไมล์ → ไฟล์ GPX','บนเว็บ Garmin Connect ไปที่ Courses → Import แล้วเลือกไฟล์ GPX จากนั้นส่งเข้าเครื่อง'],
+    note:'แนะนำไฟล์ GPX เพราะมีผู้ใช้รายงานว่าการนำเข้าไฟล์ FIT course ผ่าน Garmin Connect มีปัญหาในบางช่วง'}],
+  ['wahoo','Wahoo',{app:'แอป Wahoo / ELEMNT',
+    out:['เปิดกิจกรรมในแอป แล้วกดแชร์ เลือกไฟล์ GPX หรือ FIT ส่งมาที่ปั่นไกล','หรืออนุญาตให้แอปอัปโหลดขึ้น Strava อัตโนมัติ (Profile → Authorized apps)'],
+    in:['ในปั่นไกลกด ส่งเส้นทางไปไมล์ → ไฟล์ TCX หรือ GPX แล้วเลือกแอป Wahoo','ตอบ Yes เมื่อแอปถามว่าจะนำเข้าไฟล์ จากนั้นไปที่ Explore → My Collection → My Routes เลือกเส้นทาง แล้วกด Send to ELEMNT'],
+    note:'ขั้นตอนนี้เป็นของ ELEMNT ACE / BOLT 3 / ROAM 3 ตามคู่มือ Wahoo รุ่นเก่าเมนูอาจต่างกัน และต้องต่ออินเทอร์เน็ตตอนนำเข้า'}],
+  ['xoss','XOSS',{app:'แอป XOSS',
+    out:['ในแอป XOSS ผูกบัญชี Strava ให้กิจกรรมซิงก์ขึ้น Strava แล้วปั่นไกลดึงจาก Strava'],
+    in:['ในปั่นไกลกด ส่งเส้นทางไปไมล์ → ไฟล์ GPX แล้วเลือกแอป XOSS → Upload','หรือในแอป XOSS ไปที่ Profile → Routebook → Import เลือกไฟล์ GPX แล้วกด Save']}],
+  ['rockbros','ROCKBROS',{app:'แอปตามรุ่น',
+    out:['ไมล์ ROCKBROS แต่ละรุ่นใช้แอปต่างกัน: รุ่น M1 ใช้แอป XOSS · รุ่น M1 Pro ใช้แอป Xingzhe หรือแอป ROCKBROS · ดูชื่อแอปในคู่มือของรุ่นที่มี','ผูก Strava ในแอปนั้น แล้วให้ปั่นไกลดึงจาก Strava'],
+    in:['ส่งเส้นทางเป็นไฟล์ GPX จากปั่นไกล แล้วนำเข้าในแอปของรุ่นนั้น (รุ่นที่ใช้แอป XOSS ทำตามขั้นตอนของ XOSS)'],
+    note:'ยังไม่พบคู่มือทางการที่บอกเมนูนำเข้าเส้นทางของแอป ROCKBROS — ถ้ารุ่นของครูไม่มีเมนูนำเข้า GPX แปลว่ารุ่นนั้นอาจไม่รองรับการนำทางตามเส้นทาง'}],
+  ['bryton','Bryton',{app:'Bryton Active',
+    out:['ตั้งให้แอป Bryton Active ซิงก์กิจกรรมขึ้น Strava อัตโนมัติ แล้วปั่นไกลดึงจาก Strava','หรือเปิดกิจกรรมในแอป กดเมนู … มุมขวาบน เลือกส่งออกไฟล์ FIT มานำเข้าในปั่นไกล'],
+    in:['ส่งเส้นทางเป็นไฟล์ GPX จากปั่นไกล แล้วนำเข้าในแอป Bryton Active เพื่อส่งเข้าไมล์']}],
+  ['magene','Magene',{app:'OnelapFit',
+    out:['ในแอป OnelapFit แชร์กิจกรรมขึ้น Strava แล้วปั่นไกลดึงจาก Strava'],
+    in:['แอป OnelapFit ดึงเส้นทางที่บันทึกไว้ใน Strava ลงไมล์ได้ — ทางเลือกคือนำไฟล์ GPX จากปั่นไกลไปสร้างเส้นทางใน Strava ก่อน']}],
+  ['strava','Strava',{app:'เว็บ Strava',
+    out:['ใช้การ์ด Strava ด้านล่างให้ปั่นไกลดึงกิจกรรมเอง','หรือบนเว็บ strava.com เปิดกิจกรรม กดเมนู … แล้วเลือก Export GPX หรือ Export Original (ส่งออกได้เฉพาะบนเว็บ ไม่ใช่ในแอปมือถือ) แล้วนำไฟล์เข้าปั่นไกล'],
+    in:[]}]
+];
+function openBrandGuide(sel){ const b=BC_BRANDS.find(x=>x[0]===sel)||BC_BRANDS[0];
+  const chips=BC_BRANDS.map(x=>'<button class="bc-chip'+(x[0]===b[0]?' on':'')+'" data-b="'+x[0]+'">'+x[1]+'</button>').join('');
+  const g=b[2], list=a=>a.length?'<ol class="bc-ol">'+a.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol>':'';
+  openModal('<h3>คู่มือเชื่อมไมล์จักรยาน</h3><div class="sub">ไมล์ส่งข้อมูลสดเข้าแอปบนเว็บไม่ได้ จึงเชื่อมผ่านไฟล์และ Strava</div><div class="bc-chips">'+chips+'</div>'+
+    '<div class="bc-sec"><b>'+esc(b[1])+'</b> · '+esc(g.app)+'</div>'+
+    '<h4>📥 นำกิจกรรมจากไมล์เข้าปั่นไกล</h4>'+list(g.out)+
+    (g.in.length?'<h4>📤 ส่งเส้นทางจากปั่นไกลไปไมล์</h4>'+list(g.in):'')+
+    (g.note?'<div class="pl-note warn" style="margin-top:8px">'+esc(g.note)+'</div>':'')+
+    '<div class="sub" style="margin-top:10px">ชื่อเมนูอาจต่างไปตามรุ่นของแอป · บน Android กดแชร์ไฟล์จากแอปของไมล์แล้วเลือก ปั่นไกล ได้ (ต้องติดตั้งปั่นไกลแบบแอปก่อน)</div>'+
+    '<div class="stack"><button class="btn" id="bgX">ปิด</button></div>');
+  $$('#sheet .bc-chip').forEach(c=>c.onclick=()=>openBrandGuide(c.dataset.b)); $('#bgX').onclick=closeModal; }
+
+/* ---- files shared into the app (Android share sheet → service worker → here) ---- */
+async function bcShared(){ if(!/[?&]share=1\b/.test(location.search)) return; history.replaceState(null,'',location.pathname+location.hash);
+  const files=[]; try{ const c=await caches.open('pankrai-share'); for(const k of await c.keys()){ const m=await c.match(k); if(m){ const b=await m.blob(); files.push(new File([b],decodeURIComponent(k.url.split('/').pop()||'file'),{type:b.type})); } await c.delete(k); } }catch(e){}
+  if(!files.length){ toast('ไม่พบไฟล์ที่แชร์มา'); return; }
+  const ok=files.filter(f=>/\.(fit|gpx|tcx)$/i.test(f.name)); if(!ok.length){ toast('รองรับเฉพาะไฟล์ .fit .gpx .tcx'); return; }
+  const allFit=ok.every(f=>/\.fit$/i.test(f.name));
+  openModal('<h3>ได้รับไฟล์ '+ok.length+' ไฟล์</h3><div class="sub">'+ok.map(f=>esc(f.name)).join('<br>')+'</div><div class="stack">'+
+    '<button class="btn pri" id="shAct">📥 เก็บเป็นกิจกรรม (ประวัติการปั่น)</button>'+(ok.length===1?'<button class="btn'+(allFit?'':' pri')+'" id="shRoute">🧭 ใช้เป็นเส้นทางนำทาง</button>':'')+'<button class="btn" id="shX">ยกเลิก</button></div>');
+  const feed=(inp,fs)=>{ const dt=new DataTransfer(); fs.forEach(f=>dt.items.add(f)); inp.files=dt.files; inp.dispatchEvent(new Event('change')); };
+  $('#shAct').onclick=()=>{ goPage('act'); feed($('#fileImport'),ok); };
+  const rb=$('#shRoute'); if(rb) rb.onclick=()=>{ closeModal(); goPage('route'); feed($('#fileRoute'),ok); };
+  $('#shX').onclick=closeModal; }
+
+/* ---- Strava: rides recorded on any bike computer that syncs to Strava come in automatically ---- */
+// Needs a Strava API application (client id) and a small token-exchange worker that keeps the client secret.
+const K_STRAVA='pk_strava_v1', SV={busy:false}, SV_TYPES=/^(Ride|MountainBikeRide|GravelRide|EBikeRide|EMountainBikeRide)$/;
+function svCfg(){ const c=window.PK_STRAVA; return c&&c.clientId&&c.worker?c:null; }
+function svTok(){ const t=store.get(K_STRAVA,null); return t&&t.rt?t:null; }
+function svConnect(){ const c=svCfg(); if(!c) return; const st=Math.random().toString(36).slice(2)+Date.now().toString(36);
+  try{ sessionStorage.setItem('pk_sv_state',st); localStorage.setItem('pk_sv_state',st); }catch(e){}
+  const redir=location.origin+location.pathname+'?strava=1', mob=/Android|iPhone|iPad/i.test(navigator.userAgent);
+  location.href='https://www.strava.com/oauth/'+(mob?'mobile/':'')+'authorize?client_id='+encodeURIComponent(c.clientId)+'&redirect_uri='+encodeURIComponent(redir)+
+    '&response_type=code&approval_prompt=auto&scope='+encodeURIComponent('read,activity:read_all')+'&state='+st; }
+async function svPost(path,body){ const c=svCfg(); const r=await fetch(c.worker.replace(/\/+$/,'')+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const j=await r.json().catch(()=>({})); if(!r.ok) throw new Error(j.message||j.error||('HTTP '+r.status)); return j; }
+async function svCallback(){ const q=new URLSearchParams(location.search); if(q.get('strava')!=='1') return; history.replaceState(null,'',location.pathname+location.hash);
+  if(q.get('error')){ toast('ยกเลิกการเชื่อม Strava'); return; }
+  let st=null; try{ st=sessionStorage.getItem('pk_sv_state')||localStorage.getItem('pk_sv_state'); localStorage.removeItem('pk_sv_state'); }catch(e){}
+  if(!q.get('code')||!st||q.get('state')!==st){ toast('เชื่อม Strava ไม่สำเร็จ — ลองกดเชื่อมใหม่',5000); return; }
+  if(!/activity:read/.test(q.get('scope')||'')){ toast('ต้องติ๊กอนุญาตให้อ่านกิจกรรมด้วย จึงจะดึงกิจกรรมได้',6000); return; }
+  if(!svCfg()) return;
+  try{ const j=await svPost('/token',{code:q.get('code')});
+    store.set(K_STRAVA,{at:j.access_token,rt:j.refresh_token,exp:j.expires_at,ath:j.athlete?{id:j.athlete.id,name:((j.athlete.firstname||'')+' '+(j.athlete.lastname||'')).trim()}:null,last:null});
+    toast('เชื่อม Strava แล้ว — กำลังดึงกิจกรรม…',4000); goPage('dev'); svSync(true); }
+  catch(e){ toast('เชื่อม Strava ไม่สำเร็จ: '+e.message,6000); } }
+async function svAccess(){ let t=svTok(); if(!t) return null;
+  if(!t.exp||Date.now()/1000>t.exp-300){ const j=await svPost('/token',{refresh_token:t.rt}); t.at=j.access_token; t.rt=j.refresh_token||t.rt; t.exp=j.expires_at; store.set(K_STRAVA,t); }
+  return t.at; }
+async function svGet(path){ const at=await svAccess(); const r=await fetch(svCfg().worker.replace(/\/+$/,'')+'/api/'+path,{headers:{Authorization:'Bearer '+at}});
+  if(r.status===401){ const e=new Error('สิทธิ์หมดอายุ กดเชื่อม Strava ใหม่'); e.auth=true; throw e; }
+  if(r.status===429) throw new Error('Strava จำกัดจำนวนครั้งต่อช่วงเวลา ลองใหม่อีกครั้งภายหลัง');
+  if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }
+async function svSync(loud){ if(SV.busy||!svCfg()||!svTok()) return; if(navigator.onLine===false){ if(loud) toast('ไม่มีอินเทอร์เน็ต'); return; }
+  SV.busy=true; svRender(); let n=0;
+  try{ const t=svTok(), after=t.last||Math.floor(Date.now()/1000)-30*86400;
+    const list=await svGet('athlete/activities?per_page=30&after='+after);
+    const acts=(Array.isArray(list)?list:[]).filter(a=>SV_TYPES.test(a.sport_type||a.type)&&!a.manual&&!a.trainer).sort((a,b)=>Date.parse(a.start_date)-Date.parse(b.start_date));
+    for(const a of acts){ const t0=Date.parse(a.start_date);
+      if(!rides.some(r=>String(r.strava)===String(a.id))){
+        const s=await svGet('activities/'+a.id+'/streams?keys='+['latlng','time','altitude','heartrate','cadence','watts','distance','velocity_smooth'].join(',')+'&key_by_type=true');
+        const d=k=>s&&s[k]&&Array.isArray(s[k].data)?s[k].data:null, T=d('time');
+        if(T&&T.length>1){ const ll=d('latlng'), al=d('altitude'), hr=d('heartrate'), cd=d('cadence'), pw=d('watts'), ds=d('distance'), vs=d('velocity_smooth');
+          const pts=T.map((sec,i)=>({lat:ll&&ll[i]?ll[i][0]:null,lng:ll&&ll[i]?ll[i][1]:null,alt:al?al[i]:null,t:t0+sec*1000,hr:hr?hr[i]:null,cad:cd?cd[i]:null,pwr:pw?pw[i]:null,dist:ds?ds[i]:null,spd:vs?vs[i]:null}));
+          try{ const out=buildImported({name:a.name,pts,strava:a.id,summary:{dist:a.distance,timer:a.moving_time,ascent:a.total_elevation_gain}},'strava-'+a.id); if(out&&out!=='dup') n++; }catch(e){} } }
+      const tt=svTok(); if(!tt) break; tt.last=Math.max(tt.last||0,Math.floor(t0/1000)+1); store.set(K_STRAVA,tt); }
+    const tt=svTok(); if(tt){ tt.checked=Date.now(); store.set(K_STRAVA,tt); }
+    if(n) renderHistory(); if(loud||n) toast(n?'📥 ดึงจาก Strava '+n+' กิจกรรม':'Strava: ไม่มีกิจกรรมปั่นใหม่',4000);
+  }catch(e){ if(loud||e.auth) toast('Strava: '+e.message,6000); }
+  finally{ SV.busy=false; svRender(); } }
+async function svDisconnect(){ const t=svTok(); if(t){ try{ await svPost('/deauthorize',{access_token:await svAccess()}); }catch(e){} } store.del?store.del(K_STRAVA):localStorage.removeItem(K_STRAVA); svRender(); toast('เลิกเชื่อม Strava แล้ว'); }
+function svRender(){ const box=$('#svBox'); if(!box) return; const c=svCfg(), t=svTok();
+  if(!c){ box.innerHTML='<div class="sub" style="margin:0">ยังไม่ได้เปิดใช้ ผู้ดูแลแอปต้องลงทะเบียน Strava API ก่อน</div>'; return; }
+  if(!t){ box.innerHTML='<p class="sub" style="margin:0 0 10px">ไมล์ส่วนใหญ่ส่งกิจกรรมขึ้น Strava ได้อยู่แล้ว เชื่อมครั้งเดียว ปั่นไกลจะดึงกิจกรรมปั่นใหม่มาเก็บให้เอง</p><button class="btn sv-btn" id="svGo">เชื่อมต่อกับ Strava</button>';
+    $('#svGo').onclick=svConnect; return; }
+  box.innerHTML='<div class="sv-on"><b>เชื่อมแล้ว'+(t.ath&&t.ath.name?' · '+esc(t.ath.name):'')+'</b><small>'+(SV.busy?'กำลังดึงกิจกรรม…':t.checked?'ตรวจล่าสุด '+new Date(t.checked).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'ยังไม่ได้ดึง')+'</small></div>'+
+    '<div class="two" style="margin-top:10px"><button class="btn pri" id="svSync"'+(SV.busy?' disabled':'')+'>ดึงตอนนี้</button><button class="btn" id="svOff">เลิกเชื่อม</button></div><div class="sub" style="margin:8px 0 0">Powered by Strava</div>';
+  $('#svSync').onclick=()=>svSync(true); $('#svOff').onclick=svDisconnect; }
+function svAuto(){ const t=svTok(); if(svCfg()&&t&&(!t.checked||Date.now()-t.checked>30*60e3)) svSync(false); }
 /* =================== camera dashboard (แดชบอร์ดกล้อง) =================== */
 // Full-screen ride dashboard drawn on a canvas: optional live camera behind, gauges on top.
 // The same canvas can be recorded to a video file, so the clip carries the numbers like an action-cam overlay.
@@ -3424,6 +3603,7 @@ function openRide(id,ov){
   openModal('<h3>'+esc(r.name)+(r.demo?'<span class="tag">จำลอง</span>':'')+'</h3><div class="sub">'+fmtDate(r.start)+' · รวมพัก '+fmtDur(r.elapsed)+'</div>'+
     (segs.length&&hasL?'<div class="dmap" id="dmap"></div>':(r.noTrack?'<div class="sub">ไม่มีข้อมูลเส้นทาง</div>':(r.src==='import'?'<div class="sub">ไฟล์นี้ไม่มีข้อมูลตำแหน่ง (เช่น ปั่นในบ้านกับเทรนเนอร์)</div>':'')))+'<div class="pstrip" id="dPics" style="display:none"></div>'+statGrid(r)+sensorInfo(r)+'<div id="dSegs"></div>'+
     '<div class="sub" style="margin-top:-4px">* แคลอรี่เป็นค่าประมาณจากความเร็วเฉลี่ยและน้ำหนักตัว</div>'+
+    (r.strava?'<div class="sub"><a class="sv-link" href="https://www.strava.com/activities/'+encodeURIComponent(r.strava)+'" target="_blank" rel="noopener">View on Strava</a></div>':'')+
     '<div class="stack"><button class="btn pri" id="dImg">📤 แชร์ / บันทึกเป็นรูปภาพ</button>'+(segs.length?'<button class="btn" id="dVid">🎬 วิดีโอเส้นทาง 3 มิติ</button><button class="btn" id="dRoute">🧭 ปั่นเส้นทางนี้อีกครั้ง</button><button class="btn" id="dSeg">🏁 สร้างช่วงทางแข่งเวลา</button><button class="btn" id="dGpx">ส่งออกไฟล์ GPX</button>':'')+'<div class="two"><button class="btn ghost" id="dClose">ปิด</button><button class="btn ghost" id="dDel" style="color:var(--danger)">ลบ</button></div></div>',closeMini);
   if(segs.length) miniMap('dmap',m=>{ const all=[]; segs.forEach(s=>{ const ll=s.map(p=>[p[0],p[1]]); all.push(...ll); L.polyline(ll,LINE).addTo(m); });
     L.circleMarker(all[0],{radius:7,color:'#fff',weight:2,fillColor:'#16a34a',fillOpacity:1}).addTo(m);
@@ -3806,7 +3986,7 @@ function goPage(p,opt){ opt=opt||{}; if(document.body.classList.contains('planon
   $$('#bnav button').forEach(b=>b.classList.toggle('on',b.dataset.pg===p));
   $$('.pg').forEach(x=>x.classList.toggle('on',x.id==='pg-'+p));
   try{ sessionStorage.setItem('pk_page',p); }catch(e){}
-  if(p==='home') renderHome(); if(p==='act') renderHistory(); if(p==='me') renderMe(); if(p==='dev') renderDevs();
+  if(p==='home') renderHome(); if(p==='act') renderHistory(); if(p==='me') renderMe(); if(p==='dev'){ renderDevs(); svRender(); }
   if(p==='route'){ loadInfra(); setSheet(sheetState); if(MAIN) setTimeout(()=>MAIN.m.invalidateSize(),30); }
   if(prev!==p&&!opt.keep){ const pg=$('#pages'); if(pg) pg.scrollTop=0; } }
 function scrollToTabs(){ goPage('act'); }
@@ -3829,7 +4009,7 @@ $('#pages').addEventListener('click',e=>{ const g=e.target.closest('[data-go]');
     else if(k==='donate') $('#pillDonate').click();
     else if(k==='privacy') window.open('privacy.html','_blank','noopener');
   } });
-$('#devImport').onclick=()=>$('#fileImport').click();
+$('#devImport').onclick=()=>$('#fileImport').click(); $('#devSend').onclick=()=>openSendRoute(); $('#devGuide').onclick=()=>openBrandGuide();
 function sumOf(list){ return {dist:list.reduce((a,r)=>a+r.dist,0),moving:list.reduce((a,r)=>a+r.moving,0),gain:list.reduce((a,r)=>a+(r.gain||0),0),count:list.length}; }
 function renderHome(){ const el=$('#homeSum'); if(!el) return;
   const h=new Date().getHours(), nm=(settings.name||'').trim();
@@ -4297,7 +4477,7 @@ function beaconViewer(id){
 const bMatch=location.hash.match(/^#b-([0-9a-f]{16,40})$/);
 if(bMatch){ beaconViewer(bMatch[1]); }
 else {
-render(); renderHistory(); renderGroups(); renderIncidents(); renderPresence(); renderShops(); renderDevs(); renderAvatars(); syncInputs(); setSheet('peek'); (function(){ let p='home'; try{ p=sessionStorage.getItem('pk_page')||'home'; }catch(e){} goPage(p); })();
+render(); renderHistory(); renderGroups(); renderIncidents(); renderPresence(); renderShops(); renderDevs(); renderAvatars(); syncInputs(); setSheet('peek'); (function(){ let p='home'; try{ p=sessionStorage.getItem('pk_page')||'home'; }catch(e){} goPage(p); })(); setTimeout(()=>{ bcShared(); svCallback(); svAuto(); },600); document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') svAuto(); });
 startGeo(); switchBackend();
 const live=store.get(K_LIVE,null);
 if(live&&live.start&&Array.isArray(live.segs)){
@@ -4312,7 +4492,7 @@ window.addEventListener('beforeunload',()=>{ if(rec) saveLive(); });
 window.addEventListener('hashchange',()=>{ if(/^#b-/.test(location.hash)){ location.reload(); return; } if(!openHashRoute()){ hashDone=false; openHashGroup(); } });
 renderBeacon();
 }
-window.__pk={get be(){return be;},data,R,infra,get map(){return MAIN&&MAIN.m;},get nav(){return {navTargetPt,settings,turnsOf,R};},get acct(){return {acctUser,cloudSync,openAccount,acctGoogle,acctEmail,acctSignOut,openSettings,openRide,closeModal};},get vid(){return {openRideVideo,vidPrep,vidPlan,vidApply,vidFrameReady,vidCompose,cur:()=>vidCur};},get plan(){return {openPlan,closePlan,plCompute,plProfile,plKey,plAll,get PL(){return PL;},get PLR(){return PLR;},get rec(){return rec;}};},get hud(){return {HUD,hudOpen,hudClose,hudRecStart,hudRecStop,hudCam,SL,SENS};}};
+window.__pk={get be(){return be;},data,R,infra,get map(){return MAIN&&MAIN.m;},get nav(){return {navTargetPt,settings,turnsOf,R};},get acct(){return {acctUser,cloudSync,openAccount,acctGoogle,acctEmail,acctSignOut,openSettings,openRide,closeModal};},get vid(){return {openRideVideo,vidPrep,vidPlan,vidApply,vidFrameReady,vidCompose,cur:()=>vidCur};},get plan(){return {openPlan,closePlan,plCompute,plProfile,plKey,plAll,get PL(){return PL;},get PLR(){return PLR;},get rec(){return rec;}};},get hud(){return {HUD,hudOpen,hudClose,hudRecStart,hudRecStop,hudCam,SL,SENS};},get bc(){return {bcGpx,bcTcx,bcPoints,openSendRoute,openBrandGuide,svSync,svTok,svRender,rides:()=>rides};}};
 })();
 </script>
 </body>
