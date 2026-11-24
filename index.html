@@ -49,6 +49,8 @@ window.PK_FIREBASE = {
   messagingSenderId: "216927431660",
   appId: "1:216927431660:web:905a9f863a0770e3ae2ec9"
 };
+// usage statistics go to a separate Firebase project (pankrai-stats) owned by the admin account; see admin.html
+window.PK_STATS = { apiKey: "AIzaSyCgmTUtqJfNX2AdaxTPqu5oTJHtH7s5Zrg", authDomain: "pankrai-stats.firebaseapp.com", databaseURL: "https://pankrai-stats-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "pankrai-stats", appId: "1:915170977520:web:c37d69bf01ca6892724435" };
 window.PK_DONATE = null;
 // Strava: set after registering a Strava API application and deploying tools/strava-worker.js, e.g.
 // window.PK_STRAVA = { clientId: '123456', worker: 'https://pankrai-strava.example.workers.dev' };
@@ -3000,26 +3002,32 @@ function plText(res,c,nm){ const L2=[];
   L2.push('(ค่าประมาณจากแอปปั่นไกล)'); return L2.join('\n'); }
 /* =================== usage statistics (สถิติการใช้งานสำหรับผู้ดูแล) =================== */
 // One small record per device/account (stats/u/<uid>) and one per day (stats/d/<day>/<uid>): app opens, rides and km.
-// No location or route is sent here. Only the admin account can read these (see database.rules.json, admin.html).
+// No location or route is sent here. They live in a separate Firebase project (PK_STATS) that only the admin account can read (rules: tools/stats.rules.json, dashboard: admin.html).
 const USTAT={last:0};
 function stDay(t){ const d=new Date(t||Date.now()); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function stPlat(){ const u=navigator.userAgent||''; return /android/i.test(u)?'android':/iphone|ipad|ipod/i.test(u)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)?'ios':'desktop'; }
 function stMode(){ if((document.referrer||'').startsWith('android-app://')) return 'twa'; try{ if(matchMedia('(display-mode: standalone)').matches||navigator.standalone) return 'pwa'; }catch(e){} return 'web'; }
-function stRefs(){ if(!be||be.kind!=='firebase'||!be.ok||!window.firebase||!firebase.auth) return null; const u=firebase.auth().currentUser; return u?{u,db:firebase.database(),SV:firebase.database.ServerValue}:null; }
-function statsPing(){ const r=stRefs(); if(!r||demo) return; if(Date.now()-USTAT.last<30*60e3&&USTAT.uid===r.u.uid) return; USTAT.last=Date.now(); USTAT.uid=r.u.uid;
+let stApp=null;
+async function stRefs(){ if(demo||!window.PK_STATS||!be||be.kind!=='firebase'||!be.ok||!window.firebase||!firebase.auth||!firebase.database) return null;
+  try{ if(!stApp) stApp=(firebase.apps||[]).find(a=>a.name==='stats')||firebase.initializeApp(window.PK_STATS,'stats');
+    const A=stApp.auth(); if(!A.currentUser){ await new Promise(res=>{ const off=A.onAuthStateChanged(()=>{ off(); res(); }); }); if(!A.currentUser) await A.signInAnonymously(); }
+    const main=firebase.auth().currentUser; return {u:A.currentUser,acct:!!(main&&!main.isAnonymous),db:stApp.database(),SV:firebase.database.ServerValue}; }
+  catch(e){ console.warn('stats',e); return null; } }
+async function statsPing(){ if(Date.now()-USTAT.last<30*60e3) return; USTAT.last=Date.now(); const r=await stRefs(); if(!r){ USTAT.last=0; return; }
   const id=r.u.uid, U='stats/u/'+id+'/', up={}; up[U+'last']=r.SV.TIMESTAMP; up[U+'n']=r.SV.increment(1); up[U+'plat']=stPlat(); up[U+'app']=stMode(); up[U+'ver']=String(typeof APP_VERSION!=='undefined'?APP_VERSION:'').slice(0,20);
-  up[U+'acct']=!r.u.isAnonymous; up[U+'name']=String(settings.name||'').slice(0,30);
+  up[U+'acct']=r.acct; up[U+'name']=String(settings.name||'').slice(0,30);
   const fk='pk_st_first_'+id; if(!localStorage.getItem(fk)){ up[U+'first']=r.SV.TIMESTAMP; }
   up['stats/d/'+stDay()+'/'+id+'/n']=r.SV.increment(1);
   r.db.ref().update(up).then(()=>{ try{ localStorage.setItem(fk,'1'); }catch(e){} }).catch(e=>console.warn('stats',e)); }
-function statsRide(m){ const r=stRefs(); if(!r||demo) return; const km=Math.round((m||0)/100)/10, id=r.u.uid, up={};
+async function statsRide(m){ const r=await stRefs(); if(!r) return; const km=Math.round((m||0)/100)/10, id=r.u.uid, up={};
   up['stats/u/'+id+'/rides']=r.SV.increment(1); up['stats/u/'+id+'/km']=r.SV.increment(km);
   up['stats/d/'+stDay()+'/'+id+'/rides']=r.SV.increment(1); up['stats/d/'+stDay()+'/'+id+'/km']=r.SV.increment(km);
   r.db.ref().update(up).catch(e=>console.warn('stats',e)); }
+async function statsForget(){ const r=await stRefs(); if(r) await r.db.ref('stats/u/'+r.u.uid).remove().catch(()=>{}); }
 /* =================== app updates (แจ้งอัปเดต) =================== */
 // The Android app and installed copies can keep an old page open for days, so the app asks the server for
 // version.json and offers a one-tap update that clears the saved copy and reloads.
-const APP_VERSION='2026.11.24.2', UPD={remote:null,last:0,hide:null};
+const APP_VERSION='2026.11.24.3', UPD={remote:null,last:0,hide:null};
 function verCmp(a,b){ const x=String(a).split(/[.\-]/).map(Number), y=String(b).split(/[.\-]/).map(Number); for(let i=0;i<Math.max(x.length,y.length);i++){ const d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; }
 async function updCheck(loud){ if(!loud&&Date.now()-UPD.last<10*60e3) return; UPD.last=Date.now();
   try{ const r=await fetch('./version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json();
@@ -4383,7 +4391,7 @@ async function acctDelete(){ const a=fbAuth(), u=acctUser(); if(!u) return;
   const t0=Math.floor(Date.now()/1000), last=u.metadata&&u.metadata.lastSignInTime?Date.parse(u.metadata.lastSignInTime)/1000:0;
   if(!last||t0-last>270){ toast('เพื่อความปลอดภัย ให้กด "ออกจากระบบ" แล้วเข้าสู่ระบบใหม่ จากนั้นกดลบบัญชีอีกครั้ง',6000); return; }
   await uref().remove();
-  try{ await firebase.database().ref('stats/u/'+acctUser().uid).remove(); }catch(e){}
+  try{ await statsForget(); }catch(e){}
   try{ await acctSwitch(async()=>{ await u.delete(); await a.signInAnonymously(); }); }
   catch(e){ if(e.code==='auth/requires-recent-login'){ toast('ลบข้อมูลในบัญชีแล้ว แต่ต้องเข้าสู่ระบบใหม่ก่อนลบตัวบัญชี: ออกจากระบบ เข้าใหม่ แล้วกดลบอีกครั้ง',7000); return; } throw e; }
   syncSt={}; store.set(K_SYNC,syncSt); acctRender(); toast('ลบบัญชีและข้อมูลในบัญชีแล้ว ข้อมูลในเครื่องนี้ยังอยู่',5000); }

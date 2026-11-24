@@ -103,7 +103,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
-const CFG={apiKey:"AIzaSyCV758YwAtm1mgC5l677qyS5TgCuL4EpeA",authDomain:"pankrai.firebaseapp.com",databaseURL:"https://pankrai-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"pankrai",storageBucket:"pankrai.firebasestorage.app",messagingSenderId:"216927431660",appId:"1:216927431660:web:905a9f863a0770e3ae2ec9"};
+// statistics: pankrai-stats project (admin signs in with Google here); presence ("online now"): the app's main project
+const CFG={apiKey:"AIzaSyCgmTUtqJfNX2AdaxTPqu5oTJHtH7s5Zrg",authDomain:"pankrai-stats.firebaseapp.com",databaseURL:"https://pankrai-stats-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"pankrai-stats",appId:"1:915170977520:web:c37d69bf01ca6892724435"};
+const MAIN={apiKey:"AIzaSyCV758YwAtm1mgC5l677qyS5TgCuL4EpeA",authDomain:"pankrai.firebaseapp.com",databaseURL:"https://pankrai-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"pankrai",appId:"1:216927431660:web:905a9f863a0770e3ae2ec9"};
 const $=s=>document.querySelector(s), esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const PLAT={android:'Android',ios:'iPhone / iPad',desktop:'คอมพิวเตอร์'}, APP={twa:'แอป Android',pwa:'ติดตั้งบนหน้าจอ',web:'เบราว์เซอร์'};
 const fmt=n=>Number(n||0).toLocaleString('th-TH',{maximumFractionDigits:1});
@@ -125,9 +127,9 @@ $('#refresh').onclick=()=>load();
 
 async function load(){ const u=A.currentUser; gate('กำลังโหลดข้อมูล…',false);
   const from=day(Date.now()-89*864e5);
-  try{ const [su,sd,sp]=await Promise.all([DB.ref('stats/u').once('value'),DB.ref('stats/d').orderByKey().startAt(from).once('value'),DB.ref('presence').once('value').catch(()=>null)]);
+  try{ const [su,sd,sp]=await Promise.all([DB.ref('stats/u').once('value'),DB.ref('stats/d').orderByKey().startAt(from).once('value'),presence().catch(()=>null)]);
     U=Object.entries(su.val()||{}).map(([id,o])=>Object.assign({id},o)); DAYS=sd.val()||{}; PRES=sp?sp.val()||{}:{};
-  }catch(e){ if(/permission/i.test(e.code||e.message||'')) return gate('บัญชี <b>'+esc(u.email||u.uid)+'</b> ไม่มีสิทธิ์ผู้ดูแล<br><span class="muted">สิทธิ์ผู้ดูแลกำหนดไว้ในกฎฐานข้อมูล (database.rules.json)</span>',false);
+  }catch(e){ if(/permission/i.test(e.code||e.message||'')) return gate('บัญชี <b>'+esc(u.email||u.uid)+'</b> ไม่มีสิทธิ์ผู้ดูแล<br><span class="muted">สิทธิ์ผู้ดูแลกำหนดไว้ในกฎฐานข้อมูลของโปรเจกต์ pankrai-stats</span>',false);
     return gate('โหลดข้อมูลไม่สำเร็จ: '+esc(e.message),false); }
   // users that only exist in the daily log (first ping lost) still count
   for(const [k,v] of Object.entries(DAYS)) for(const id of Object.keys(v||{})) if(!U.find(x=>x.id===id)) U.push({id,first:Date.parse(k)});
@@ -135,6 +137,9 @@ async function load(){ const u=A.currentUser; gate('กำลังโหลด�
   $('#gate').classList.add('hide'); $('#dash').classList.remove('hide'); $('#out').classList.remove('hide'); $('#refresh').classList.remove('hide');
   render(); }
 
+async function presence(){ const m=(firebase.apps||[]).find(a=>a.name==='main')||firebase.initializeApp(MAIN,'main'); const ma=m.auth();
+  if(!ma.currentUser){ await new Promise(res=>{ const off=ma.onAuthStateChanged(()=>{ off(); res(); }); }); if(!ma.currentUser) await ma.signInAnonymously(); }
+  return m.database().ref('presence').once('value'); }
 function lastNDays(n){ const out=[]; for(let i=n-1;i>=0;i--) out.push(day(Date.now()-i*864e5)); return out; }
 function activeSince(n){ const ks=new Set(lastNDays(n)), s=new Set(); for(const k of ks) for(const id of Object.keys(DAYS[k]||{})) s.add(id); U.forEach(x=>{ if(x.last&&Date.now()-x.last<n*864e5) s.add(x.id); }); return s.size; }
 function render(){
