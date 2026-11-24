@@ -771,6 +771,12 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
   .rt-ic{flex:none;font-size:16px}
   .rt-nm{flex:1;font-size:14px;line-height:1.35}
   .rt-nm small{display:block;color:var(--muted);font-size:12px}
+  .altmk span{display:block;background:#fff;border:1.5px solid #94a3b8;border-radius:10px;padding:2px 6px;font-size:11.5px;line-height:1.25;text-align:center;color:#334155;box-shadow:0 1px 4px rgba(0,0,0,.25);white-space:nowrap}
+  .altmk b{display:block;font-size:12px;color:#0f172a}
+  .rc-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .rc{border:1px solid var(--line);background:#fff;border-radius:12px;padding:8px 10px;text-align:left;min-height:56px;display:flex;flex-direction:column;gap:1px}
+  .rc b{font-size:14px} .rc span{font-size:13px} .rc small{font-size:11.5px;color:var(--muted)}
+  .rc.on{border-color:#7c3aed;box-shadow:0 0 0 1.5px #7c3aed inset;background:#f5f3ff}
 </style>
 </head>
 <body>
@@ -835,7 +841,7 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
       <div class="results" id="results"></div>
       <div class="addvia"><span><button id="btnLoop">🔁 เส้นทางวน</button><button id="btnRouteFile">📂 เปิดไฟล์</button></span><button id="btnAddVia">+ เพิ่มจุดแวะ</button></div>
       <input type="file" id="fileRoute" accept=".gpx,.tcx,.fit" hidden>
-      <div class="seg" id="profSeg"><button data-p="safety" class="on">ปลอดภัยสุด</button><button data-p="trekking">สมดุล</button><button data-p="fastbike">เร็วสุด</button></div>
+      <div class="seg" id="profSeg"><button data-p="main" class="on">ถนนหลัก</button><button data-p="fastbike">เร็วสุด</button><button data-p="trekking">สมดุล</button><button data-p="safety">ปลอดภัยสุด</button></div>
     </div>
   </div>
 
@@ -1059,7 +1065,9 @@ const HAZ={pothole:['🕳️','หลุมบ่อ/ถนนพัง'],flood:
 const SOSK={flat:['🚲','ยางแตก/รั่ว'],broken:['🔧','รถเสีย/โซ่หลุด'],hurt:['🩹','บาดเจ็บ'],lost:['🧭','หลงทาง'],other:['🆘','อื่น ๆ']};
 const PACE={easy:'สบาย ๆ (ไม่เกิน 20 กม./ชม.)',mid:'กลาง (20–27 กม./ชม.)',fast:'เร็ว (27 กม./ชม. ขึ้นไป)'};
 const kindOf=i=>(i.type==='sos'?SOSK:HAZ)[i.kind]||(i.type==='sos'?SOSK.other:HAZ.other);
-const PROF={safety:['ปลอดภัยสุด',15],trekking:['สมดุล',17],fastbike:['เร็วสุด',20]};
+// main = the main roads a car would use (BRouter car-fast; falls back to moped if that route uses a motorway, where bikes aren't allowed)
+const PROF={main:['ถนนหลัก',20],fastbike:['เร็วสุด',20],trekking:['สมดุล',17],safety:['ปลอดภัยสุด',15]};
+const PROF_ORDER=['main','fastbike','trekking','safety'];
 const CATS=[['bike','ทางจักรยาน','#16a34a'],['quiet','ถนนเงียบ','#5eead4'],['park','สวน/ทางเท้า','#a3e635'],['minor','ถนนรอง','#fb923c'],['major','ถนนใหญ่','#ef4444']];
 const CATC=Object.fromEntries(CATS.map(c=>[c[0],c]));
 
@@ -1432,7 +1440,8 @@ if(MAIN){ MAIN.m.on('contextmenu',e=>{ if(document.body.classList.contains('pick
     '<button class="pbtn" data-act="addVia"'+d+'>แวะที่นี่</button><button class="pbtn" data-act="reporthere"'+d+'>⚠️ แจ้งเหตุที่นี่</button></div></div>').openOn(MAIN.m); }); }
 
 /* =================== route planner =================== */
-const R={a:{me:true},vias:[],b:null,profile:'safety',alt:0,res:null,loading:false,error:null,key:null,cache:{}};
+const R={a:{me:true},vias:[],b:null,profile:PROF[settings.routeProf]?settings.routeProf:'main',alt:0,res:null,loading:false,error:null,key:null,cache:{},others:{}};
+$$('#profSeg button').forEach(b=>b.classList.toggle('on',b.dataset.p===R.profile));
 function ptOf(p){ if(!p) return null; if(p.me) return lastFix?{lat:lastFix.lat,lng:lastFix.lng,name:'ตำแหน่งของฉัน'}:null; return p.lat!=null?p:null; }
 function syncInputs(){
   $('#inA').value=R.a?(R.a.me?'ตำแหน่งของฉัน':R.a.name||'จุดบนแผนที่'):'';
@@ -1469,13 +1478,14 @@ function buildSegs(msgs,coords){
 }
 function mixOf(segs){ const tot=segs.reduce((a,s)=>a+s.d,0); if(!tot) return null; const m={}; CATS.forEach(c=>m[c[0]]=0); segs.forEach(s=>m[s.cat]+=s.d/tot); return m; }
 async function fetchBRouter(pts,profile,alt){
+  if(profile==='main'){ const r=await fetchBRouter(pts,'car-fast',alt); if(!r.motorway) return Object.assign(r,{engineProfile:'car-fast'}); return Object.assign(await fetchBRouter(pts,'moped',alt),{engineProfile:'moped'}); }
   const u='https://brouter.de/brouter?lonlats='+pts.map(p=>p.lng.toFixed(6)+','+p.lat.toFixed(6)).join('|')+'&profile='+profile+'&alternativeidx='+(alt||0)+'&format=geojson';
   const r=await fetchT(u,{},30000); if(!r.ok) throw new Error('BRouter '+r.status);
   const j=await r.json(); const f=j.features&&j.features[0]; if(!f) throw new Error('ไม่พบเส้นทาง');
   const pr=f.properties||{}, g=f.geometry.coordinates;
   const coords=g.map(c=>[c[1],c[0]]), ele=g.map(c=>c[2]!=null?Math.round(c[2]):null);
-  const segs=buildSegs(pr.messages,coords);
-  return {coords,ele,dist:+pr['track-length']||0,ascend:+pr['filtered ascend']||0,segs,mix:mixOf(segs),engine:'brouter'};
+  const segs=buildSegs(pr.messages,coords), motorway=Array.isArray(pr.messages)&&pr.messages.some(m=>/highway=motorway/.test(String(m[m.length-1]||'')+String(m.join(' '))));
+  return {coords,ele,dist:+pr['track-length']||0,ascend:+pr['filtered ascend']||0,segs,mix:mixOf(segs),engine:'brouter',motorway};
 }
 async function fetchOSRM(pts){
   const u='https://routing.openstreetmap.de/routed-bike/route/v1/driving/'+pts.map(p=>p.lng.toFixed(6)+','+p.lat.toFixed(6)).join(';')+'?overview=full&geometries=geojson';
@@ -1499,11 +1509,13 @@ async function computeRoute(fit){
   R.loading=false;
   if(res){ R.cache[key]=res; R.res=res; } else { R.res=null; R.error=R.alt>0?'ไม่มีเส้นทางที่ '+(R.alt+1)+' สำหรับจุดนี้ ลองเส้นทาง 1':'หาเส้นทางไม่ได้ตอนนี้ (อาจไม่มีอินเทอร์เน็ต หรือบริการเส้นทางไม่ตอบ)'; }
   renderRoute(); drawRoute(fit!==false);
+  if(res&&!res.fallback&&R.alt===0) routeOthers(pts,key);
 }
 let hiLine=null;
 function drawRoute(fit){
   if(!MAIN) return; layers.route.clearLayers(); hiLine=null;
   const a=ptOf(R.a), b=ptOf(R.b);
+  if(R.res&&!R.track) routeOthersDraw();
   if(R.res){ L.polyline(R.res.coords,{color:'#fff',weight:10,opacity:.95}).addTo(layers.route);
     L.polyline(R.res.coords,{color:'#7c3aed',weight:6}).addTo(layers.route); }
   if(R.track&&R.track.wpts) R.track.wpts.forEach(w=>{ const k=PL_KIND[w.kind]||PL_KIND.poi;
@@ -1552,6 +1564,33 @@ function renderRoute(){
 }
 function clearRoute(){ if(layers.amen) layers.amen.clearLayers(); dropTrack(); R.loop=null; R.b=null; R.vias=[]; R.res=null; R.error=null; R.alt=0; R.a={me:true}; syncInputs(); renderRoute(); drawRoute(); }
 
+
+/* ----- other route choices: every profile at once, like the alternatives in Google Maps ----- */
+function routeKeyFor(p,pts){ return p+'|0|'+pts.map(q=>q.lat.toFixed(5)+','+q.lng.toFixed(5)).join(';'); }
+async function routeOthers(pts,key){ const job=R.others.job=key; R.others.list={};
+  for(const p of PROF_ORDER){ if(R.others.job!==job) return; if(p===R.profile) continue;
+    const k=routeKeyFor(p,pts); let r=R.cache[k];
+    if(!r){ try{ r=await fetchBRouter(pts,p,0); R.cache[k]=r; }catch(e){ r=null; } }
+    if(R.others.job!==job||R.key!==key) return; if(r) R.others.list[p]=r; routeChoicesRender(); drawRoute(false); } }
+function routeLabelPt(r,main){ // a point on this line that is far from the chosen route, for its label
+  let best=null, bd=-1; const c=r.coords, n=c.length, step=Math.max(1,Math.floor(n/60));
+  for(let i=Math.floor(n*0.15);i<n*0.85;i+=step){ const pr=rtProject(main,c[i][0],c[i][1]); if(pr.off>bd){ bd=pr.off; best=c[i]; } }
+  return bd>150?best:null; }
+function routeOthersDraw(){ const L0=R.others&&R.others.list; if(!L0||!R.res) return;
+  Object.entries(L0).forEach(([p,r])=>{ if(p===R.profile||!r) return; if(Math.abs(r.dist-R.res.dist)<30&&r.coords.length===R.res.coords.length) return;
+    const pick=()=>routePick(p);
+    L.polyline(r.coords,{color:'#fff',weight:9,opacity:.9}).on('click',pick).addTo(layers.route);
+    L.polyline(r.coords,{color:'#94a3b8',weight:6,opacity:.95}).on('click',pick).addTo(layers.route);
+    const lp=routeLabelPt(r,R.res); if(lp) L.marker(lp,{icon:L.divIcon({className:'altmk',html:'<span>'+PROF[p][0]+'<b>'+(r.dist/1000).toFixed(r.dist<10e3?1:0)+' กม.</b></span>',iconSize:[90,34],iconAnchor:[45,17]}),zIndexOffset:600}).on('click',pick).addTo(layers.route); }); }
+function routePick(p){ if(!PROF[p]) return; R.profile=p; R.alt=0; settings.routeProf=p; saveSettings(); $$('#profSeg button').forEach(b=>b.classList.toggle('on',b.dataset.p===p)); toast('ใช้เส้นทาง: '+PROF[p][0]); computeRoute(false); }
+function routeMainShare(r){ return r&&r.mix?Math.round((r.mix.major+r.mix.minor)*100):null; }
+function routeChoicesRender(){ const box=$('#rtChoices'); if(!box||!R.res) return; const L0=Object.assign({},R.others.list||{}); L0[R.profile]=R.res;
+  const rows=PROF_ORDER.filter(p=>L0[p]);
+  box.innerHTML=rows.length<2?'<div class="rt-sub">กำลังหาเส้นทางแบบอื่นมาเทียบ…</div>':
+    '<div class="rc-row">'+rows.map(p=>{ const r=L0[p], km=r.dist/1000, ms=routeMainShare(r);
+      return '<button class="rc'+(p===R.profile?' on':'')+'" data-rp="'+p+'" aria-pressed="'+(p===R.profile)+'"><b>'+PROF[p][0]+'</b><span>'+km.toFixed(km<10?1:0)+' กม. · '+fmtMin(km/PROF[p][1]*60)+'</span>'+(ms!=null?'<small>ถนนใหญ่/รอง '+ms+'%</small>':'')+'</button>'; }).join('')+'</div>'+
+    '<div class="rt-sub">แตะเพื่อเลือก หรือแตะเส้นสีเทาบนแผนที่</div>';
+  $$('#rtChoices [data-rp]').forEach(b=>b.onclick=()=>{ if(b.dataset.rp!==R.profile) routePick(b.dataset.rp); }); }
 /* =================== along the route: km marks, elevation, facilities =================== */
 // After A→B is planned: distance marks on the line, an elevation chart, and what is within ~300 m of the route
 // (petrol stations, shops, cafés, food, water, toilets, bike repair, medical), from OpenStreetMap and Longdo Map.
@@ -1613,8 +1652,8 @@ async function rtFetchEle(r){ const cum=r.cum||(r.cum=cumOf(r.coords)), D=cum[cu
   const st=D/(vals.length-1); return plProfile(r,{step:st,vals,D}); }
 // right under the distance summary, so it is on screen without scrolling the panel
 function rtMount(r){ const box=$('#routeBox'); if(!box) return; const old=$('#rtExtra'); if(old) old.remove();
-  const anc=box.querySelector('.legend')||box.querySelector('.bar')||box.querySelector('.rs-top'); const html='<div id="rtExtra"></div>';
-  if(anc) anc.insertAdjacentHTML('afterend',html); else box.insertAdjacentHTML('beforeend',html); rtExtras(r); }
+  const anc=box.querySelector('.legend')||box.querySelector('.bar')||box.querySelector('.rs-top'); const html=(R.track||r.fallback?'':'<div class="rt-card" style="margin-top:10px"><div class="rt-h"><b>🛣 เลือกเส้นทาง</b></div><div id="rtChoices"></div></div>')+'<div id="rtExtra"></div>';
+  if(anc) anc.insertAdjacentHTML('afterend',html); else box.insertAdjacentHTML('beforeend',html); routeChoicesRender(); rtExtras(r); }
 function rtExtras(r){ rtEnsure(r); rtRender(r); rtDrawAmen(); }
 function rtRender(r){ const box=$('#rtExtra'); if(!box||rtKey(r)!==RT.key) return; let h='';
   // elevation
@@ -1687,7 +1726,7 @@ function openHashRoute(){ const m=location.hash.match(/^#r\/(\w+)\/(.+)$/); if(!
   if(PROF[m[1]]){ R.profile=m[1]; $$('#profSeg button').forEach(b=>b.classList.toggle('on',b.dataset.p===R.profile)); }
   R.a={lat:pts[0][0],lng:pts[0][1],name:'จุดเริ่มต้น'}; R.b={lat:pts[pts.length-1][0],lng:pts[pts.length-1][1],name:'ปลายทาง'};
   R.vias=pts.slice(1,-1).map((p,i)=>({lat:p[0],lng:p[1],name:'จุดแวะ '+(i+1)})); syncInputs(); computeRoute(true); return true; }
-$$('#profSeg button').forEach(b=>b.onclick=()=>{ R.profile=b.dataset.p; R.alt=0; $$('#profSeg button').forEach(x=>x.classList.toggle('on',x===b)); if(R.b) computeRoute(true); });
+$$('#profSeg button').forEach(b=>b.onclick=()=>{ R.profile=b.dataset.p; R.alt=0; settings.routeProf=R.profile; saveSettings(); $$('#profSeg button').forEach(x=>x.classList.toggle('on',x===b)); if(R.b) computeRoute(true); });
 $('#btnMeA').onclick=()=>{ R.a={me:true}; syncInputs(); if(R.b) computeRoute(true); };
 $('#btnSwap').onclick=()=>{ if(R.track){ reverseTrack(); return; } if(R.loop&&R.b===R.loop.b){ R.vias.reverse(); syncInputs(); computeRoute(true); toast('สลับทิศการวนแล้ว'); return; } if(!R.b){ toast('ใส่ปลายทาง B ก่อน'); return; } const a=R.a; R.a=R.b; R.b=a&&a.me?(lastFix?{lat:lastFix.lat,lng:lastFix.lng,name:'ตำแหน่งของฉัน'}:null):a; R.vias.reverse(); syncInputs(); computeRoute(true); };
 $('#btnAddVia').onclick=()=>{ if(R.vias.length>=5){ toast('เพิ่มจุดแวะได้สูงสุด 5 จุด'); return; } R.vias.push(null); syncInputs(); const ins=$$('#vias input'); if(ins.length) ins[ins.length-1].focus(); };
@@ -3336,7 +3375,7 @@ async function statsForget(){ const r=await stRefs(); if(r) await r.db.ref('stat
 /* =================== app updates (แจ้งอัปเดต) =================== */
 // The Android app and installed copies can keep an old page open for days, so the app asks the server for
 // version.json and offers a one-tap update that clears the saved copy and reloads.
-const APP_VERSION='2026.11.24.14', UPD={remote:null,last:0,hide:null};
+const APP_VERSION='2026.11.24.15', UPD={remote:null,last:0,hide:null};
 function verCmp(a,b){ const x=String(a).split(/[.\-]/).map(Number), y=String(b).split(/[.\-]/).map(Number); for(let i=0;i<Math.max(x.length,y.length);i++){ const d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; }
 async function updCheck(loud){ if(!loud&&Date.now()-UPD.last<10*60e3) return; UPD.last=Date.now();
   try{ const r=await fetch('./version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json();
