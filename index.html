@@ -119,6 +119,10 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
   .results{display:none;border:1px solid var(--line);border-radius:14px;margin:-2px 0 10px;overflow:hidden;background:#fff}
   .results.show{display:block;max-height:58vh;overflow-y:auto;overscroll-behavior:contain}
   .ri .cat{display:inline-block;font-size:11.5px;color:#0f5b4d;background:#e7f2ef;border-radius:6px;padding:0 6px;margin-left:6px;vertical-align:1px;font-weight:600}
+  .mp-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+  .mp-row span{flex:1}
+  .mp-row small{display:block;color:var(--muted);font-size:12px}
+  .mp-row .btn{min-height:40px;padding:0 14px}
   .ri.hd{font-size:12.5px;color:var(--muted);background:var(--soft);padding:6px 12px;font-weight:600}
   .ri{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:10px 12px;font-size:14.5px;line-height:1.4}
   .ri:last-child{border-bottom:0}
@@ -1650,9 +1654,33 @@ function srRank(list,q,c){ const nq=srNorm(q), seen=[];
 function srRow(x){ const k=SR.me?x.km:null;
   return '<button class="ri" data-lat="'+x.lat+'" data-lng="'+x.lng+'" data-name="'+esc(x.name)+'">'+esc(x.name)+(x.cat&&x.cat!==x.name?'<span class="cat">'+esc(x.cat)+'</span>':'')+
     '<small>'+esc(x.sub||'')+(k!=null?(x.sub?' · ':'')+fmtKm(k):'')+'</small></button>'; }
-function srTail(){ return '<button class="ri" data-o="me">◎ ตำแหน่งของฉัน</button><button class="ri" data-o="pick">📍 เลือกบนแผนที่</button>'; }
+// my places: spots the map data doesn't have yet (saved from a Google Maps link, coordinates or a pin)
+const K_MYPL='pk_myplaces_v1';
+function myPlaces(){ const v=store.get(K_MYPL,[]); return Array.isArray(v)?v:[]; }
+function myPlacesSave(list){ store.set(K_MYPL,list.slice(0,100)); }
+function myPlaceAdd(p){ openModal('<h3>บันทึกเป็นสถานที่ของฉัน</h3><div class="sub">ค้นหาด้วยชื่อนี้ได้ครั้งหน้า แม้แผนที่จะยังไม่มีข้อมูลที่นี่ (เก็บในเครื่องนี้)</div>'+
+    '<div class="field"><label>ชื่อสถานที่ *</label><input class="txt" id="mpN" maxlength="80" value="'+esc(/^(พิกัด |ตำแหน่งจากลิงก์|จุดบนแผนที่)/.test(p.name||'')?'':(p.name||''))+'" placeholder="เช่น MR.DIY สาขาคลองมะนาว"></div>'+
+    '<div class="sub">'+(+p.lat).toFixed(5)+', '+(+p.lng).toFixed(5)+'</div>'+
+    '<div class="stack"><button class="btn pri" id="mpOk">บันทึก</button><button class="btn ghost" id="mpX">ยกเลิก</button></div>');
+  setTimeout(()=>{ const i=$('#mpN'); if(i) i.focus(); },50);
+  $('#mpX').onclick=closeModal;
+  $('#mpOk').onclick=()=>{ const name=$('#mpN').value.trim(); if(!name){ toast('ใส่ชื่อสถานที่ก่อน'); return; }
+    const l=myPlaces().filter(x=>!(hav(x.lat,x.lng,p.lat,p.lng)<15&&srNorm(x.name)===srNorm(name))); l.unshift({name,lat:+p.lat,lng:+p.lng,t:Date.now()}); myPlacesSave(l);
+    closeModal(); toast('บันทึก “'+name+'” แล้ว พิมพ์ชื่อนี้ในช่องค้นหาได้เลย',4000); if(act) showOpts(); }; }
+function myPlacesManage(){ const l=myPlaces();
+  openModal('<h3>สถานที่ของฉัน</h3>'+(l.length?'<div class="sub">แตะ ✕ เพื่อลบ</div>'+l.map((x,i)=>'<div class="mp-row"><span><b>'+esc(x.name)+'</b><small>'+x.lat.toFixed(5)+', '+x.lng.toFixed(5)+'</small></span><button class="btn ghost" data-del="'+i+'" aria-label="ลบ '+esc(x.name)+'">✕</button></div>').join(''):'<div class="sub">ยังไม่มี — วางลิงก์ Google Maps หรือพิกัดในช่องค้นหา แล้วเลือก “บันทึกเป็นสถานที่ของฉัน”</div>')+
+    '<div class="stack"><button class="btn" id="mpClose">ปิด</button></div>');
+  $('#mpClose').onclick=closeModal;
+  $$('#modal [data-del]').forEach(b=>b.onclick=()=>{ const l2=myPlaces(); l2.splice(+b.dataset.del,1); myPlacesSave(l2); myPlacesManage(); }); }
+function myPlacesMatch(q,c){ const nq=srNorm(q); if(!nq) return [];
+  return myPlaces().filter(x=>{ const nn=srNorm(x.name); return nn.includes(nq)||srBigram(nq,nn)>=0.6; }).map(x=>Object.assign(srItem(x.name,'สถานที่ของฉัน','',x.lat,x.lng,'mine'),{km:hav(c.lat,c.lng,x.lat,x.lng)/1000})); }
+function srTail(){ return '<button class="ri" data-o="me">◎ ตำแหน่งของฉัน</button><button class="ri" data-o="pick">📍 เลือกบนแผนที่</button>'+(myPlaces().length?'<button class="ri" data-o="mine">⭐ สถานที่ของฉัน ('+myPlaces().length+')<small>ดู / ลบสถานที่ที่บันทึกไว้</small></button>':''); }
 function showOpts(){ if(!act) return; const q=act.el.value.trim(), isMe=q==='ตำแหน่งของฉัน';
-  resBox.innerHTML=(q&&!isMe?'<button class="ri" data-o="search">🔍 ค้นหา “'+esc(q)+'”</button>':'<div class="ri hd">พิมพ์ชื่อสถานที่ ประเภท (เช่น ปั๊ม ร้านกาแฟ) พิกัด หรือวางลิงก์ Google Maps</div>')+srTail();
+  const mp=(!q||isMe)?myPlaces().slice(0,5):[];
+  const cp=act.el===$('#inA')?R.a:act.el===$('#inB')?R.b:null, canSave=cp&&!cp.me&&isFinite(cp.lat)&&!myPlaces().some(x=>hav(x.lat,x.lng,cp.lat,cp.lng)<15);
+  if(canSave) SR.last=cp;
+  resBox.innerHTML=(q&&!isMe?'<button class="ri" data-o="search">🔍 ค้นหา “'+esc(q)+'”</button>':'<div class="ri hd">พิมพ์ชื่อสถานที่ ประเภท (เช่น ปั๊ม ร้านกาแฟ) พิกัด หรือวางลิงก์ Google Maps</div>')+(canSave?'<button class="ri" data-o="save">⭐ บันทึก “'+esc(cp.name||'จุดนี้')+'” เป็นสถานที่ของฉัน<small>ตั้งชื่อไว้ค้นหาครั้งหน้า</small></button>':'')+
+    (mp.length?'<div class="ri hd">สถานที่ของฉัน</div>'+mp.map(x=>srRow(Object.assign(srItem(x.name,'สถานที่ของฉัน','',x.lat,x.lng,'mine'),{km:lastFix?hav(lastFix.lat,lastFix.lng,x.lat,x.lng)/1000:null}))).join(''):'')+srTail();
   resBox.classList.add('show'); }
 // suggestions while typing (Photon only, so the free services aren't flooded)
 function srSuggest(){ clearTimeout(SR.timer); if(!act) return; const q=act.el.value.trim();
@@ -1660,7 +1688,8 @@ function srSuggest(){ clearTimeout(SR.timer); if(!act) return; const q=act.el.va
   const my=++SR.seq; SR.timer=setTimeout(async()=>{ await srLocate(2500); const c=srCenter(); SR.me=!!c.me; let list=[];
     try{ const qa=srAlias(q); const rs=await Promise.all([srPhoton(q,c,7).catch(()=>[]),srLongdo(q,c).catch(()=>[])].concat(qa?[srPhoton(qa,c,5).catch(()=>[])]:[])); list=srRank(rs.flat(),qa||q,c).slice(0,8); }catch(e){}
     if(my!==SR.seq||!act||act.el.value.trim()!==q) return;
-    resBox.innerHTML='<button class="ri" data-o="search">🔍 ค้นหาทั้งหมด “'+esc(q)+'”<small>ค้นหาจากทุกแหล่ง แสดงที่ใกล้ก่อน</small></button>'+list.map(srRow).join('')+srTail(); resBox.classList.add('show'); },350); }
+    const mine=myPlacesMatch(q,c);
+    resBox.innerHTML='<button class="ri" data-o="search">🔍 ค้นหาทั้งหมด “'+esc(q)+'”<small>ค้นหาจากทุกแหล่ง แสดงที่ใกล้ก่อน</small></button>'+mine.map(srRow).join('')+list.map(srRow).join('')+srTail(); resBox.classList.add('show'); },350); }
 function bindSearch(el,setter){
   el.addEventListener('focus',()=>{ act={el,setter}; if(isMobile()) setSheet('max'); showOpts(); setTimeout(()=>{ try{ el.select(); }catch(e){} },0); });
   el.addEventListener('input',()=>{ act={el,setter}; srSuggest(); });
@@ -1672,6 +1701,8 @@ document.addEventListener('pointerdown',e=>{ if(!e.target.closest('.rform')) { r
 resBox.addEventListener('click',async e=>{
   const b=e.target.closest('.ri'); if(!b||!act||b.classList.contains('hd')||b.classList.contains('muted')) return; const cur=act;
   if(b.dataset.o==='search'){ doSearch(cur.el.value.trim()); return; }
+  if(b.dataset.o==='save'){ if(SR.last) myPlaceAdd(SR.last); return; }
+  if(b.dataset.o==='mine'){ myPlacesManage(); return; }
   if(b.dataset.o==='me'){ cur.setter({me:true}); if(!R.a||!R.a.me){ /* used for B or via */ }
     if(cur.el!==$('#inA')){ if(!lastFix){ toast('ยังไม่มีสัญญาณ GPS'); return; } cur.setter({lat:lastFix.lat,lng:lastFix.lng,name:'ตำแหน่งของฉัน'}); } }
   else if(b.dataset.o==='pick'){ resBox.classList.remove('show'); act=null; const p=await pickLocation('เลื่อนแผนที่ให้เป้าตรงจุดที่ต้องการ'); if(isMobile()) setSheet('mid'); if(!p){ syncInputs(); return; } cur.setter(Object.assign(p,{name:'จุดบนแผนที่'})); }
@@ -1688,7 +1719,8 @@ async function doSearch(q){
   // coordinates / Google Maps links
   let pp=srParse(q); if(pp&&pp.short){ resBox.innerHTML='<div class="ri muted">กำลังอ่านลิงก์ Google Maps…</div>'; pp=await srExpand(pp.short);
     if(!pp){ if(my===SR.seq&&act) resBox.innerHTML='<div class="ri muted">อ่านลิงก์นี้ไม่ได้ ลองเปิดลิงก์ใน Google Maps แล้วกดค้างที่หมุดเพื่อคัดลอกพิกัดมาวางแทน</div>'+srTail(); return; } }
-  if(pp){ if(my!==SR.seq||!act) return; resBox.innerHTML='<div class="ri hd">ตำแหน่งจากพิกัด/ลิงก์</div>'+srRow(Object.assign(srItem(pp.name,(+pp.lat).toFixed(5)+', '+(+pp.lng).toFixed(5),'',pp.lat,pp.lng,'link'),{km:hav(c.lat,c.lng,pp.lat,pp.lng)/1000}))+srTail(); return; }
+  if(pp){ if(my!==SR.seq||!act) return; SR.last=pp; resBox.innerHTML='<div class="ri hd">ตำแหน่งจากพิกัด/ลิงก์</div>'+srRow(Object.assign(srItem(pp.name,(+pp.lat).toFixed(5)+', '+(+pp.lng).toFixed(5),'',pp.lat,pp.lng,'link'),{km:hav(c.lat,c.lng,pp.lat,pp.lng)/1000}))+
+    '<button class="ri" data-o="save">⭐ บันทึกเป็นสถานที่ของฉัน<small>ตั้งชื่อไว้ค้นหาครั้งหน้า</small></button>'+srTail(); return; }
   const qn=q.replace(/\s*(ใกล้ฉัน|ใกล้ๆ|ใกล้ ๆ|แถวนี้|ใกล้ที่สุด|near me)$/i,'').trim(), near=SR_NEAR.find(n=>n[0].test(qn)), qa=srAlias(qn);
   const got=[], st={left:0,fail:0,near:near?'wait':null,nearList:[]};
   // show what has arrived so far; slower sources fill in when they answer
@@ -1699,11 +1731,12 @@ async function doSearch(q){
       const named=list.filter(x=>x.km<60); if(named.length) html+='<div class="ri hd">ชื่อที่ตรงกับ “'+esc(qn)+'”</div>'+named.slice(0,6).map(srRow).join(''); }
     else { const top=list.slice(0,12), rel=top.filter(x=>x.rel), nearest=rel.length?Math.min(...rel.map(x=>x.km)):0;
       // put close matches first; when even the closest is far away, say so instead of pretending
-      if(rel.length&&!st.left&&nearest>30) html+='<div class="ri hd">ไม่พบ “'+esc(qn)+'” ในระยะ 30 กม. จาก'+(c.me?'ตำแหน่งของคุณ':'จุดกลางแผนที่')+' — ที่ใกล้ที่สุดห่าง '+fmtKm(nearest)+' (ข้อมูลแผนที่อาจยังไม่มีสาขาใกล้คุณ ลองวางลิงก์ Google Maps แทน)</div>';
+      if(rel.length&&!st.left&&nearest>30&&!myPlacesMatch(qn,c).length) html+='<div class="ri hd">ไม่พบ “'+esc(qn)+'” ในระยะ 30 กม. จาก'+(c.me?'ตำแหน่งของคุณ':'จุดกลางแผนที่')+' — ที่ใกล้ที่สุดห่าง '+fmtKm(nearest)+' (ข้อมูลแผนที่อาจยังไม่มีสาขาใกล้คุณ ลองวางลิงก์ Google Maps แทน)</div>';
       const close=x=>x.rel&&x.km<30?0:1; html+=top.slice().sort((a,b)=>close(a)-close(b)||b.score-a.score).map(srRow).join(''); }
     if(st.left>0&&!near) html+='<div class="ri muted">กำลังค้นหาเพิ่ม…</div>';
     if(!st.left&&!got.length&&!(near&&st.nearList.length)) html=st.fail&&!near?'<div class="ri muted">ค้นหาไม่ได้ตอนนี้ (อาจไม่มีอินเทอร์เน็ต)</div>':(near?html:'')+'<div class="ri muted">ไม่พบ “'+esc(q)+'” ลองพิมพ์สั้นลง พิมพ์ชื่ออำเภอต่อท้าย วางลิงก์ Google Maps หรือเลือกบนแผนที่</div>';
     else if(!st.left) html+='<div class="ri hd">ไม่เจอที่ต้องการ? วางลิงก์ Google Maps หรือพิกัดในช่องค้นหาได้</div>';
+    const mine=myPlacesMatch(qn,c); if(mine.length) html='<div class="ri hd">สถานที่ของฉัน</div>'+mine.map(srRow).join('')+html;
     resBox.innerHTML=html+srTail(); };
   const add=pr=>{ st.left++; pr.then(r=>{ if(r) got.push(...r); }).catch(()=>{ st.fail++; }).finally(()=>{ st.left--; paint(); }); };
   add(srPhoton(qn,c,10)); add(srNominatim(qn,c)); if(!near) add(srLongdo(qn,c));
@@ -3161,7 +3194,7 @@ async function statsForget(){ const r=await stRefs(); if(r) await r.db.ref('stat
 /* =================== app updates (แจ้งอัปเดต) =================== */
 // The Android app and installed copies can keep an old page open for days, so the app asks the server for
 // version.json and offers a one-tap update that clears the saved copy and reloads.
-const APP_VERSION='2026.11.24.10', UPD={remote:null,last:0,hide:null};
+const APP_VERSION='2026.11.24.11', UPD={remote:null,last:0,hide:null};
 function verCmp(a,b){ const x=String(a).split(/[.\-]/).map(Number), y=String(b).split(/[.\-]/).map(Number); for(let i=0;i<Math.max(x.length,y.length);i++){ const d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; }
 async function updCheck(loud){ if(!loud&&Date.now()-UPD.last<10*60e3) return; UPD.last=Date.now();
   try{ const r=await fetch('./version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json();
