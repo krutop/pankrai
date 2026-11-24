@@ -717,7 +717,7 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
   .hud.show{display:block}
   .hud canvas{position:absolute;left:0;top:0;display:block}
   .hud video{position:absolute;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none}
-  .hud-ctl{position:absolute;left:14px;bottom:calc(16px + var(--sab));display:flex;flex-direction:column;gap:12px}
+  .hud-ctl{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--sat) + 62px);display:flex;flex-direction:row;gap:12px}
   .hud-ctl button{width:52px;height:52px;border-radius:50%;border:0;background:rgba(0,0,0,.45);color:#fff;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
   .hud-ctl svg{width:26px;height:26px}
   #hudCam.on{background:rgba(255,255,255,.9);color:#0b2a4a}
@@ -3231,7 +3231,7 @@ function hudDraw(){
   c.shadowBlur=6*s; c.fillStyle='#fff';
   // inclination arc (top right)
   const deg=g!=null?Math.atan(g)*180/Math.PI:null, ax=Rr-46*s, ay=top+62*s, ar=44*s;
-  txt(deg!=null?(deg>=0?'':'−')+Math.abs(deg).toFixed(0)+'°':'--°',Rr,top+22*s,30,700,'right'); txt('ความลาดเอียง',Rr,top+38*s,11.5,600,'right');
+  txt(deg!=null?(deg<=-0.5?'−':'')+Math.abs(deg).toFixed(0)+'°':'--°',Rr,top+22*s,30,700,'right'); txt('ความลาดเอียง',Rr,top+38*s,11.5,600,'right');
   c.shadowBlur=0; c.lineCap='round'; c.lineWidth=5*s; const gr2=c.createLinearGradient(ax-ar,0,ax+ar,0); gr2.addColorStop(0,'#22d3ee'); gr2.addColorStop(1,'#4ade80');
   c.strokeStyle=gr2; c.beginPath(); c.arc(ax,ay+ar*0.9,ar,Math.PI*1.25,Math.PI*1.75); c.stroke();
   if(deg!=null){ const t=Math.PI*1.5+Math.max(-1,Math.min(1,deg/20))*Math.PI*0.25; c.fillStyle='#fff'; c.beginPath(); c.arc(ax+Math.cos(t)*ar,ay+ar*0.9+Math.sin(t)*ar,5*s,0,7); c.fill(); }
@@ -3242,30 +3242,54 @@ function hudDraw(){
   if(ele!=null){ const fr=HUD.altMax>HUD.altMin?(ele-HUD.altMin)/(HUD.altMax-HUD.altMin):0.5; c.fillStyle='#2dd4bf'; c.fillRect(bx,by+bh*(1-fr),6*s,bh*fr); }
   c.shadowBlur=6*s; c.fillStyle='#fff';
   // slope + wedge
-  const sy=H*0.40; val(g!=null?(g<0?'−':'')+Math.abs(g*100).toFixed(0):'--','%','ความชัน',Rr,sy,34,'right');
+  const sy=H*0.40; val(g!=null?(g*100<=-0.5?'−':'')+Math.abs(g*100).toFixed(0):'--','%','ความชัน',Rr,sy,34,'right');
   const wx=Rr, wy=sy+46*s, ww=74*s, wh=34*s, fr2=g!=null?Math.min(1,Math.abs(g)/0.12):0; c.shadowBlur=0;
   c.fillStyle='rgba(255,255,255,.3)'; c.beginPath(); c.moveTo(wx-ww,wy); c.lineTo(wx,wy); c.lineTo(wx,wy-wh); c.closePath(); c.fill();
   if(fr2>0){ c.fillStyle=g>0?'#fb923c':'#22d3ee'; c.beginPath(); c.moveTo(wx-ww,wy); c.lineTo(wx-ww+ww*fr2,wy); c.lineTo(wx-ww+ww*fr2,wy-wh*fr2); c.closePath(); c.fill(); }
   c.shadowBlur=6*s; c.fillStyle='#fff';
-  // left column: sensors, heart rate, acceleration, distance, time
+  // left column: acceleration, distance, time
   const names=Object.values(typeof SENS!=='undefined'?SENS:{}).filter(x=>x&&x.state==='on').map(x=>x.name).filter(Boolean);
-  let ly=H*0.30; if(names.length){ c.globalAlpha=0.85; txt(names.join(' · ').slice(0,40),L,ly,12.5,700); c.globalAlpha=1; ly+=40*s; } else ly+=26*s;
-  if(sv.hr!=null){ val(String(Math.round(sv.hr)),'bpm','ชีพจร',L,ly,44); ly+=70*s; }
-  if(sv.pwr!=null){ val(String(Math.round(sv.pwr)),'W','กำลัง',L,ly,36); ly+=60*s; }
+  let ly=H*0.32;
   val(HUD.acc.toFixed(2),'G','ความเร่ง',L,ly,36); ly+=60*s;
   val(dist.toFixed(dist<100?1:0),'km','ระยะทาง',L,ly,44); ly+=70*s;
   val(fmtClock(mov),'','เวลาปั่น',L,ly,30);
-  // speed gauge
-  const r=Math.min(W*0.26,H*0.14), cx=W*0.55, cy=H-r-58*s, a0=Math.PI*0.75, a1=Math.PI*2.25, vmax=spd>55?80:60, fr=Math.min(1,spd/vmax);
-  c.shadowBlur=0; c.lineCap='round'; c.lineWidth=14*s; c.strokeStyle='rgba(255,255,255,.32)'; c.beginPath(); c.arc(cx,cy,r,a0,a1); c.stroke();
-  if(fr>0.005){ const gg=c.createLinearGradient(cx-r,cy+r,cx+r,cy-r); gg.addColorStop(0,'#0ea5e9'); gg.addColorStop(.6,'#22d3ee'); gg.addColorStop(1,'#86efac');
-    c.strokeStyle=gg; c.beginPath(); c.arc(cx,cy,r,a0,a0+(a1-a0)*fr); c.stroke(); const t=a0+(a1-a0)*fr; c.fillStyle='#fff'; c.beginPath(); c.arc(cx+Math.cos(t)*r,cy+Math.sin(t)*r,9*s,0,7); c.fill(); }
-  c.shadowBlur=8*s; c.fillStyle='#fff'; txt(spd.toFixed(0),cx,cy+20*s,70,800,'center'); txt('กม./ชม.',cx,cy+44*s,14,700,'center');
-  // cadence ring
-  if(sv.cad!=null){ const r2=r*0.55, cx2=Math.min(W-r2-14*s,cx+r*1.05), cy2=cy+r*0.3, b0=Math.PI*1.1, b1=Math.PI*2.4, f3=Math.min(1,sv.cad/130);
-    c.shadowBlur=0; c.lineWidth=10*s; c.strokeStyle='rgba(255,255,255,.3)'; c.beginPath(); c.arc(cx2,cy2,r2,b0,b1); c.stroke();
-    c.strokeStyle='#38bdf8'; c.beginPath(); c.arc(cx2,cy2,r2,b0,b0+(b1-b0)*f3); c.stroke(); c.shadowBlur=6*s; c.fillStyle='#fff';
-    txt(String(Math.round(sv.cad)),cx2,cy2+8*s,30,800,'center'); txt('รอบ/นาที',cx2,cy2+24*s,11,700,'center'); }
+  // speed gauge (bike-computer style): dark dial, ticks 0–80, blue arc from the bottom, big number in the middle
+  const r=Math.min(W*0.24,H*0.13), cx=L+r*1.12, cy=H-r*1.12-34*s, vmax=spd>75?100:80, fr=Math.min(1,spd/vmax), A0=Math.PI/2;
+  c.shadowBlur=0;
+  c.fillStyle='rgba(70,110,200,.22)'; c.beginPath(); c.arc(cx,cy,r*1.12,0,7); c.fill();
+  const dg=c.createRadialGradient(cx,cy-r*0.3,r*0.1,cx,cy,r); dg.addColorStop(0,'rgba(30,45,95,.82)'); dg.addColorStop(1,'rgba(12,20,48,.88)');
+  c.fillStyle=dg; c.beginPath(); c.arc(cx,cy,r,0,7); c.fill();
+  for(let v=0;v<vmax;v+=2){ const t=A0+v/vmax*Math.PI*2, major=v%10===0, r1=r*(major?0.86:0.9);
+    c.strokeStyle=major?'rgba(220,230,255,.85)':'rgba(170,185,230,.45)'; c.lineWidth=(major?2.2:1.2)*s; c.lineCap='butt';
+    c.beginPath(); c.moveTo(cx+Math.cos(t)*r1,cy+Math.sin(t)*r1); c.lineTo(cx+Math.cos(t)*r*0.97,cy+Math.sin(t)*r*0.97); c.stroke(); }
+  c.fillStyle='rgba(200,215,255,.8)'; c.font='700 '+Math.round(r*0.13)+'px '+ff; c.textAlign='center'; c.textBaseline='middle';
+  for(let v=0;v<vmax;v+=vmax/4){ const t=A0+v/vmax*Math.PI*2; c.fillText(String(v),cx+Math.cos(t)*r*1.06,cy+Math.sin(t)*r*1.06); }
+  c.textBaseline='alphabetic';
+  c.strokeStyle='rgba(45,212,191,.55)'; c.lineWidth=1.6*s; c.beginPath(); c.arc(cx,cy,r*0.66,0,7); c.stroke();
+  if(fr>0.004){ const ar=r*0.76, a1=A0+fr*Math.PI*2, gg=c.createLinearGradient(cx-r,cy+r,cx+r,cy-r); gg.addColorStop(0,'#1e40af'); gg.addColorStop(.5,'#2563eb'); gg.addColorStop(1,'#60a5fa');
+    c.lineCap='round'; c.lineWidth=r*0.11; c.strokeStyle=gg; c.shadowColor='rgba(59,130,246,.7)'; c.shadowBlur=10*s;
+    c.beginPath(); c.arc(cx,cy,ar,A0,a1); c.stroke(); c.shadowBlur=0; c.shadowColor='rgba(0,0,0,.55)'; }
+  c.fillStyle='#fff'; c.font='800 '+Math.round(r*0.6)+'px '+ff; c.textAlign='center'; c.fillText(spd.toFixed(0),cx,cy+r*0.2);
+  c.fillStyle='#60a5fa'; c.font='800 '+Math.round(r*0.17)+'px '+ff; c.fillText('KM/H',cx,cy+r*0.45);
+  c.fillStyle='rgba(147,197,253,.85)'; c.font='800 '+Math.round(r*0.15)+'px '+ff; c.fillText('SPEED',cx,cy-r*1.22);
+  c.globalAlpha=0.7; c.fillStyle='#cbd5e1'; c.font='800 '+Math.round(11*s)+'px '+ff; c.fillText((names.join(' · ')||'ปั่นไกล').slice(0,32).toUpperCase(),cx,cy+r*1.12+20*s); c.globalAlpha=1;
+  // power / cadence / heart rate, large numbers beside the dial (fall back to distance and average speed without sensors)
+  const avgV=mov>0?(rec.dist/mov*3.6):0, colX=cx+r*1.28, big=Math.max(40,Math.min(64,r*0.5/s)), unitC='#cbd5e1';
+  const slotA=sv.pwr!=null?[String(Math.round(sv.pwr)),'W']:[dist.toFixed(1),'KM'], slotB=sv.cad!=null?[String(Math.round(sv.cad)),'RPM']:[avgV.toFixed(1),'AVG KM/H'];
+  c.shadowColor='rgba(0,0,0,.55)'; c.shadowBlur=6*s; c.textAlign='left';
+  const bigVal=(v,u,x,y,sz,uc)=>{ c.fillStyle='#fff'; c.font='800 '+Math.round(sz*s)+'px '+ff; c.fillText(v,x,y); c.fillStyle=uc; c.font='800 '+Math.round(sz*0.42*s)+'px '+ff; c.fillText(u,x,y+sz*0.45*s); };
+  bigVal(slotA[0],slotA[1],colX,cy-r*0.45,big,unitC);
+  bigVal(slotB[0],slotB[1],colX,cy+r*0.55,big*0.78,unitC);
+  const hh=HUD.hrH||(HUD.hrH=[]); if(sv.hr!=null&&(!HUD.hrT||now-HUD.hrT>1000)){ hh.push(sv.hr); HUD.hrT=now; if(hh.length>24) hh.shift(); }
+  if(sv.hr!=null){ const hx=W-16*s, wide=(W-16*s-colX)>big*s*4.4;
+    // wide screens: heart rate as a third column like a bike computer; narrow phones: above the row, bars to its left
+    const hy=wide?cy-r*0.45:cy-r*1.32, by=wide?cy+r*0.55:hy+big*0.45*s;
+    c.textAlign='right'; c.fillStyle='#fff'; c.font='800 '+Math.round(big*s)+'px '+ff; c.fillText(String(Math.round(sv.hr)),hx,hy);
+    const nw=c.measureText(String(Math.round(sv.hr))).width;
+    c.fillStyle='#60a5fa'; c.font='800 '+Math.round(big*0.42*s)+'px '+ff; c.fillText('BPM',hx,hy+big*0.45*s);
+    if(hh.length>1){ c.shadowBlur=0; const mn=Math.min(...hh)-5, mx=Math.max(...hh)+5, bw=4*s, gap=2.5*s, n=Math.min(hh.length,wide?24:16), bh=wide?r*0.55:big*0.9*s, xr=wide?hx:hx-nw-12*s, x0=xr-n*(bw+gap), hs=hh.slice(-n);
+      hs.forEach((v,i)=>{ const hgt=Math.max(3*s,(v-mn)/(mx-mn)*bh); c.fillStyle='rgba(59,130,246,'+(0.35+0.65*i/n)+')'; c.fillRect(x0+i*(bw+gap),by-hgt,bw,hgt); }); } }
+  c.textAlign='left';
   // recording badge
   if(HUD.rec){ c.shadowBlur=0; const t=Math.floor((now-HUD.recStart)/1000); c.fillStyle='rgba(0,0,0,.45)'; hudRR(c,W/2-46*s,top-2*s,92*s,26*s,13*s); c.fill();
     c.fillStyle=(Math.floor(now/500)%2)?'#ef4444':'#991b1b'; c.beginPath(); c.arc(W/2-30*s,top+11*s,6*s,0,7); c.fill(); c.fillStyle='#fff'; txt(pad(Math.floor(t/60))+':'+pad(t%60),W/2+8*s,top+17*s,15,700,'center'); }
