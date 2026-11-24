@@ -1603,14 +1603,20 @@ async function srLongdo(q,c){ const key=window.PK_LONGDO; if(!key) return [];
   const u='https://search.longdo.com/mapsearch/json/search?limit=12&locale=th&span=300km&lat='+c.lat+'&lon='+c.lng+'&keyword='+encodeURIComponent(q)+'&key='+encodeURIComponent(key);
   const r=await fetchT(u,{},10000); const j=await r.json();
   return (j.data||[]).filter(x=>isFinite(x.lat)&&isFinite(x.lon)).map(x=>srItem(x.name,x.address||'',(x.tag&&x.tag[0])||'',x.lat,x.lon,'longdo')); }
-async function srNearby(sel,label,c){ const run=async R=>{ const q='[out:json][timeout:15];nwr'+sel+'(around:'+R+','+c.lat+','+c.lng+');out center tags 60;';
-    const r=await fetchT('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(q)},20000); const j=await r.json();
+// the public Overpass servers are often busy: ask a few at once and take the first good answer
+const OVERPASS=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter'];
+async function overpassQ(q,ms){ const one=async ep=>{ const r=await fetchT(ep,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(q)},ms||25000);
+    if(!r.ok) throw new Error('overpass '+r.status); const t=await r.text(); if(t[0]!=='{') throw new Error('overpass busy'); return JSON.parse(t); };
+  return Promise.any(OVERPASS.map(one)); }
+async function srNearby(sel,label,c){ const run=async R=>{ const q='[out:json][timeout:20];nwr'+sel+'(around:'+R+','+c.lat+','+c.lng+');out center tags 60;';
+    const j=await overpassQ(q,25000);
     return (j.elements||[]).map(el=>{ const t=el.tags||{}, la=el.lat!=null?el.lat:el.center&&el.center.lat, lo=el.lon!=null?el.lon:el.center&&el.center.lon; if(!isFinite(la)) return null;
       return srItem(t.name||t['name:th']||t.brand||label,[t['addr:street'],t['addr:subdistrict']||t['addr:city']].filter(Boolean).join(', '),label,la,lo,'near'); }).filter(Boolean); };
-  let out=await run(4000); if(out.length<4) out=await run(15000); return out; }
+  let out=await run(4000); if(out.length<4) out=await run(15000); out.forEach(x=>{ x.km=hav(c.lat,c.lng,x.lat,x.lng)/1000; }); return out; }
+function srBigram(a,b){ if(a.length<2) return b.includes(a)?1:0; let n=0, t=0; for(let i=0;i<a.length-1;i++){ t++; if(b.includes(a.slice(i,i+2))) n++; } return t?n/t:0; }
 function srRank(list,q,c){ const nq=srNorm(q), seen=[];
   list.forEach(x=>{ const nn=srNorm(x.name), km=hav(c.lat,c.lng,x.lat,x.lng)/1000;
-    const txt=nn===nq?4:nn.startsWith(nq)?3:nn.includes(nq)?2.4:nq.includes(nn)&&nn.length>2?1.6:1;
+    const txt=nn===nq?4:nn.startsWith(nq)?3:nn.includes(nq)?2.4:1+1.3*srBigram(nq,nn+srNorm(x.sub));
     x.km=km; x.score=txt+(x.src==='longdo'?0.4:0)-Math.log10(km+1)*(x.src==='near'?3:0.9); });
   list.sort((a,b)=>b.score-a.score);
   return list.filter(x=>{ const nn=srNorm(x.name); if(seen.some(y=>hav(y.lat,y.lng,x.lat,x.lng)<(srNorm(y.name)===nn?250:20))) return false; seen.push(x); return true; }); }
@@ -1656,19 +1662,23 @@ async function doSearch(q){
     if(!pp){ if(my===SR.seq&&act) resBox.innerHTML='<div class="ri muted">อ่านลิงก์นี้ไม่ได้ ลองเปิดลิงก์ใน Google Maps แล้วกดค้างที่หมุดเพื่อคัดลอกพิกัดมาวางแทน</div>'+srTail(); return; } }
   if(pp){ if(my!==SR.seq||!act) return; resBox.innerHTML='<div class="ri hd">ตำแหน่งจากพิกัด/ลิงก์</div>'+srRow(Object.assign(srItem(pp.name,(+pp.lat).toFixed(5)+', '+(+pp.lng).toFixed(5),'',pp.lat,pp.lng,'link'),{km:hav(c.lat,c.lng,pp.lat,pp.lng)/1000}))+srTail(); return; }
   const qn=q.replace(/\s*(ใกล้ฉัน|ใกล้ๆ|ใกล้ ๆ|แถวนี้|ใกล้ที่สุด|near me)$/i,'').trim(), near=SR_NEAR.find(n=>n[0].test(qn)), qa=srAlias(qn);
-  const jobs=[srPhoton(qn,c,10),srNominatim(qn,c),srLongdo(qn,c)];
-  if(qa) jobs.push(srPhoton(qa,c,8),srNominatim(qa,c));
-  if(near) jobs.push(srNearby(near[1],near[2],c));
-  const rs=await Promise.all(jobs.map(j=>j.catch(()=>null)));
-  if(my!==SR.seq||!act) return;
-  if(rs.every(x=>x===null)){ resBox.innerHTML='<div class="ri muted">ค้นหาไม่ได้ตอนนี้ (อาจไม่มีอินเทอร์เน็ต)</div>'+srTail(); return; }
-  let list=srRank(rs.filter(Boolean).flat(),qa||qn,c);
-  if(near){ const nb=list.filter(x=>x.src==='near').sort((a,b)=>a.km-b.km).slice(0,10), rest=list.filter(x=>x.src!=='near').slice(0,6);
-    html=(nb.length?'<div class="ri hd">'+esc(near[2])+'ใกล้'+(c.me?'คุณ':'จุดกลางแผนที่')+' (เรียงจากใกล้ที่สุด)</div>'+nb.map(srRow).join(''):'')+(rest.length?'<div class="ri hd">ชื่อที่ตรงกับ “'+esc(qn)+'”</div>'+rest.map(srRow).join(''):''); }
-  else html=list.slice(0,12).map(srRow).join('');
-  if(!html) html='<div class="ri muted">ไม่พบ “'+esc(q)+'” ลองพิมพ์สั้นลง พิมพ์ชื่ออำเภอต่อท้าย วางลิงก์ Google Maps หรือเลือกบนแผนที่</div>';
-  else html+='<div class="ri hd">ไม่เจอที่ต้องการ? วางลิงก์ Google Maps หรือพิกัดในช่องค้นหาได้</div>';
-  resBox.innerHTML=html+srTail();
+  const got=[], st={left:0,fail:0,near:near?'wait':null,nearList:[]};
+  // show what has arrived so far; slower sources fill in when they answer
+  const paint=()=>{ if(my!==SR.seq||!act) return; const list=srRank(got.slice(),qa||qn,c); let html='';
+    if(near){ const nb=st.nearList.slice().sort((a,b)=>a.km-b.km).slice(0,10);
+      html+='<div class="ri hd">'+esc(near[2])+'ใกล้'+(c.me?'คุณ':'จุดกลางแผนที่')+' (เรียงจากใกล้ที่สุด)</div>'+
+        (nb.length?nb.map(srRow).join(''):st.near==='wait'?'<div class="ri muted">กำลังหา'+esc(near[2])+'ที่ใกล้ที่สุด…</div>':'<div class="ri muted">'+(st.near==='fail'?'เซิร์ฟเวอร์ข้อมูลแผนที่ไม่ว่าง ลองใหม่อีกครั้ง':'ไม่พบ'+esc(near[2])+'ในระยะ 15 กม.')+'</div>');
+      if(list.length) html+='<div class="ri hd">ชื่อที่ตรงกับ “'+esc(qn)+'”</div>'+list.slice(0,6).map(srRow).join(''); }
+    else html+=list.slice(0,12).map(srRow).join('');
+    if(st.left>0&&!near) html+='<div class="ri muted">กำลังค้นหาเพิ่ม…</div>';
+    if(!st.left&&!got.length&&!(near&&st.nearList.length)) html=st.fail&&!near?'<div class="ri muted">ค้นหาไม่ได้ตอนนี้ (อาจไม่มีอินเทอร์เน็ต)</div>':(near?html:'')+'<div class="ri muted">ไม่พบ “'+esc(q)+'” ลองพิมพ์สั้นลง พิมพ์ชื่ออำเภอต่อท้าย วางลิงก์ Google Maps หรือเลือกบนแผนที่</div>';
+    else if(!st.left) html+='<div class="ri hd">ไม่เจอที่ต้องการ? วางลิงก์ Google Maps หรือพิกัดในช่องค้นหาได้</div>';
+    resBox.innerHTML=html+srTail(); };
+  const add=pr=>{ st.left++; pr.then(r=>{ if(r) got.push(...r); }).catch(()=>{ st.fail++; }).finally(()=>{ st.left--; paint(); }); };
+  add(srPhoton(qn,c,10)); add(srNominatim(qn,c)); add(srLongdo(qn,c));
+  if(qa){ add(srPhoton(qa,c,8)); add(srNominatim(qa,c)); }
+  if(near) srNearby(near[1],near[2],c).then(r=>{ st.nearList=r; st.near='ok'; }).catch(()=>{ st.near='fail'; }).finally(paint);
+  paint();
 }
 
 /* =================== bike infrastructure + shops (Overpass, by viewport) =================== */
@@ -1693,8 +1703,7 @@ async function loadInfra(){
     'way["highway"]["cycleway:right"~"^(lane|track|shared_lane)$"];way["highway"]["cycleway:both"~"^(lane|track|shared_lane)$"];way["highway"]["bicycle"="designated"];);out geom tags;'+
     '(node["shop"="bicycle"];way["shop"="bicycle"];node["amenity"="bicycle_repair_station"];);out center tags;';
   try{
-    const r=await fetchT('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(q)},35000);
-    if(!r.ok) throw new Error('Overpass '+r.status); const j=await r.json();
+    const j=await overpassQ(q,35000);
     (j.elements||[]).forEach(el=>{ const t=el.tags||{};
       if(t.shop==='bicycle'||t.amenity==='bicycle_repair_station'){ const s=osmShop(el); if(s) infra.shops.set(s.id,s); return; }
       if(el.type==='way'&&el.geometry&&t.highway){ const ll=el.geometry.map(p=>[p.lat,p.lon]); let len=0; for(let i=1;i<ll.length;i++) len+=hav(ll[i-1][0],ll[i-1][1],ll[i][0],ll[i][1]);
@@ -1736,8 +1745,7 @@ function renderShops(){
 async function fetchNearShops(c){
   const run=async R=>{ const a='(around:'+R+','+c.lat.toFixed(5)+','+c.lng.toFixed(5)+')';
     const q='[out:json][timeout:25];(nwr["shop"="bicycle"]'+a+';node["amenity"="bicycle_repair_station"]'+a+';nwr["service:bicycle:repair"="yes"]'+a+';);out center tags 80;';
-    const r=await fetchT('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(q)},30000);
-    if(!r.ok) throw new Error('Overpass '+r.status); const j=await r.json(); return (j.elements||[]).map(osmShop).filter(Boolean); };
+    const j=await overpassQ(q,30000); return (j.elements||[]).map(osmShop).filter(Boolean); };
   let list=await run(6000); if(list.length<3) list=await run(20000); list.forEach(s=>infra.shops.set(s.id,s)); renderShops();
 }
 async function openShops(){
@@ -3119,7 +3127,7 @@ async function statsForget(){ const r=await stRefs(); if(r) await r.db.ref('stat
 /* =================== app updates (แจ้งอัปเดต) =================== */
 // The Android app and installed copies can keep an old page open for days, so the app asks the server for
 // version.json and offers a one-tap update that clears the saved copy and reloads.
-const APP_VERSION='2026.11.24.5', UPD={remote:null,last:0,hide:null};
+const APP_VERSION='2026.11.24.6', UPD={remote:null,last:0,hide:null};
 function verCmp(a,b){ const x=String(a).split(/[.\-]/).map(Number), y=String(b).split(/[.\-]/).map(Number); for(let i=0;i<Math.max(x.length,y.length);i++){ const d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; }
 async function updCheck(loud){ if(!loud&&Date.now()-UPD.last<10*60e3) return; UPD.last=Date.now();
   try{ const r=await fetch('./version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json();
