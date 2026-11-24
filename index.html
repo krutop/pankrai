@@ -1567,11 +1567,19 @@ const SR_ALIAS=[[/^รพ\.?\s*สต\.?/,'โรงพยาบาลส่ง�
   [/^ม\.\s*/,'มหาวิทยาลัย'],[/^สภ\.?\s*/,'สถานีตำรวจภูธร'],[/^เซเว่น(อีเลฟเว่น)?\s*/,'7-Eleven '],[/^7-?11\s*/,'7-Eleven '],[/^โลตัส\s*/,'Lotus '],[/^แม็?คโคร\s*/,'Makro '],
   [/^บิ๊กซี\s*/,'Big C '],[/^คาเฟ่อเมซอน|^อเมซอน\s*/,'Café Amazon '],[/^ปตท\.?\s*/,'PTT ']];
 // category words → nearest places of that kind
-const SR_NEAR=[[/^(ปั๊ม|ปั้ม|ปั๊มน้ำมัน|เติมน้ำมัน|ปั๊มแก๊ส)$/,'["amenity"="fuel"]','ปั๊มน้ำมัน'],[/^(ร้านกาแฟ|คาเฟ่|กาแฟ|cafe|coffee)$/i,'["amenity"="cafe"]','ร้านกาแฟ'],
-  [/^(ร้านอาหาร|อาหาร|ร้านข้าว|ข้าว|ก๋วยเตี๋ยว)$/,'["amenity"~"^(restaurant|fast_food|food_court)$"]','ร้านอาหาร'],[/^(ร้านสะดวกซื้อ|เซเว่น|7-?11|มินิมาร์ท|ร้านค้า)$/,'["shop"~"^(convenience|supermarket)$"]','ร้านสะดวกซื้อ'],
-  [/^(ร้านจักรยาน|ซ่อมจักรยาน|จักรยาน)$/,'["shop"="bicycle"]','ร้านจักรยาน'],[/^(ห้องน้ำ|สุขา)$/,'["amenity"="toilets"]','ห้องน้ำ'],[/^(โรงพยาบาล|รพ\.?|คลินิก|หมอ)$/,'["amenity"~"^(hospital|clinic|doctors)$"]','โรงพยาบาล/คลินิก'],
-  [/^(ร้านขายยา|ขายยา)$/,'["amenity"="pharmacy"]','ร้านขายยา'],[/^(วัด)$/,'["amenity"="place_of_worship"]','วัด'],[/^(atm|เอทีเอ็ม|ตู้เอทีเอ็ม|ตู้atm)$/i,'["amenity"="atm"]','ตู้ ATM'],
-  [/^(ที่พัก|โรงแรม|รีสอร์ท|รีสอร์ต)$/,'["tourism"~"^(hotel|guest_house|motel|hostel)$"]','ที่พัก'],[/^(ตลาด)$/,'["amenity"="marketplace"]','ตลาด'],[/^(โรงเรียน)$/,'["amenity"="school"]','โรงเรียน']];
+const SR_NEAR=[[/^(ปั๊ม|ปั้ม|ปั๊มน้ำมัน|เติมน้ำมัน|ปั๊มแก๊ส)$/,'["amenity"="fuel"]','ปั๊มน้ำมัน',['amenity:fuel'],'fuel'],
+  [/^(ร้านกาแฟ|คาเฟ่|กาแฟ|cafe|coffee)$/i,'["amenity"="cafe"]','ร้านกาแฟ',['amenity:cafe'],'cafe'],
+  [/^(ร้านอาหาร|อาหาร|ร้านข้าว|ข้าว|ก๋วยเตี๋ยว)$/,'["amenity"~"^(restaurant|fast_food|food_court)$"]','ร้านอาหาร',['amenity:restaurant','amenity:fast_food'],'restaurant'],
+  [/^(ร้านสะดวกซื้อ|เซเว่น|7-?11|มินิมาร์ท|ร้านค้า)$/,'["shop"~"^(convenience|supermarket)$"]','ร้านสะดวกซื้อ',['shop:convenience','shop:supermarket'],'7-Eleven'],
+  [/^(ร้านจักรยาน|ซ่อมจักรยาน|จักรยาน)$/,'["shop"="bicycle"]','ร้านจักรยาน',['shop:bicycle'],'bicycle'],
+  [/^(ห้องน้ำ|สุขา)$/,'["amenity"="toilets"]','ห้องน้ำ',['amenity:toilets'],'toilets'],
+  [/^(โรงพยาบาล|รพ\.?|คลินิก|หมอ)$/,'["amenity"~"^(hospital|clinic|doctors)$"]','โรงพยาบาล/คลินิก',['amenity:hospital','amenity:clinic'],'hospital'],
+  [/^(ร้านขายยา|ขายยา)$/,'["amenity"="pharmacy"]','ร้านขายยา',['amenity:pharmacy'],'pharmacy'],
+  [/^(วัด)$/,'["amenity"="place_of_worship"]','วัด',['amenity:place_of_worship'],'วัด'],
+  [/^(atm|เอทีเอ็ม|ตู้เอทีเอ็ม|ตู้atm)$/i,'["amenity"="atm"]','ตู้ ATM',['amenity:atm'],'atm'],
+  [/^(ที่พัก|โรงแรม|รีสอร์ท|รีสอร์ต)$/,'["tourism"~"^(hotel|guest_house|motel|hostel)$"]','ที่พัก',['tourism:hotel','tourism:guest_house'],'hotel'],
+  [/^(ตลาด)$/,'["amenity"="marketplace"]','ตลาด',['amenity:marketplace'],'ตลาด'],
+  [/^(โรงเรียน)$/,'["amenity"="school"]','โรงเรียน',['amenity:school'],'โรงเรียน']];
 function srCenter(){ if(lastFix) return {lat:lastFix.lat,lng:lastFix.lng,me:true}; const c=MAIN?MAIN.m.getCenter():null; return c?{lat:c.lat,lng:c.lng}:{lat:13.75,lng:100.5}; }
 function srNorm(t){ return String(t||'').toLowerCase().replace(/[\s\-_.()]/g,''); }
 function srAlias(q){ for(const [re,to] of SR_ALIAS) if(re.test(q)) return q.replace(re,to).trim(); return null; }
@@ -1614,10 +1622,15 @@ async function srNearby(sel,label,c){ const run=async R=>{ const q='[out:json][t
       return srItem(t.name||t['name:th']||t.brand||label,[t['addr:street'],t['addr:subdistrict']||t['addr:city']].filter(Boolean).join(', '),label,la,lo,'near'); }).filter(Boolean); };
   let out=await run(4000); if(out.length<4) out=await run(15000); out.forEach(x=>{ x.km=hav(c.lat,c.lng,x.lat,x.lng)/1000; }); return out; }
 function srBigram(a,b){ if(a.length<2) return b.includes(a)?1:0; let n=0, t=0; for(let i=0;i<a.length-1;i++){ t++; if(b.includes(a.slice(i,i+2))) n++; } return t?n/t:0; }
+// quick "nearby" answer from Photon (category filter + location), shown while Overpass is still working
+async function srPhotonNear(n,c){ const u='https://photon.komoot.io/api/?limit=15&lang=default&lat='+c.lat+'&lon='+c.lng+'&location_bias_scale=0&zoom=14&'+n[3].map(t=>'osm_tag='+t).join('&')+'&q='+encodeURIComponent(n[4]);
+  const r=await fetchT(u,{},10000); const j=await r.json();
+  return (j.features||[]).map(f=>{ const p=f.properties||{}, g=f.geometry&&f.geometry.coordinates; if(!g) return null; const it=srItem(p.name||n[2],[p.street,p.district||p.city,p.county].filter(Boolean).join(', '),n[2],g[1],g[0],'near'); it.km=hav(c.lat,c.lng,it.lat,it.lng)/1000; return it; })
+    .filter(x=>x&&x.km<30); }
 function srRank(list,q,c){ const nq=srNorm(q), seen=[];
   list.forEach(x=>{ const nn=srNorm(x.name), km=hav(c.lat,c.lng,x.lat,x.lng)/1000;
     const txt=nn===nq?4:nn.startsWith(nq)?3:nn.includes(nq)?2.4:1+1.3*srBigram(nq,nn+srNorm(x.sub));
-    x.km=km; x.score=txt+(x.src==='longdo'?0.4:0)-Math.log10(km+1)*(x.src==='near'?3:0.9); });
+    x.km=km; x.score=txt+(x.src==='longdo'?0.4:0)-Math.log10(km+1)*(x.src==='near'?3:1.4); });
   list.sort((a,b)=>b.score-a.score);
   return list.filter(x=>{ const nn=srNorm(x.name); if(seen.some(y=>hav(y.lat,y.lng,x.lat,x.lng)<(srNorm(y.name)===nn?250:20))) return false; seen.push(x); return true; }); }
 function srRow(x){ const k=lastFix?x.km:null;
@@ -1667,7 +1680,7 @@ async function doSearch(q){
   const paint=()=>{ if(my!==SR.seq||!act) return; const list=srRank(got.slice(),qa||qn,c); let html='';
     if(near){ const nb=st.nearList.slice().sort((a,b)=>a.km-b.km).slice(0,10);
       html+='<div class="ri hd">'+esc(near[2])+'ใกล้'+(c.me?'คุณ':'จุดกลางแผนที่')+' (เรียงจากใกล้ที่สุด)</div>'+
-        (nb.length?nb.map(srRow).join(''):st.near==='wait'?'<div class="ri muted">กำลังหา'+esc(near[2])+'ที่ใกล้ที่สุด…</div>':'<div class="ri muted">'+(st.near==='fail'?'เซิร์ฟเวอร์ข้อมูลแผนที่ไม่ว่าง ลองใหม่อีกครั้ง':'ไม่พบ'+esc(near[2])+'ในระยะ 15 กม.')+'</div>');
+        (nb.length?nb.map(srRow).join('')+(st.near==='wait'?'<div class="ri muted">กำลังหาเพิ่มเติม…</div>':''):st.near==='wait'?'<div class="ri muted">กำลังหา'+esc(near[2])+'ที่ใกล้ที่สุด…</div>':'<div class="ri muted">'+(st.near==='fail'?'เซิร์ฟเวอร์ข้อมูลแผนที่ไม่ว่าง ลองค้นหาใหม่อีกครั้ง':'ไม่พบ'+esc(near[2])+'ในระยะ 15 กม.')+'</div>');
       if(list.length) html+='<div class="ri hd">ชื่อที่ตรงกับ “'+esc(qn)+'”</div>'+list.slice(0,6).map(srRow).join(''); }
     else html+=list.slice(0,12).map(srRow).join('');
     if(st.left>0&&!near) html+='<div class="ri muted">กำลังค้นหาเพิ่ม…</div>';
@@ -1677,7 +1690,9 @@ async function doSearch(q){
   const add=pr=>{ st.left++; pr.then(r=>{ if(r) got.push(...r); }).catch(()=>{ st.fail++; }).finally(()=>{ st.left--; paint(); }); };
   add(srPhoton(qn,c,10)); add(srNominatim(qn,c)); add(srLongdo(qn,c));
   if(qa){ add(srPhoton(qa,c,8)); add(srNominatim(qa,c)); }
-  if(near) srNearby(near[1],near[2],c).then(r=>{ st.nearList=r; st.near='ok'; }).catch(()=>{ st.near='fail'; }).finally(paint);
+  if(near){ const merge=r=>{ r.forEach(x=>{ if(!st.nearList.some(y=>hav(y.lat,y.lng,x.lat,x.lng)<40)) st.nearList.push(x); }); };
+    srPhotonNear(near,c).then(merge).catch(()=>{}).finally(paint);
+    srNearby(near[1],near[2],c).then(r=>{ merge(r); st.near='ok'; }).catch(()=>{ st.near='fail'; }).finally(paint); }
   paint();
 }
 
@@ -3127,7 +3142,7 @@ async function statsForget(){ const r=await stRefs(); if(r) await r.db.ref('stat
 /* =================== app updates (แจ้งอัปเดต) =================== */
 // The Android app and installed copies can keep an old page open for days, so the app asks the server for
 // version.json and offers a one-tap update that clears the saved copy and reloads.
-const APP_VERSION='2026.11.24.6', UPD={remote:null,last:0,hide:null};
+const APP_VERSION='2026.11.24.7', UPD={remote:null,last:0,hide:null};
 function verCmp(a,b){ const x=String(a).split(/[.\-]/).map(Number), y=String(b).split(/[.\-]/).map(Number); for(let i=0;i<Math.max(x.length,y.length);i++){ const d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; }
 async function updCheck(loud){ if(!loud&&Date.now()-UPD.last<10*60e3) return; UPD.last=Date.now();
   try{ const r=await fetch('./version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json();
