@@ -782,6 +782,7 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
   <div class="hud-ctl">
     <button id="hudX" aria-label="กลับหน้าจอปั่น"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     <button id="hudCam" aria-label="เปิดกล้อง"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="13" height="12" rx="2.5"/><path d="m15.5 10.5 6-3.5v10l-6-3.5z"/><path d="M6 14.5a3 3 0 0 1 6 0" stroke-width="1.6"/></svg></button>
+    <button id="hudStyle" aria-label="เปลี่ยนรูปแบบแดชบอร์ด"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M7 9h4M7 13h3M15 15a2.5 2.5 0 1 1 3-3"/></svg></button>
     <button id="hudRec" aria-label="บันทึกวิดีโอพร้อมแดชบอร์ด"><i></i></button>
   </div>
 </div>
@@ -2237,6 +2238,7 @@ $('#ruLoc').onclick=()=>{ if(!lastFix){ toast('ยังไม่มีสัญ
 if(MAIN) MAIN.m.on('dragstart',()=>{ $('#ruLoc').classList.remove('on'); });
 $('#ruHandle').onclick=()=>{ $('#rcard').classList.toggle('open'); setRideH(); };
 $('#ruHud').onclick=hudOpen; $('#hudX').onclick=hudClose; $('#hudCam').onclick=()=>hudCam(!HUD.cam); $('#hudRec').onclick=()=>{ if(HUD.rec) hudRecStop(); else hudRecStart(); };
+$('#hudStyle').onclick=()=>{ const i=(HUD_STYLES.findIndex(x=>x[0]===hudStyle())+1)%HUD_STYLES.length; settings.hudStyle=HUD_STYLES[i][0]; saveSettings(); toast('รูปแบบแดชบอร์ด: '+HUD_STYLES[i][1]); };
 $('#ruSens').onclick=()=>{ openModal('<h3>เซนเซอร์บลูทูธ</h3><div id="devListM"></div><div class="stack"><button class="btn ghost" id="dmX">ปิด</button></div>'); renderDevs(); $('#dmX').onclick=closeModal; };
 $('#ruSet').onclick=openRideSettings;
 function openRideSettings(){
@@ -3027,7 +3029,7 @@ async function statsForget(){ const r=await stRefs(); if(r) await r.db.ref('stat
 /* =================== app updates (แจ้งอัปเดต) =================== */
 // The Android app and installed copies can keep an old page open for days, so the app asks the server for
 // version.json and offers a one-tap update that clears the saved copy and reloads.
-const APP_VERSION='2026.11.24.3', UPD={remote:null,last:0,hide:null};
+const APP_VERSION='2026.11.24.4', UPD={remote:null,last:0,hide:null};
 function verCmp(a,b){ const x=String(a).split(/[.\-]/).map(Number), y=String(b).split(/[.\-]/).map(Number); for(let i=0;i<Math.max(x.length,y.length);i++){ const d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; }
 async function updCheck(loud){ if(!loud&&Date.now()-UPD.last<10*60e3) return; UPD.last=Date.now();
   try{ const r=await fetch('./version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json();
@@ -3270,12 +3272,13 @@ function hudDraw(){
   const sl=hudSlope(); if(sl&&sl.g!=null&&isFinite(sl.g)) HUD.slope=HUD.slope==null?sl.g:HUD.slope*0.85+sl.g*0.15;
   const ele=sl&&sl.e!=null&&isFinite(sl.e)?sl.e:null; if(ele!=null){ HUD.altMin=HUD.altMin==null?ele:Math.min(HUD.altMin,ele); HUD.altMax=HUD.altMax==null?ele:Math.max(HUD.altMax,ele); }
   const dist=rec?rec.dist/1000:0, mov=rec?rec.moving:0, g=HUD.slope;
+  if(hudStyle()==='action'){ hudDrawAction(c,W,H,s,now,sv,ff,spd,ele,g,dist,mov); hudRecBadge(c,W,s,now,ff); return; }
   c.textBaseline='alphabetic'; c.shadowColor='rgba(0,0,0,.55)'; c.shadowBlur=6*s; c.fillStyle='#fff';
   const txt=(t,x,y,size,wt,al)=>{ c.font=(wt||700)+' '+Math.round(size*s)+'px '+ff; c.textAlign=al||'left'; c.fillText(t,x,y); };
   const val=(num,unit,label,x,y,big,al)=>{ al=al||'left'; c.font='700 '+Math.round(big*s)+'px '+ff; const nw=c.measureText(num).width;
     c.font='600 '+Math.round(big*0.45*s)+'px '+ff; const uw=unit?c.measureText(' '+unit).width:0; const x0=al==='right'?x-nw-uw:x;
     txt(num,x0,y,big,700,'left'); if(unit) txt(' '+unit,x0+nw,y,big*0.45,600,'left'); txt(label,al==='right'?x:x,y+big*0.42*s,13,600,al); };
-  const top=(parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat'))||0)*W/window.innerWidth+14*s, L=16*s, Rr=W-16*s;
+  const top=hudTop(W,s), L=16*s, Rr=W-16*s;
   // date + time
   const d=new Date(now); txt(d.getFullYear()+'/'+pad(d.getMonth()+1)+'/'+pad(d.getDate())+'   '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()),L,top+16*s,15,700);
   // mini map (north up) with the ride so far, the planned route and an arrow
@@ -3351,10 +3354,67 @@ function hudDraw(){
     if(hh.length>1){ c.shadowBlur=0; const mn=Math.min(...hh)-5, mx=Math.max(...hh)+5, bw=4*s, gap=2.5*s, n=Math.min(hh.length,wide?24:16), bh=wide?r*0.55:big*0.9*s, xr=wide?hx:hx-nw-12*s, x0=xr-n*(bw+gap), hs=hh.slice(-n);
       hs.forEach((v,i)=>{ const hgt=Math.max(3*s,(v-mn)/(mx-mn)*bh); c.fillStyle='rgba(59,130,246,'+(0.35+0.65*i/n)+')'; c.fillRect(x0+i*(bw+gap),by-hgt,bw,hgt); }); } }
   c.textAlign='left';
-  // recording badge
-  if(HUD.rec){ c.shadowBlur=0; const t=Math.floor((now-HUD.recStart)/1000); c.fillStyle='rgba(0,0,0,.45)'; hudRR(c,W/2-46*s,top-2*s,92*s,26*s,13*s); c.fill();
-    c.fillStyle=(Math.floor(now/500)%2)?'#ef4444':'#991b1b'; c.beginPath(); c.arc(W/2-30*s,top+11*s,6*s,0,7); c.fill(); c.fillStyle='#fff'; txt(pad(Math.floor(t/60))+':'+pad(t%60),W/2+8*s,top+17*s,15,700,'center'); }
+  hudRecBadge(c,W,s,now,ff);
   c.shadowBlur=0; c.globalAlpha=0.75; txt('ปั่นไกล',W-12*s,H-10*s,11,700,'right'); c.globalAlpha=1;
+}
+const HUD_STYLES=[['dash','ไมล์จักรยาน'],['action','กล้องแอคชัน']];
+function hudStyle(){ const v=settings.hudStyle; return HUD_STYLES.some(x=>x[0]===v)?v:'dash'; }
+function hudTop(W,s){ return (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat'))||0)*W/window.innerWidth+14*s; }
+function hudRecBadge(c,W,s,now,ff){ if(!HUD.rec) return; const top=hudTop(W,s); c.shadowBlur=0; const t=Math.floor((now-HUD.recStart)/1000); c.fillStyle='rgba(0,0,0,.45)'; hudRR(c,W/2-46*s,top-2*s,92*s,26*s,13*s); c.fill();
+  c.fillStyle=(Math.floor(now/500)%2)?'#ef4444':'#991b1b'; c.beginPath(); c.arc(W/2-30*s,top+11*s,6*s,0,7); c.fill();
+  c.fillStyle='#fff'; c.font='700 '+Math.round(15*s)+'px '+ff; c.textAlign='center'; c.textBaseline='alphabetic'; c.fillText(pad(Math.floor(t/60))+':'+pad(t%60),W/2+8*s,top+17*s); c.textAlign='left'; }
+// action-camera style: white numbers with small orange units, segmented bars, route outline, orange arc speedometer
+function hudDrawAction(c,W,H,s,now,sv,ff,spd,ele,g,dist,mov){
+  const OR='#ff8a3d', top=hudTop(W,s), L=18*s, Rr=W-18*s, land=W>H*1.15;
+  c.textBaseline='alphabetic'; c.shadowColor='rgba(0,0,0,.6)'; c.shadowBlur=5*s;
+  const font=(sz,wt)=>{ c.font=(wt||800)+' '+Math.round(sz*s)+'px '+ff; };
+  const label=(t,x,y)=>{ font(13,600); c.fillStyle='#fff'; c.textAlign='left'; c.fillText(t,x,y); };
+  const NS=land?28:34, NB=land?30:34; // number sizes: landscape screens have less height
+  const num=(v,u,x,y,sz)=>{ font(sz,800); c.fillStyle='#fff'; c.textAlign='left'; c.fillText(v,x,y); const w=c.measureText(v).width; font(sz*0.42,800); c.fillStyle=OR; c.fillText(u,x+w+3*s,y); return w; };
+  const bar=(x,y,frac,w)=>{ const n=20, gap=w/n, bw=Math.max(2,gap*0.42), on=Math.round(Math.max(0,Math.min(1,frac))*n); c.shadowBlur=0;
+    for(let i=0;i<n;i++){ c.fillStyle=i<on?OR:'rgba(255,255,255,.92)'; hudRR(c,x+i*gap,y,bw,14*s,bw/2); c.fill(); } c.shadowBlur=5*s; };
+  // date and time, top left
+  const d=new Date(now); font(12,800); c.fillStyle='#fff'; c.textAlign='left'; c.fillText(String(d.getFullYear()),L,top+12*s);
+  font(19,800); c.fillText(pad(d.getMonth()+1)+'/'+pad(d.getDate()),L,top+34*s); font(12,800); c.fillText(pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()),L,top+50*s);
+  // left column: altitude, slope, distance
+  // portrait: start below the round buttons at the top centre; landscape: the buttons sit between the columns
+  const step=land?62*s:70*s; let ly=top+(land?80:132)*s;
+  label('ระดับความสูง',L,ly); num(ele!=null?String(Math.round(ele)):'--','M',L,ly+(NB-2)*s,NB); ly+=step;
+  label('ความชัน',L,ly); num(g!=null?String(Math.round(g*100)).replace('-','−'):'--','%',L,ly+(NB-2)*s,NB); ly+=step;
+  label('ระยะทางทั้งหมด',L,ly); num(dist.toFixed(2),'KM',L,ly+(NB-2)*s,NB);
+  // right column: cadence, power, heart rate (or ride time and average speed without sensors)
+  const colW=Math.min(150*s,W*0.38), rx=Rr-colW, rows=[];
+  const avgV=mov>0&&rec?(rec.dist/mov*3.6):0;
+  if(sv.cad!=null) rows.push(['รอบขา',String(Math.round(sv.cad)),'RPM',sv.cad/120]);
+  if(sv.pwr!=null) rows.push(['กำลัง',String(Math.round(sv.pwr)),'W',sv.pwr/600]);
+  if(sv.hr!=null) rows.push(['อัตราการเต้นของหัวใจ',String(Math.round(sv.hr)),'BPM',null]);
+  if(!rows.length){ rows.push(['เวลาปั่น',fmtClock(mov),'',null]); rows.push(['ความเร็วเฉลี่ย',avgV.toFixed(1),'KM/H',null]); }
+  const gr=land?52*s:Math.min(66*s,W*0.17), gcx=Rr-gr*1.02, gcy=H-gr*1.05-(land?20:26)*s, hB=(land?70:82)*s, hP=(land?56:62)*s;
+  let ry=Math.max(top+(land?50:132)*s, gcy-gr*1.25-rows.reduce((a,r)=>a+(r[3]!=null?hB:hP),0));
+  rows.forEach(r=>{ label(r[0],rx,ry); num(r[1],r[2],rx,ry+(NS-2)*s,NS); if(r[3]!=null){ bar(rx,ry+(NS+8)*s,r[3],colW); ry+=hB; } else ry+=hP; });
+  // route outline, bottom left, north up
+  const mr=land?38*s:Math.min(52*s,W*0.13), mcx=L+mr*1.05, mcy=H-mr-(land?34:46)*s;
+  c.shadowBlur=0; c.fillStyle='rgba(0,0,0,.28)'; c.beginPath(); c.arc(mcx,mcy,mr,0,7); c.fill();
+  c.fillStyle=OR; c.beginPath(); c.moveTo(mcx,mcy-mr-16*s); c.lineTo(mcx+6*s,mcy-mr-7*s); c.lineTo(mcx-6*s,mcy-mr-7*s); c.closePath(); c.fill();
+  font(10,800); c.fillStyle='#fff'; c.textAlign='center'; c.fillText('N',mcx,mcy-mr+12*s);
+  const pts=[]; if(rec) rec.segs.forEach(sg=>sg.forEach(p=>pts.push([p[0],p[1]]))); if(lastFix) pts.push([lastFix.lat,lastFix.lng]);
+  const rp=R.res&&R.res.coords?R.res.coords:null, all=(rp||[]).concat(pts);
+  if(all.length>1){ let a0=Infinity,a1=-Infinity,o0=Infinity,o1=-Infinity; all.forEach(p=>{ a0=Math.min(a0,p[0]); a1=Math.max(a1,p[0]); o0=Math.min(o0,p[1]); o1=Math.max(o1,p[1]); });
+    const kx=Math.cos(((a0+a1)/2)*Math.PI/180), sp=Math.max(a1-a0,(o1-o0)*kx,1e-5), sc=mr*1.25/sp, ca=(a0+a1)/2, co=(o0+o1)/2, P=p=>[mcx+(p[1]-co)*kx*sc, mcy+4*s-(p[0]-ca)*sc];
+    c.lineCap='round'; c.lineJoin='round'; c.strokeStyle='#fff'; c.lineWidth=4*s; c.beginPath(); (rp||pts).forEach((p,i)=>{ const q=P(p); i?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]); }); c.stroke();
+    if(lastFix){ const q=P([lastFix.lat,lastFix.lng]); c.fillStyle=OR; c.beginPath(); c.arc(q[0],q[1],6*s,0,7); c.fill(); } }
+  if(lastHeading!=null){ const hd=Math.round(lastHeading)%360, dirs=['N','NE','E','SE','S','SW','W','NW']; c.shadowBlur=5*s; font(13,800); c.fillStyle='#fff'; c.textAlign='center'; c.fillText(hd+'°'+dirs[Math.round(hd/45)%8],mcx,mcy+mr+20*s); }
+  // speedometer, bottom right: 240° orange arc, dashed inner arc, needle mark, big number
+  const a0=Math.PI*0.75, sweep=Math.PI*1.5, vmax=spd>55?80:60, fr=Math.min(1,spd/vmax);
+  c.shadowBlur=0; c.lineCap='round';
+  const og=c.createLinearGradient(gcx-gr,gcy+gr,gcx+gr,gcy-gr); og.addColorStop(0,'#c2410c'); og.addColorStop(1,'#fdba74');
+  c.strokeStyle=og; c.lineWidth=gr*0.17; c.beginPath(); c.arc(gcx,gcy,gr,a0,a0+sweep); c.stroke();
+  c.strokeStyle='rgba(255,170,110,.85)'; c.lineWidth=2*s; c.setLineDash([7*s,6*s]); c.beginPath(); c.arc(gcx,gcy,gr*0.74,a0+0.12,a0+sweep-0.12); c.stroke(); c.setLineDash([]);
+  const t=a0+fr*sweep; c.strokeStyle='#fff'; c.lineWidth=gr*0.08; c.shadowColor='rgba(0,0,0,.6)'; c.shadowBlur=4*s;
+  c.beginPath(); c.moveTo(gcx+Math.cos(t)*gr*0.84,gcy+Math.sin(t)*gr*0.84); c.lineTo(gcx+Math.cos(t)*gr*1.12,gcy+Math.sin(t)*gr*1.12); c.stroke();
+  c.shadowBlur=5*s; c.fillStyle='#fff'; c.textAlign='center'; c.font='800 '+Math.round(gr*0.62)+'px '+ff; c.fillText(spd.toFixed(0),gcx,gcy+gr*0.2);
+  c.font='800 '+Math.round(gr*0.2)+'px '+ff; c.fillText('KM/H',gcx,gcy+gr*0.78);
+  c.shadowBlur=0; c.globalAlpha=0.75; c.textAlign='right'; font(11,700); c.fillText('ปั่นไกล',W-12*s,H-10*s); c.globalAlpha=1; c.textAlign='left';
 }
 function hudRR(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
 /* ---- while riding ---- */
