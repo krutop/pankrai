@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0f5b4d">
+<title>ปั่นไกล · หลังบ้าน</title>
+<link rel="icon" href="favicon-32.png">
+<style>
+  :root{--bg:#f3f6f5;--card:#fff;--ink:#16302b;--ink2:#4a5f5a;--mute:#6b7c78;--line:#e1e8e6;--pri:#0f5b4d;--bar:#14705f;--bar2:#c2410c;--sat:env(safe-area-inset-top,0px)}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Noto Sans Thai","Segoe UI",sans-serif;background:var(--bg);color:var(--ink);font-size:15px}
+  header{position:sticky;top:0;z-index:5;background:var(--pri);color:#fff;padding:calc(var(--sat) + 10px) 16px 10px;display:flex;align-items:center;gap:10px}
+  header img{width:32px;height:32px;border-radius:8px}
+  header h1{font-size:18px;margin:0;flex:1}
+  header button{background:rgba(255,255,255,.16);color:#fff;border:0;border-radius:10px;min-height:40px;padding:0 12px;font:inherit;font-size:14px;cursor:pointer}
+  main{max-width:1100px;margin:0 auto;padding:14px 14px 40px}
+  .card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .card h2{font-size:16px;margin:0 0 4px}
+  .sub{color:var(--mute);font-size:13px;margin:0 0 12px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+  .kpi{background:var(--card);border-radius:14px;padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .kpi b{display:block;font-size:28px;line-height:1.15;font-variant-numeric:tabular-nums}
+  .kpi span{color:var(--ink2);font-size:13px}
+  .kpi small{display:block;color:var(--mute);font-size:12px;margin-top:2px}
+  .kpi.live b{color:#0f7a3f}
+  .grid2{display:grid;grid-template-columns:1fr;gap:14px}
+  @media (min-width:860px){ .grid2{grid-template-columns:1fr 1fr} }
+  .chart{position:relative;height:170px;display:flex;align-items:flex-end;gap:2px;border-bottom:1px solid var(--line);padding-top:18px}
+  .chart .col{flex:1;height:100%;display:flex;align-items:flex-end;position:relative;cursor:default;min-width:0}
+  .chart .col i{display:block;width:100%;background:var(--bar);border-radius:4px 4px 0 0;min-height:0}
+  .chart .col:hover i,.chart .col:focus i{background:#0b3f35}
+  .chart .col.z i{background:var(--line);height:2px!important;border-radius:0}
+  .chart .ymax{position:absolute;left:0;top:0;font-size:11px;color:var(--mute)}
+  .chart .gl{position:absolute;left:0;right:0;top:18px;border-top:1px dashed var(--line)}
+  .xl{display:flex;justify-content:space-between;color:var(--mute);font-size:11px;margin-top:4px}
+  .tip{position:fixed;z-index:20;pointer-events:none;background:#16302b;color:#fff;font-size:12.5px;padding:6px 9px;border-radius:8px;white-space:nowrap;display:none}
+  .hb{display:flex;flex-direction:column;gap:8px}
+  .hb .r{display:grid;grid-template-columns:120px 1fr 64px;align-items:center;gap:8px;font-size:14px}
+  .hb .t{height:14px;background:var(--line);border-radius:4px;overflow:hidden}
+  .hb .t i{display:block;height:100%;background:var(--bar);border-radius:0 4px 4px 0}
+  .hb .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink2)}
+  .tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .tools input,.tools select{font:inherit;min-height:42px;border:1px solid var(--line);border-radius:10px;padding:0 12px;background:#fff;color:var(--ink)}
+  .tools input{flex:1;min-width:160px}
+  .btn{font:inherit;min-height:42px;border:0;border-radius:10px;padding:0 14px;background:var(--pri);color:#fff;font-weight:600;cursor:pointer}
+  .btn.ghost{background:#e7efed;color:var(--pri)}
+  .tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+  table{border-collapse:collapse;width:100%;min-width:760px;font-size:14px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{background:#f7faf9;color:var(--ink2);font-weight:600;font-size:13px;position:sticky;top:0}
+  td.n{text-align:right;font-variant-numeric:tabular-nums}
+  .pill{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:#e7efed;color:var(--pri)}
+  .pill.a{background:#fde8d7;color:#8a3a06}
+  .muted{color:var(--mute)}
+  .center{max-width:440px;margin:12vh auto;text-align:center}
+  .center p{color:var(--ink2);line-height:1.6}
+  .note{font-size:13px;color:var(--ink2);background:#fff7ed;border-radius:12px;padding:10px 12px;line-height:1.55}
+  .hide{display:none!important}
+  .more{margin-top:10px;text-align:center}
+  code{background:#eef3f1;padding:1px 5px;border-radius:5px;font-size:13px}
+</style>
+</head>
+<body>
+<header><img src="icon-192.png" alt=""><h1>ปั่นไกล · หลังบ้าน</h1><button id="refresh" class="hide" type="button">รีเฟรช</button><button id="out" class="hide" type="button">ออกจากระบบ</button></header>
+<main>
+  <div id="gate" class="center">
+    <h2>สำหรับผู้ดูแลระบบ</h2>
+    <p id="gateMsg">กำลังโหลด…</p>
+    <button class="btn" id="login" type="button" hidden>เข้าสู่ระบบด้วย Google</button>
+  </div>
+  <div id="dash" class="hide">
+    <div class="kpis" id="kpis"></div>
+    <div class="grid2">
+      <section class="card"><h2>ผู้ใช้งานรายวัน</h2><p class="sub">จำนวนผู้ใช้ที่เปิดแอปในแต่ละวัน · 30 วันล่าสุด</p><div id="cDau"></div></section>
+      <section class="card"><h2>ผู้ใช้ใหม่รายวัน</h2><p class="sub">เปิดแอปครั้งแรก · 30 วันล่าสุด</p><div id="cNew"></div></section>
+      <section class="card"><h2>ทริปที่บันทึกรายวัน</h2><p class="sub">จำนวนทริปที่กดบันทึกเสร็จ · 30 วันล่าสุด</p><div id="cRides"></div></section>
+      <section class="card"><h2>ระยะทางรวมรายวัน (กม.)</h2><p class="sub">ผลรวมระยะทางของทริปที่บันทึก · 30 วันล่าสุด</p><div id="cKm"></div></section>
+      <section class="card"><h2>อุปกรณ์</h2><p class="sub">ผู้ใช้ทั้งหมด แยกตามอุปกรณ์</p><div class="hb" id="bPlat"></div></section>
+      <section class="card"><h2>เปิดใช้งานผ่าน</h2><p class="sub">ผู้ใช้ทั้งหมด แยกตามวิธีเปิดแอปล่าสุด</p><div class="hb" id="bApp"></div></section>
+      <section class="card"><h2>เวอร์ชันแอป</h2><p class="sub">เวอร์ชันที่ผู้ใช้เปิดล่าสุด · ใช้ดูว่าอัปเดตทั่วถึงหรือยัง</p><div class="hb" id="bVer"></div></section>
+      <section class="card"><h2>เกี่ยวกับข้อมูลนี้</h2><div class="note">
+        นับเป็น “ผู้ใช้” ต่อเครื่องหรือต่อบัญชี: คนที่ไม่ได้สมัครบัญชีจะนับแยกตามเครื่อง ถ้าล้างข้อมูลเบราว์เซอร์จะนับเป็นผู้ใช้ใหม่<br>
+        เริ่มเก็บสถิติตั้งแต่เวอร์ชันที่มีระบบหลังบ้าน การใช้งานก่อนหน้านั้นไม่ได้ถูกนับ<br>
+        ไม่เก็บตำแหน่งหรือเส้นทางในสถิติ ชื่อที่เห็นคือชื่อเล่นที่ผู้ใช้ตั้งเองในแอป
+      </div></section>
+    </div>
+    <section class="card">
+      <h2>รายชื่อผู้ใช้</h2><p class="sub" id="uSub"></p>
+      <div class="tools">
+        <input id="q" type="search" aria-label="ค้นหาผู้ใช้" placeholder="ค้นหาชื่อ อุปกรณ์ เวอร์ชัน">
+        <select id="sort" aria-label="เรียงตาม"><option value="last">ใช้ล่าสุด</option><option value="first">เริ่มใช้ล่าสุด</option><option value="n">เปิดแอปบ่อยสุด</option><option value="km">ระยะทางมากสุด</option></select>
+        <button class="btn ghost" id="csv" type="button">ดาวน์โหลด CSV</button>
+      </div>
+      <div class="tw"><table><thead><tr><th>ชื่อ</th><th>บัญชี</th><th>อุปกรณ์</th><th>เปิดผ่าน</th><th>เวอร์ชัน</th><th>เปิดแอป</th><th>ทริป</th><th>กม.</th><th>เริ่มใช้</th><th>ใช้ล่าสุด</th></tr></thead><tbody id="tb"></tbody></table></div>
+      <div class="more"><button class="btn ghost hide" id="moreBtn" type="button">แสดงเพิ่ม</button></div>
+    </section>
+  </div>
+</main>
+<div class="tip" id="tip" role="tooltip"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+const CFG={apiKey:"AIzaSyCV758YwAtm1mgC5l677qyS5TgCuL4EpeA",authDomain:"pankrai.firebaseapp.com",databaseURL:"https://pankrai-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"pankrai",storageBucket:"pankrai.firebasestorage.app",messagingSenderId:"216927431660",appId:"1:216927431660:web:905a9f863a0770e3ae2ec9"};
+const $=s=>document.querySelector(s), esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const PLAT={android:'Android',ios:'iPhone / iPad',desktop:'คอมพิวเตอร์'}, APP={twa:'แอป Android',pwa:'ติดตั้งบนหน้าจอ',web:'เบราว์เซอร์'};
+const fmt=n=>Number(n||0).toLocaleString('th-TH',{maximumFractionDigits:1});
+const day=t=>{ const d=new Date(t); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+const dLabel=k=>{ const [y,m,d]=k.split('-').map(Number); return d+'/'+m; };
+const when=t=>{ if(!t) return '-'; const s=(Date.now()-t)/1000; if(s<90) return 'เมื่อสักครู่'; if(s<3600) return Math.round(s/60)+' นาทีที่แล้ว'; if(s<86400) return Math.round(s/3600)+' ชม.ที่แล้ว';
+  const d=new Date(t); return d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'})+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}); };
+let A, DB, U=[], DAYS={}, PRES={}, shown=50;
+
+firebase.initializeApp(CFG); A=firebase.auth(); DB=firebase.database();
+A.getRedirectResult().catch(e=>gate('เข้าสู่ระบบไม่สำเร็จ: '+e.message,true));
+A.onAuthStateChanged(u=>{ if(!u||u.isAnonymous) return gate('เข้าสู่ระบบด้วยบัญชี Google ของผู้ดูแลเพื่อดูสถิติการใช้งาน',true); load(); });
+function gate(msg,showLogin){ $('#dash').classList.add('hide'); $('#gate').classList.remove('hide'); $('#gateMsg').innerHTML=msg; $('#login').hidden=!showLogin;
+  const u=A.currentUser; $('#out').classList.toggle('hide',!u||u.isAnonymous); $('#refresh').classList.add('hide'); }
+$('#login').onclick=async()=>{ const p=new firebase.auth.GoogleAuthProvider(); p.setCustomParameters({prompt:'select_account'});
+  try{ await A.signInWithPopup(p); }catch(e){ if(/popup/.test(e.code||'')||e.code==='auth/operation-not-supported-in-this-environment') return A.signInWithRedirect(p); gate('เข้าสู่ระบบไม่สำเร็จ: '+esc(e.message),true); } };
+$('#out').onclick=()=>A.signOut();
+$('#refresh').onclick=()=>load();
+
+async function load(){ const u=A.currentUser; gate('กำลังโหลดข้อมูล…',false);
+  const from=day(Date.now()-89*864e5);
+  try{ const [su,sd,sp]=await Promise.all([DB.ref('stats/u').once('value'),DB.ref('stats/d').orderByKey().startAt(from).once('value'),DB.ref('presence').once('value').catch(()=>null)]);
+    U=Object.entries(su.val()||{}).map(([id,o])=>Object.assign({id},o)); DAYS=sd.val()||{}; PRES=sp?sp.val()||{}:{};
+  }catch(e){ if(/permission/i.test(e.code||e.message||'')) return gate('บัญชี <b>'+esc(u.email||u.uid)+'</b> ไม่มีสิทธิ์ผู้ดูแล<br><span class="muted">สิทธิ์ผู้ดูแลกำหนดไว้ในกฎฐานข้อมูล (database.rules.json)</span>',false);
+    return gate('โหลดข้อมูลไม่สำเร็จ: '+esc(e.message),false); }
+  // users that only exist in the daily log (first ping lost) still count
+  for(const [k,v] of Object.entries(DAYS)) for(const id of Object.keys(v||{})) if(!U.find(x=>x.id===id)) U.push({id,first:Date.parse(k)});
+  U.forEach(x=>{ if(!x.first){ const ks=Object.keys(DAYS).filter(k=>DAYS[k]&&DAYS[k][x.id]).sort(); x.first=ks.length?Date.parse(ks[0]+'T00:00:00'):x.last; } });
+  $('#gate').classList.add('hide'); $('#dash').classList.remove('hide'); $('#out').classList.remove('hide'); $('#refresh').classList.remove('hide');
+  render(); }
+
+function lastNDays(n){ const out=[]; for(let i=n-1;i>=0;i--) out.push(day(Date.now()-i*864e5)); return out; }
+function activeSince(n){ const ks=new Set(lastNDays(n)), s=new Set(); for(const k of ks) for(const id of Object.keys(DAYS[k]||{})) s.add(id); U.forEach(x=>{ if(x.last&&Date.now()-x.last<n*864e5) s.add(x.id); }); return s.size; }
+function render(){
+  const now=Date.now(), today=day(now), online=Object.values(PRES).filter(p=>p&&p.ts&&now-p.ts<5*60e3).length;
+  const rides=U.reduce((a,x)=>a+(x.rides||0),0), km=U.reduce((a,x)=>a+(x.km||0),0), acct=U.filter(x=>x.acct).length, new7=U.filter(x=>x.first&&now-x.first<7*864e5).length;
+  const K=[['ผู้ใช้ทั้งหมด',U.length,'นับต่อเครื่อง/บัญชี'],['ออนไลน์ตอนนี้',online,'แชร์ตำแหน่งบนแผนที่ชุมชน','live'],['ใช้งานวันนี้',Object.keys(DAYS[today]||{}).length],['ใช้งาน 7 วัน',activeSince(7)],['ใช้งาน 30 วัน',activeSince(30)],
+    ['ผู้ใช้ใหม่ 7 วัน',new7],['สมัครบัญชี',acct,U.length?Math.round(acct/U.length*100)+'% ของผู้ใช้':''],['ทริปที่บันทึก',rides,fmt(km)+' กม. รวม']];
+  $('#kpis').innerHTML=K.map(k=>'<div class="kpi'+(k[3]?' '+k[3]:'')+'"><b>'+fmt(k[1])+'</b><span>'+k[0]+'</span>'+(k[2]?'<small>'+k[2]+'</small>':'')+'</div>').join('');
+  const ds=lastNDays(30);
+  bars('#cDau',ds,ds.map(k=>Object.keys(DAYS[k]||{}).length),'คน');
+  const nb={}; U.forEach(x=>{ if(x.first){ const k=day(x.first); nb[k]=(nb[k]||0)+1; } }); bars('#cNew',ds,ds.map(k=>nb[k]||0),'คน');
+  const sum=(k,f)=>Object.values(DAYS[k]||{}).reduce((a,v)=>a+(v&&v[f]||0),0);
+  bars('#cRides',ds,ds.map(k=>sum(k,'rides')),'ทริป'); bars('#cKm',ds,ds.map(k=>Math.round(sum(k,'km')*10)/10),'กม.');
+  hbars('#bPlat',count(U,x=>PLAT[x.plat]||'ไม่ทราบ')); hbars('#bApp',count(U,x=>APP[x.app]||'ไม่ทราบ')); hbars('#bVer',count(U,x=>x.ver||'ก่อนมีหลังบ้าน').slice(0,6));
+  table(); }
+function count(arr,f){ const m={}; arr.forEach(x=>{ const k=f(x); m[k]=(m[k]||0)+1; }); return Object.entries(m).sort((a,b)=>b[1]-a[1]); }
+function bars(sel,keys,vals,unit){ const mx=Math.max(1,...vals), el=$(sel);
+  el.innerHTML='<div class="chart" role="img" aria-label="'+esc(el.previousElementSibling.textContent)+'"><span class="ymax">'+fmt(mx)+' '+unit+'</span><div class="gl"></div>'+
+    keys.map((k,i)=>'<div class="col'+(vals[i]?'':' z')+'" tabindex="0" data-tip="'+dLabel(k)+' · '+fmt(vals[i])+' '+unit+'"><i style="height:'+(vals[i]/mx*100)+'%"></i></div>').join('')+'</div>'+
+    '<div class="xl"><span>'+dLabel(keys[0])+'</span><span>'+dLabel(keys[Math.floor(keys.length/2)])+'</span><span>วันนี้</span></div>'; }
+function hbars(sel,rows){ const tot=rows.reduce((a,r)=>a+r[1],0)||1;
+  $(sel).innerHTML=rows.length?rows.map(r=>'<div class="r"><span>'+esc(r[0])+'</span><div class="t"><i style="width:'+(r[1]/tot*100)+'%"></i></div><span class="v">'+fmt(r[1])+' · '+Math.round(r[1]/tot*100)+'%</span></div>').join(''):'<span class="muted">ยังไม่มีข้อมูล</span>'; }
+function rowsFiltered(){ const q=$('#q').value.trim().toLowerCase(), s=$('#sort').value;
+  return U.filter(x=>!q||[x.name,PLAT[x.plat],APP[x.app],x.ver,x.id].join(' ').toLowerCase().includes(q)).sort((a,b)=>(b[s]||0)-(a[s]||0)); }
+function table(){ const R=rowsFiltered(); $('#uSub').textContent='ทั้งหมด '+fmt(U.length)+' ราย'+(R.length!==U.length?' · ตรงกับการค้นหา '+fmt(R.length):'');
+  $('#tb').innerHTML=R.slice(0,shown).map(x=>'<tr><td>'+(x.name?esc(x.name):'<span class="muted">ไม่ระบุชื่อ</span>')+' <span class="muted" title="'+esc(x.id)+'">#'+esc(x.id.slice(0,5))+'</span></td><td>'+(x.acct?'<span class="pill">สมัครแล้ว</span>':'<span class="pill a">ไม่ได้สมัคร</span>')+
+    '</td><td>'+esc(PLAT[x.plat]||'-')+'</td><td>'+esc(APP[x.app]||'-')+'</td><td>'+esc(x.ver||'-')+'</td><td class="n">'+fmt(x.n)+'</td><td class="n">'+fmt(x.rides)+'</td><td class="n">'+fmt(x.km)+'</td><td>'+when(x.first)+'</td><td>'+when(x.last)+'</td></tr>').join('')||'<tr><td colspan="10" class="muted">ยังไม่มีผู้ใช้</td></tr>';
+  $('#moreBtn').classList.toggle('hide',R.length<=shown); }
+$('#q').oninput=()=>{ shown=50; table(); }; $('#sort').onchange=()=>table(); $('#moreBtn').onclick=()=>{ shown+=100; table(); };
+$('#csv').onclick=()=>{ const h=['uid','ชื่อ','สมัครบัญชี','อุปกรณ์','เปิดผ่าน','เวอร์ชัน','เปิดแอป','ทริป','กม.','เริ่มใช้','ใช้ล่าสุด'], iso=t=>t?new Date(t).toISOString():'';
+  const rows=rowsFiltered().map(x=>[x.id,x.name||'',x.acct?'ใช่':'ไม่',PLAT[x.plat]||'',APP[x.app]||'',x.ver||'',x.n||0,x.rides||0,x.km||0,iso(x.first),iso(x.last)]);
+  const csv='﻿'+[h,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='pankrai-users-'+day(Date.now())+'.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); };
+// hover / focus tooltip for chart bars
+const tip=$('#tip');
+function showTip(e){ const c=e.target.closest&&e.target.closest('.col'); if(!c){ tip.style.display='none'; return; } tip.textContent=c.dataset.tip; tip.style.display='block';
+  const r=c.getBoundingClientRect(), w=tip.offsetWidth; tip.style.left=Math.max(6,Math.min(innerWidth-w-6,r.left+r.width/2-w/2))+'px'; tip.style.top=(r.top-34)+'px'; }
+document.addEventListener('mouseover',showTip); document.addEventListener('focusin',showTip); document.addEventListener('touchstart',showTip,{passive:true}); document.addEventListener('scroll',()=>tip.style.display='none',true);
+</script>
+</body>
+</html>

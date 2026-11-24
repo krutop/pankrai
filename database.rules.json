@@ -269,6 +269,70 @@
           ".validate": false
         }
       }
+    },
+    "stats": {
+      ".read": "auth != null && auth.token.email === 'ksomsar@gmail.com' && auth.token.email_verified === true",
+      "u": {
+        ".indexOn": [
+          "last"
+        ],
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid",
+          "first": {
+            ".validate": "newData.isNumber() && newData.val() <= now + 60000"
+          },
+          "last": {
+            ".validate": "newData.isNumber() && newData.val() <= now + 60000"
+          },
+          "n": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "rides": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "km": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "plat": {
+            ".validate": "newData.isString() && newData.val().length <= 20"
+          },
+          "app": {
+            ".validate": "newData.isString() && newData.val().length <= 20"
+          },
+          "ver": {
+            ".validate": "newData.isString() && newData.val().length <= 20"
+          },
+          "acct": {
+            ".validate": "newData.isBoolean()"
+          },
+          "name": {
+            ".validate": "newData.isString() && newData.val().length <= 30"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      },
+      "d": {
+        "$day": {
+          ".validate": "$day.matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)",
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid",
+            "n": {
+              ".validate": "newData.isNumber() && newData.val() >= 0"
+            },
+            "rides": {
+              ".validate": "newData.isNumber() && newData.val() >= 0"
+            },
+            "km": {
+              ".validate": "newData.isNumber() && newData.val() >= 0"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        }
+      }
     }
   }
 }
