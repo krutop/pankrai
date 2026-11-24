@@ -755,6 +755,22 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
   .updx{width:40px;height:40px;border:0;background:transparent;color:#fff;font-size:16px}
   body.ridemode .updbar{display:none}
   @media (min-width:760px){ .updbar{left:auto;right:14px;width:380px} }
+  .kmmk span{display:block;background:#fff;color:#5b21b6;border:1.5px solid #7c3aed;border-radius:9px;font-size:11px;font-weight:700;line-height:15px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+  .amk span{display:flex;width:24px;height:24px;border-radius:50%;background:#fff;align-items:center;justify-content:center;font-size:13px;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+  .rt-card{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:12px;background:#fff}
+  .rt-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:6px}
+  .rt-h small,.rt-sub{color:var(--muted);font-size:12.5px}
+  .rt-sub{margin-top:6px;line-height:1.5}
+  .rt-stats{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;margin-top:6px}
+  .rt-chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+  .rt-chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 10px;font-size:13px;min-height:36px;color:var(--muted)}
+  .rt-chip.on{background:#e7f2ef;border-color:#9ccfc2;color:#0f5b4d}
+  .rt-list{max-height:320px;overflow-y:auto;border-top:1px solid var(--line)}
+  .rt-it{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:8px 2px;min-height:44px}
+  .rt-km{flex:none;width:62px;font-size:12.5px;font-weight:700;color:#5b21b6}
+  .rt-ic{flex:none;font-size:16px}
+  .rt-nm{flex:1;font-size:14px;line-height:1.35}
+  .rt-nm small{display:block;color:var(--muted);font-size:12px}
 </style>
 </head>
 <body>
@@ -1104,7 +1120,7 @@ if(hasL){
   L.control.zoom({position:'bottomright'}).addTo(m);
   MAIN={m,pos:null,acc:null,had:false};
   layers.canvas=L.canvas({padding:0.4});
-  ['mineSq','mine','sep','lane','shared','segs','track','route','shops','stations','groups','incidents','riders'].forEach(k=>layers[k]=L.layerGroup().addTo(m));
+  ['mineSq','mine','sep','lane','shared','segs','track','route','amen','shops','stations','groups','incidents','riders'].forEach(k=>layers[k]=L.layerGroup().addTo(m));
 } else $('#map').innerHTML='<div class="map-off">โหลดแผนที่ไม่ได้ (อาจไม่มีอินเทอร์เน็ต)<br>ยังบันทึกการปั่นได้ตามปกติ</div>';
 function setPos(v,lat,lng,acc,pan){
   if(!v) return;
@@ -1492,6 +1508,7 @@ function drawRoute(fit){
     L.polyline(R.res.coords,{color:'#7c3aed',weight:6}).addTo(layers.route); }
   if(R.track&&R.track.wpts) R.track.wpts.forEach(w=>{ const k=PL_KIND[w.kind]||PL_KIND.poi;
     L.marker([w.lat,w.lng],{icon:L.divIcon({className:'wptmk',html:'<span>'+k[0]+'</span>',iconSize:[26,26],iconAnchor:[13,13]}),keyboard:false,zIndexOffset:500}).bindTooltip(esc(w.name||k[1])).addTo(layers.route); });
+  if(R.res) rtKmMarks(R.res);
   if(R.track&&R.track.appr) L.polyline(R.track.appr,{color:'#7c3aed',weight:5,opacity:.85,dashArray:'2 10',lineCap:'round'}).addTo(layers.route);
   const addMk=(p,icon,set)=>{ const m=L.marker([p.lat,p.lng],{icon,draggable:!R.track,zIndexOffset:900,autoPan:true}).addTo(layers.route);
     m.on('dragend',()=>{ const ll=m.getLatLng(); set({lat:ll.lat,lng:ll.lng,name:'จุดบนแผนที่'}); syncInputs(); computeRoute(false); }); };
@@ -1522,6 +1539,7 @@ function renderRoute(){
       '<div class="note">ประเภทถนนมาจากข้อมูล OpenStreetMap ควรสังเกตป้ายจราจรและสภาพถนนจริงเสมอ</div></details>':'');
   $$('#routeBox [data-alt]').forEach(b=>b.onclick=()=>{ const n=+b.dataset.alt; if(n!==R.alt){ R.alt=n; computeRoute(true); } });
   $('#rGo').onclick=()=>{ setTab('ride'); if(!rec) startRide(); else toast('กำลังบันทึกการปั่นอยู่แล้ว'); };
+  $('#routeBox').insertAdjacentHTML('beforeend','<div id="rtExtra"></div>'); rtExtras(r);
   $('#rGpx').onclick=openSendRoute; $('#rPlan').onclick=openPlan;
   $('#rShare').onclick=shareRoute;
   $('#rClear').onclick=clearRoute;
@@ -1532,7 +1550,123 @@ function renderRoute(){
     MAIN.m.fitBounds(L.latLngBounds(part),Object.assign(fitPad(),{maxZoom:17})); });
   $('#routeHint').textContent='แสดงเส้นทางที่วางไว้ ('+km.toFixed(1)+' กม.) เป็นเส้นสีม่วงบนแผนที่';
 }
-function clearRoute(){ dropTrack(); R.loop=null; R.b=null; R.vias=[]; R.res=null; R.error=null; R.alt=0; R.a={me:true}; syncInputs(); renderRoute(); drawRoute(); }
+function clearRoute(){ if(layers.amen) layers.amen.clearLayers(); dropTrack(); R.loop=null; R.b=null; R.vias=[]; R.res=null; R.error=null; R.alt=0; R.a={me:true}; syncInputs(); renderRoute(); drawRoute(); }
+
+/* =================== along the route: km marks, elevation, facilities =================== */
+// After A→B is planned: distance marks on the line, an elevation chart, and what is within ~300 m of the route
+// (petrol stations, shops, cafés, food, water, toilets, bike repair, medical), from OpenStreetMap and Longdo Map.
+const RT_CAT={fuel:['⛽','ปั๊มน้ำมัน'],shop:['🏪','ร้านสะดวกซื้อ'],cafe:['☕','ร้านกาแฟ'],food:['🍜','ร้านอาหาร'],water:['🚰','น้ำดื่ม'],wc:['🚻','ห้องน้ำ'],bike:['🔧','ร้าน/ซ่อมจักรยาน'],med:['➕','โรงพยาบาล/ร้านยา']};
+const RT_ORDER=['fuel','shop','cafe','food','water','wc','bike','med'];
+const RT={key:null,amen:null,state:null,show:new Set(['fuel','shop','cafe','water','wc','bike','med']),ele:null,eleState:null};
+function rtKey(r){ return r&&r.coords&&r.coords.length>1?plKey(r):null; }
+function rtKmMarks(r){ const cum=r.cum||(r.cum=cumOf(r.coords)), D=cum[cum.length-1]; if(!(D>1500)) return;
+  const step=D<=12e3?1000:D<=30e3?2000:D<=80e3?5000:D<=200e3?10000:25000; let j=1;
+  for(let x=step;x<D-step*0.3;x+=step){ while(j<cum.length-1&&cum[j]<x) j++; const t=(x-cum[j-1])/((cum[j]-cum[j-1])||1), c0=r.coords[j-1], c1=r.coords[j];
+    const ll=[c0[0]+(c1[0]-c0[0])*t, c0[1]+(c1[1]-c0[1])*t];
+    L.marker(ll,{icon:L.divIcon({className:'kmmk',html:'<span>'+(x/1000)+'</span>',iconSize:[30,18],iconAnchor:[15,9]}),keyboard:false,interactive:false,zIndexOffset:300}).addTo(layers.route); } }
+// position of a point along the route: distance from the start and how far it is off the line
+function rtProject(r,lat,lng){ const c=r.coords, cum=r.cum||(r.cum=cumOf(c)), kx=Math.cos(lat*Math.PI/180)*111320, ky=110540;
+  let best={off:Infinity,at:0}; const step=c.length>4000?2:1;
+  for(let i=1;i<c.length;i+=step){ const a=c[i-step]||c[i-1], b=c[i], ia=i-step>=0?i-step:i-1;
+    const ax=(a[1]-lng)*kx, ay=(a[0]-lat)*ky, bx=(b[1]-lng)*kx, by=(b[0]-lat)*ky, dx=bx-ax, dy=by-ay, L2=dx*dx+dy*dy;
+    let t=L2?-(ax*dx+ay*dy)/L2:0; t=Math.max(0,Math.min(1,t)); const px=ax+dx*t, py=ay+dy*t, off=Math.hypot(px,py);
+    if(off<best.off) best={off,at:cum[ia]+(cum[i]-cum[ia])*t}; }
+  return best; }
+function rtSample(r,every,max){ const cum=r.cum||(r.cum=cumOf(r.coords)), D=cum[cum.length-1]; every=Math.max(every,D/max); const out=[]; let j=1;
+  for(let x=0;x<=D;x+=every){ while(j<cum.length-1&&cum[j]<x) j++; const t=(x-cum[j-1])/((cum[j]-cum[j-1])||1), a=r.coords[j-1], b=r.coords[j]; out.push([a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t]); }
+  const l=r.coords[r.coords.length-1]; out.push([l[0],l[1]]); return out; }
+function rtCatOSM(t){ const a=t.amenity, sh=t.shop;
+  if(a==='fuel') return 'fuel'; if(sh==='convenience'||sh==='supermarket') return 'shop'; if(a==='cafe') return 'cafe';
+  if(a==='restaurant'||a==='fast_food'||a==='food_court') return 'food'; if(a==='drinking_water'||a==='water_point') return 'water'; if(a==='toilets') return 'wc';
+  if(sh==='bicycle'||a==='bicycle_repair_station') return 'bike'; if(a==='hospital'||a==='clinic'||a==='doctors'||a==='pharmacy') return 'med'; return null; }
+function rtCatLongdo(tags){ tags=tags||[]; if(tags.includes('gas_station')) return 'fuel'; if(tags.includes('convenience_store')) return 'shop'; if(tags.includes('coffee_shop')) return 'cafe';
+  if(tags.includes('restaurant')) return 'food'; if(tags.includes('hospital')) return 'med'; return null; }
+async function rtFetchAmen(r){
+  const cum=r.cum||(r.cum=cumOf(r.coords)), D=cum[cum.length-1], found=[];
+  const add=(cat,name,lat,lng,src)=>{ if(!cat||!isFinite(lat)) return; const pr=rtProject(r,lat,lng); if(pr.off>300) return;
+    if(found.some(f=>hav(f.lat,f.lng,lat,lng)<(srNorm(f.name)===srNorm(name)?150:30))) return; found.push({cat,name:name||RT_CAT[cat][1],lat,lng,at:pr.at,off:pr.off,src}); };
+  const jobs=[];
+  // OpenStreetMap: everything within 300 m of the line
+  const pts=rtSample(r,Math.max(300,D/220),220).map(p=>p[0].toFixed(5)+','+p[1].toFixed(5)).join(',');
+  const A='(around:300,'+pts+')';
+  jobs.push(overpassQ('[out:json][timeout:40];(nwr["amenity"~"^(fuel|cafe|restaurant|fast_food|food_court|drinking_water|water_point|toilets|hospital|clinic|doctors|pharmacy|bicycle_repair_station)$"]'+A+
+    ';nwr["shop"~"^(convenience|supermarket|bicycle)$"]'+A+';);out center tags 400;',45000).then(j=>{ (j.elements||[]).forEach(el=>{ const t=el.tags||{};
+      add(rtCatOSM(t),t.name||t['name:th']||t.brand,el.lat!=null?el.lat:el.center&&el.center.lat,el.lon!=null?el.lon:el.center&&el.center.lon,'osm'); }); }));
+  // Longdo Map: better coverage of Thai petrol stations, 7-Elevens and cafés
+  if(window.PK_LONGDO){ const sp=rtSample(r,2500,40); let k=0;
+    const worker=async()=>{ while(k<sp.length){ const p=sp[k++];
+      try{ const u='https://search.longdo.com/mapsearch/json/search?limit=30&locale=th&span=1.5km&lat='+p[0]+'&lon='+p[1]+'&tag=gas_station,convenience_store,coffee_shop,restaurant,hospital&key='+encodeURIComponent(window.PK_LONGDO);
+        const j=await (await fetchT(u,{},12000)).json(); (j.data||[]).forEach(x=>{ if(!x.obsoleted) add(rtCatLongdo(x.tag),x.name,+x.lat,+x.lon,'longdo'); }); }catch(e){} } };
+    jobs.push(Promise.all([worker(),worker(),worker(),worker()])); }
+  const res=await Promise.allSettled(jobs); if(res.every(x=>x.status==='rejected')) throw new Error('ไม่มีข้อมูล');
+  return found.sort((a,b)=>a.at-b.at); }
+function rtEnsure(r){ const key=rtKey(r); if(!key) return;
+  if(RT.key!==key){ RT.key=key; RT.amen=null; RT.state=null; RT.ele=null; RT.eleState=null; if(layers.amen) layers.amen.clearLayers(); }
+  if(!RT.state){ RT.state='loading'; const k0=key; rtFetchAmen(r).then(l=>{ if(RT.key!==k0) return; RT.amen=l; RT.state='ok'; }).catch(()=>{ if(RT.key!==k0) return; RT.state='fail'; }).finally(()=>{ if(RT.key===k0){ rtRender(r); rtDrawAmen(); } }); }
+  if(!RT.eleState){ const pf=plProfile(r,null); if(pf){ RT.ele=pf; RT.eleState='ok'; } else { RT.eleState='loading'; const k0=key; rtFetchEle(r).then(pf2=>{ if(RT.key!==k0) return; RT.ele=pf2; RT.eleState=pf2?'ok':'fail'; }).catch(()=>{ if(RT.key===k0) RT.eleState='fail'; }).finally(()=>{ if(RT.key===k0) rtRender(r); }); } } }
+// elevation from Open-Meteo when the routing service didn't send any (same source the ride planner uses)
+async function rtFetchEle(r){ const cum=r.cum||(r.cum=cumOf(r.coords)), D=cum[cum.length-1], step=Math.max(100,Math.ceil(D/1000/50)*50), pts=rtSample(r,step,1000), vals=[];
+  for(let i=0;i<pts.length;i+=100){ const ch=pts.slice(i,i+100);
+    const u='https://api.open-meteo.com/v1/elevation?latitude='+ch.map(p=>p[0].toFixed(5)).join(',')+'&longitude='+ch.map(p=>p[1].toFixed(5)).join(',');
+    const j=await (await fetchT(u,{},15000)).json(); if(!j||!Array.isArray(j.elevation)||j.elevation.length!==ch.length) return null; vals.push(...j.elevation.map(Number)); }
+  const st=D/(vals.length-1); return plProfile(r,{step:st,vals,D}); }
+function rtExtras(r){ rtEnsure(r); rtRender(r); rtDrawAmen(); }
+function rtRender(r){ const box=$('#rtExtra'); if(!box||rtKey(r)!==RT.key) return; let h='';
+  // elevation
+  const pf=RT.ele;
+  if(pf){ const e=pf.e, mn=Math.min(...e), mx=Math.max(...e); let up=0, dn=0; for(let i=1;i<e.length;i++){ const d=e[i]-e[i-1]; if(d>0) up+=d; else dn-=d; }
+    const cl=plClimbs(pf).up;
+    h+='<div class="rt-card"><div class="rt-h"><b>⛰ ความสูงตลอดเส้นทาง</b><small>แตะกราฟเพื่อดูตำแหน่ง</small></div>'+rtSvg(pf)+
+      '<div class="rt-stats"><span>ต่ำสุด <b>'+Math.round(mn)+'</b> ม.</span><span>สูงสุด <b>'+Math.round(mx)+'</b> ม.</span><span>ขึ้นรวม <b>'+Math.round(up)+'</b> ม.</span><span>ลงรวม <b>'+Math.round(dn)+'</b> ม.</span></div>'+
+      (cl.length?'<div class="rt-sub">เนินที่ต้องออกแรง '+cl.length+' จุด: '+cl.slice(0,4).map(c=>'กม. '+(c.d0/1000).toFixed(1)+' ยาว '+fmtKm(c.len/1000)+' ชัน '+(c.g*100).toFixed(1)+'%').join(' · ')+(cl.length>4?' …':'')+'</div>':'<div class="rt-sub">ไม่มีเนินชันยาว ๆ บนเส้นทางนี้</div>')+'</div>'; }
+  else if(RT.eleState==='loading') h+='<div class="rt-card"><div class="rt-h"><b>⛰ ความสูงตลอดเส้นทาง</b></div><div class="rt-sub">กำลังโหลดข้อมูลความสูง…</div></div>';
+  else if(RT.eleState==='fail') h+='<div class="rt-card"><div class="rt-h"><b>⛰ ความสูงตลอดเส้นทาง</b></div><div class="rt-sub">โหลดข้อมูลความสูงไม่ได้ตอนนี้</div></div>';
+  // facilities
+  h+='<div class="rt-card"><div class="rt-h"><b>🏪 สิ่งอำนวยความสะดวกตลอดเส้นทาง</b><small>ห่างเส้นทางไม่เกิน 300 ม.</small></div>';
+  if(RT.state==='loading') h+='<div class="rt-sub">กำลังค้นหาปั๊ม ร้านค้า ร้านกาแฟ ห้องน้ำ ตลอดเส้นทาง… (เส้นทางยาวอาจใช้เวลาครึ่งนาที)</div>';
+  else if(RT.state==='fail') h+='<div class="rt-sub">ค้นหาไม่ได้ตอนนี้ <button class="btn" id="rtRetry">ลองใหม่</button></div>';
+  else if(RT.amen){ const A=RT.amen, cnt={}; A.forEach(x=>cnt[x.cat]=(cnt[x.cat]||0)+1);
+    h+='<div class="rt-chips">'+RT_ORDER.map(c=>'<button class="rt-chip'+(RT.show.has(c)?' on':'')+'" data-rc="'+c+'" aria-pressed="'+RT.show.has(c)+'">'+RT_CAT[c][0]+' '+RT_CAT[c][1]+' <b>'+(cnt[c]||0)+'</b></button>').join('')+'</div>';
+    // longest stretch without a place to buy water or food
+    const cum=r.cum||(r.cum=cumOf(r.coords)), D=cum[cum.length-1], stops=[0].concat(A.filter(x=>x.cat==='fuel'||x.cat==='shop'||x.cat==='cafe'||x.cat==='water').map(x=>x.at),[D]).sort((a,b)=>a-b);
+    let g=0, g0=0; for(let i=1;i<stops.length;i++) if(stops[i]-stops[i-1]>g){ g=stops[i]-stops[i-1]; g0=stops[i-1]; }
+    if(D>15000&&g>15000) h+='<div class="note warn">ช่วงยาวที่สุดที่ไม่มีที่เติมน้ำ/ซื้อของ: กม. '+(g0/1000).toFixed(1)+'–'+((g0+g)/1000).toFixed(1)+' ('+(g/1000).toFixed(0)+' กม.) เตรียมน้ำให้พอ</div>';
+    const vis=A.filter(x=>RT.show.has(x.cat));
+    h+=vis.length?'<div class="rt-list">'+vis.slice(0,RT.more?400:30).map(x=>'<button class="rt-it" data-rl="'+A.indexOf(x)+'"><span class="rt-km">กม. '+(x.at/1000).toFixed(1)+'</span><span class="rt-ic">'+RT_CAT[x.cat][0]+'</span><span class="rt-nm">'+esc(x.name)+'<small>'+RT_CAT[x.cat][1]+(x.off>40?' · ห่างเส้นทาง '+Math.round(x.off/10)*10+' ม.':' · ติดเส้นทาง')+'</small></span></button>').join('')+'</div>'+
+      (vis.length>30&&!RT.more?'<button class="btn" id="rtMore" style="width:100%;margin-top:6px">แสดงทั้งหมด '+vis.length+' แห่ง</button>':''):'<div class="rt-sub">'+(A.length?'เลือกประเภทด้านบนเพื่อแสดง':'ไม่พบข้อมูลสิ่งอำนวยความสะดวกใกล้เส้นทางนี้ในแผนที่')+'</div>';
+    h+='<div class="rt-sub">ข้อมูลจาก OpenStreetMap และ Longdo Map อาจไม่ครบหรือร้านอาจปิดแล้ว ควรเผื่อน้ำและอาหารเสมอ</div>'; }
+  h+='</div>';
+  box.innerHTML=h;
+  const rr=$('#rtRetry'); if(rr) rr.onclick=()=>{ RT.state=null; rtExtras(r); };
+  const mo=$('#rtMore'); if(mo) mo.onclick=()=>{ RT.more=true; rtRender(r); };
+  $$('#rtExtra [data-rc]').forEach(b=>b.onclick=()=>{ const c=b.dataset.rc; if(RT.show.has(c)) RT.show.delete(c); else RT.show.add(c); rtRender(r); rtDrawAmen(); });
+  $$('#rtExtra [data-rl]').forEach(b=>b.onclick=()=>{ const x=RT.amen[+b.dataset.rl]; if(!x||!MAIN) return; if(isMobile()) setSheet('peek'); MAIN.m.setView([x.lat,x.lng],17);
+    const m=RT.mk&&RT.mk.get(x); if(m) setTimeout(()=>m.openTooltip(),350); });
+  const sv=$('#rtExtra .rt-svg'); if(sv&&pf) rtSvgBind(sv,pf,r); }
+function rtDrawAmen(){ if(!MAIN||!layers.amen) return; layers.amen.clearLayers(); RT.mk=new Map(); if(!RT.amen) return;
+  RT.amen.forEach(x=>{ if(!RT.show.has(x.cat)) return;
+    const m=L.marker([x.lat,x.lng],{icon:L.divIcon({className:'amk',html:'<span>'+RT_CAT[x.cat][0]+'</span>',iconSize:[24,24],iconAnchor:[12,12]}),keyboard:false,zIndexOffset:400})
+      .bindTooltip(esc(x.name)+' · กม. '+(x.at/1000).toFixed(1)).addTo(layers.amen); RT.mk.set(x,m); }); }
+function rtSvg(pf){ const W=640, H=150, pl=34, pr=8, pt=10, pb=22, D=pf.D, X=x=>pl+(W-pl-pr)*x/D;
+  let mn=Math.min(...pf.e), mx=Math.max(...pf.e); if(mx-mn<20){ const mid=(mx+mn)/2; mn=mid-10; mx=mid+10; } const pad=(mx-mn)*0.1; mn-=pad; mx+=pad;
+  const Y=v=>pt+(H-pt-pb)*(1-(v-mn)/(mx-mn)); let area='M'+X(0)+' '+(H-pb), line='';
+  pf.d.forEach((d,i)=>{ area+=' L'+X(d).toFixed(1)+' '+Y(pf.e[i]).toFixed(1); line+=(i?' L':'M')+X(d).toFixed(1)+' '+Y(pf.e[i]).toFixed(1); }); area+=' L'+X(D)+' '+(H-pb)+' Z';
+  const tick=D<=15000?2000:D<=40000?5000:D<=100000?10000:D<=250000?25000:50000; let ax='';
+  for(let x=0;x<=D+1;x+=tick) ax+='<text x="'+X(x).toFixed(1)+'" y="'+(H-5)+'" text-anchor="middle">'+(x/1000)+'</text>';
+  const am=(RT.amen||[]).filter(x=>x.cat==='fuel'||x.cat==='shop'||x.cat==='water').map(x=>'<line x1="'+X(x.at).toFixed(1)+'" x2="'+X(x.at).toFixed(1)+'" y1="'+(H-pb)+'" y2="'+(H-pb+4)+'" stroke="#0f5b4d" stroke-width="2"/>').join('');
+  return '<svg viewBox="0 0 '+W+' '+H+'" class="pl-svg rt-svg" role="img" aria-label="กราฟความสูงของเส้นทาง ต่ำสุด '+Math.round(Math.min(...pf.e))+' เมตร สูงสุด '+Math.round(Math.max(...pf.e))+' เมตร">'+
+    '<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+(H-pb)+'" y2="'+(H-pb)+'" stroke="#cbd5d1"/>'+
+    '<text x="2" y="'+(Y(mx-pad)+4).toFixed(1)+'">'+Math.round(mx-pad)+'</text><text x="2" y="'+(Y(mn+pad)+4).toFixed(1)+'">'+Math.round(mn+pad)+'</text>'+
+    '<path d="'+area+'" fill="#d6ebe5"/><path d="'+line+'" fill="none" stroke="#14705f" stroke-width="2"/>'+am+ax+
+    '<line class="rt-cur" x1="0" x2="0" y1="'+pt+'" y2="'+(H-pb)+'" stroke="#17211e" stroke-width="1.2" stroke-dasharray="3 3" visibility="hidden"/>'+
+    '<text class="rt-lbl" x="0" y="'+(pt+10)+'" text-anchor="middle" visibility="hidden" style="font-weight:700;fill:#17211e"></text></svg>'; }
+function rtSvgBind(sv,pf,r){ const W=640, pl=34, pr=8, D=pf.D, cur=sv.querySelector('.rt-cur'), lbl=sv.querySelector('.rt-lbl');
+  const at=ev=>{ const b=sv.getBoundingClientRect(), cx=(ev.touches?ev.touches[0].clientX:ev.clientX); const x=(cx-b.left)/b.width*W; return Math.max(0,Math.min(D,(x-pl)/(W-pl-pr)*D)); };
+  const show=ev=>{ const d=at(ev), x=pl+(W-pl-pr)*d/D, e=plEleAt(pf,d); cur.setAttribute('x1',x); cur.setAttribute('x2',x); cur.setAttribute('visibility','visible');
+    lbl.textContent='กม. '+(d/1000).toFixed(1)+' · '+Math.round(e)+' ม.'; lbl.setAttribute('x',Math.max(70,Math.min(W-70,x))); lbl.setAttribute('visibility','visible');
+    const cum=r.cum||(r.cum=cumOf(r.coords)); let j=cum.findIndex(c=>c>=d); if(j<1) j=1; const t=(d-cum[j-1])/((cum[j]-cum[j-1])||1), a=r.coords[j-1], b=r.coords[j];
+    const ll=[a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t]; if(MAIN){ if(!RT.dot) RT.dot=L.circleMarker(ll,{radius:7,color:'#fff',weight:3,fillColor:'#dc2626',fillOpacity:1,interactive:false}); RT.dot.setLatLng(ll).addTo(layers.route); } };
+  sv.addEventListener('pointermove',show); sv.addEventListener('pointerdown',show); sv.addEventListener('touchmove',show,{passive:true}); }
 function exportRouteGpx(){ const r=R.res; if(!r) return;
   const name=R.track?R.track.name+(R.track.rev?' (กลับทิศ)':''):'ปั่นไกล '+($('#inA').value||'A')+' → '+($('#inB').value||'B');
   let g='<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Pankrai" xmlns="http://www.topografix.com/GPX/1/1">\n<trk><name>'+esc(name)+'</name><type>cycling</type><trkseg>\n';
@@ -2880,6 +3014,7 @@ function renderTrackBox(r){
     '<div class="note">ระหว่างบันทึกการปั่น แอปจะบอกระยะที่เหลือ และเตือนเมื่อออกนอกเส้นทาง · เส้นทางมาจาก GPS ของทริปเดิม ควรดูป้ายจราจรและสภาพถนนจริงเสมอ</div>';
   $('#rGo').onclick=()=>{ setTab('ride'); if(!rec) startRide(); else toast('กำลังบันทึกการปั่นอยู่แล้ว'); };
   $('#tRev').onclick=reverseTrack; $('#rGpx').onclick=openSendRoute; $('#rPlan').onclick=openPlan; $('#rClear').onclick=clearRoute;
+  $('#routeBox').insertAdjacentHTML('beforeend','<div id="rtExtra"></div>'); rtExtras(r);
   $('#routeHint').textContent='แสดงเส้นทาง "'+t.name+'" ('+km.toFixed(1)+' กม.) เป็นเส้นสีม่วงบนแผนที่';
 }
 /* =================== ride plan (วางแผนการปั่น) =================== */
@@ -3194,7 +3329,7 @@ async function statsForget(){ const r=await stRefs(); if(r) await r.db.ref('stat
 /* =================== app updates (แจ้งอัปเดต) =================== */
 // The Android app and installed copies can keep an old page open for days, so the app asks the server for
 // version.json and offers a one-tap update that clears the saved copy and reloads.
-const APP_VERSION='2026.11.24.11', UPD={remote:null,last:0,hide:null};
+const APP_VERSION='2026.11.24.12', UPD={remote:null,last:0,hide:null};
 function verCmp(a,b){ const x=String(a).split(/[.\-]/).map(Number), y=String(b).split(/[.\-]/).map(Number); for(let i=0;i<Math.max(x.length,y.length);i++){ const d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; }
 async function updCheck(loud){ if(!loud&&Date.now()-UPD.last<10*60e3) return; UPD.last=Date.now();
   try{ const r=await fetch('./version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json();
