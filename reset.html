@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>ปั่นไกล · ล้างเวอร์ชันเก่า</title>
+<style>
+  body{margin:0;font-family:system-ui,-apple-system,"Noto Sans Thai",sans-serif;background:#f4f7f6;color:#17302b;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
+  .card{background:#fff;border-radius:18px;box-shadow:0 6px 24px rgba(0,0,0,.08);padding:24px;max-width:420px;width:100%}
+  h1{font-size:20px;margin:0 0 6px}
+  p{margin:6px 0;line-height:1.55;font-size:15px}
+  ol{padding-left:20px;margin:10px 0;font-size:15px;line-height:1.7}
+  .ok{color:#0f7a5f}.bad{color:#b3261e}
+  a.btn{display:block;text-align:center;background:#0f5b4d;color:#fff;text-decoration:none;font-weight:700;border-radius:12px;padding:14px;margin-top:16px;font-size:16px}
+  small{color:#5b6f6a}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🔄 ล้างเวอร์ชันเก่าของปั่นไกล</h1>
+  <p><small>ประวัติการปั่น เส้นทาง และการตั้งค่าในเครื่องจะไม่ถูกลบ ล้างเฉพาะหน้าแอปที่เก็บไว้</small></p>
+  <ol id="log"><li>กำลังเริ่ม…</li></ol>
+  <div id="done" hidden>
+    <p class="ok"><b>เรียบร้อย</b> — เวอร์ชันบนเซิร์ฟเวอร์: <b id="ver">-</b></p>
+    <p>ถ้าเปิดหน้านี้ใน Chrome: <b>ปิดแอปปั่นไกล</b> (ปัดทิ้งจากแอปล่าสุด) แล้วเปิดใหม่</p>
+    <a class="btn" href="./?u=reset">เปิดปั่นไกล</a>
+  </div>
+</div>
+<script>
+(async()=>{
+  const log=document.getElementById('log'); log.innerHTML='';
+  const step=(t,cls)=>{ const li=document.createElement('li'); li.textContent=t; if(cls) li.className=cls; log.appendChild(li); };
+  try{ if('serviceWorker' in navigator){ const regs=await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map(r=>r.unregister())); step('ยกเลิกตัวเก็บแอปเดิม ('+regs.length+')','ok'); } }catch(e){ step('ยกเลิกตัวเก็บแอปเดิมไม่สำเร็จ','bad'); }
+  try{ if(window.caches){ const ks=await caches.keys(), del=ks.filter(k=>k!=='pankrai-share'); await Promise.all(del.map(k=>caches.delete(k))); step('ล้างหน้าแอปที่เก็บไว้ ('+del.length+')','ok'); } }catch(e){ step('ล้างหน้าแอปที่เก็บไว้ไม่สำเร็จ','bad'); }
+  try{ await Promise.all(['./','./index.html','./?source=pwa','./sw.js','./manifest.webmanifest'].map(u=>fetch(u,{cache:'reload'}))); step('โหลดหน้าแอปใหม่จากเซิร์ฟเวอร์','ok'); }catch(e){ step('โหลดใหม่ไม่สำเร็จ — ตรวจอินเทอร์เน็ตแล้วเปิดหน้านี้อีกครั้ง','bad'); }
+  try{ const j=await (await fetch('./version.json?t='+Date.now(),{cache:'no-store'})).json(); document.getElementById('ver').textContent=j.version; }catch(e){}
+  document.getElementById('done').hidden=false;
+})();
+</script>
+</body>
+</html>
