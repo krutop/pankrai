@@ -51,6 +51,8 @@ window.PK_FIREBASE = {
 };
 // usage statistics go to a separate Firebase project (pankrai-stats) owned by the admin account; see admin.html
 window.PK_STATS = { apiKey: "AIzaSyCgmTUtqJfNX2AdaxTPqu5oTJHtH7s5Zrg", authDomain: "pankrai-stats.firebaseapp.com", databaseURL: "https://pankrai-stats-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "pankrai-stats", appId: "1:915170977520:web:c37d69bf01ca6892724435" };
+// Longdo Map API key (free Thai place search, https://api.longdo.com/console). Leave null to search OpenStreetMap only.
+window.PK_LONGDO = null;
 window.PK_DONATE = null;
 // Strava: set after registering a Strava API application and deploying tools/strava-worker.js, e.g.
 // window.PK_STRAVA = { clientId: '123456', worker: 'https://pankrai-strava.example.workers.dev' };
@@ -115,7 +117,9 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
   .kmrow{display:flex;gap:8px;align-items:center;margin-top:8px}
   .kmrow input{width:90px}
   .results{display:none;border:1px solid var(--line);border-radius:14px;margin:-2px 0 10px;overflow:hidden;background:#fff}
-  .results.show{display:block}
+  .results.show{display:block;max-height:58vh;overflow-y:auto;overscroll-behavior:contain}
+  .ri .cat{display:inline-block;font-size:11.5px;color:#0f5b4d;background:#e7f2ef;border-radius:6px;padding:0 6px;margin-left:6px;vertical-align:1px;font-weight:600}
+  .ri.hd{font-size:12.5px;color:var(--muted);background:var(--soft);padding:6px 12px;font-weight:600}
   .ri{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:10px 12px;font-size:14.5px;line-height:1.4}
   .ri:last-child{border-bottom:0}
   .ri:hover{background:var(--soft)}
@@ -1542,43 +1546,129 @@ $('#btnMeA').onclick=()=>{ R.a={me:true}; syncInputs(); if(R.b) computeRoute(tru
 $('#btnSwap').onclick=()=>{ if(R.track){ reverseTrack(); return; } if(R.loop&&R.b===R.loop.b){ R.vias.reverse(); syncInputs(); computeRoute(true); toast('สลับทิศการวนแล้ว'); return; } if(!R.b){ toast('ใส่ปลายทาง B ก่อน'); return; } const a=R.a; R.a=R.b; R.b=a&&a.me?(lastFix?{lat:lastFix.lat,lng:lastFix.lng,name:'ตำแหน่งของฉัน'}:null):a; R.vias.reverse(); syncInputs(); computeRoute(true); };
 $('#btnAddVia').onclick=()=>{ if(R.vias.length>=5){ toast('เพิ่มจุดแวะได้สูงสุด 5 จุด'); return; } R.vias.push(null); syncInputs(); const ins=$$('#vias input'); if(ins.length) ins[ins.length-1].focus(); };
 
-/* ----- search (Nominatim: search only on Enter / tap, no autocomplete) ----- */
+/* ----- place search ----- */
+// Several free sources, merged and ranked by how well the name matches and how close the place is:
+//  · Photon (OpenStreetMap, typo-tolerant, used for suggestions while typing)
+//  · Nominatim (OpenStreetMap, addresses and official names)
+//  · Overpass "nearby" for category words such as ปั๊ม / ร้านกาแฟ / ห้องน้ำ (nearest first)
+//  · Longdo Map (Thai place database) when window.PK_LONGDO holds an API key
+// It also understands coordinates ("13.82, 102.07") and Google Maps links, including maps.app.goo.gl short links.
 let act=null;
 const resBox=$('#results');
+const SR={seq:0,timer:0,cache:new Map()};
+const SR_CAT={school:'โรงเรียน',college:'วิทยาลัย',university:'มหาวิทยาลัย',kindergarten:'โรงเรียนอนุบาล',hospital:'โรงพยาบาล',clinic:'คลินิก',doctors:'คลินิก',pharmacy:'ร้านขายยา',
+  fuel:'ปั๊มน้ำมัน',cafe:'ร้านกาแฟ',restaurant:'ร้านอาหาร',fast_food:'ร้านอาหาร',food_court:'ศูนย์อาหาร',convenience:'ร้านสะดวกซื้อ',supermarket:'ซูเปอร์มาร์เก็ต',mall:'ห้าง',
+  department_store:'ห้าง',marketplace:'ตลาด',place_of_worship:'ศาสนสถาน',bicycle:'ร้านจักรยาน',village:'หมู่บ้าน',hamlet:'หมู่บ้าน',town:'เมือง',city:'เมือง',suburb:'ย่าน',
+  neighbourhood:'ย่าน',bus_station:'สถานีขนส่ง',station:'สถานี',police:'สถานีตำรวจ',bank:'ธนาคาร',atm:'ตู้ ATM',hotel:'ที่พัก',guest_house:'ที่พัก',resort:'ที่พัก',motel:'ที่พัก',
+  park:'สวนสาธารณะ',attraction:'ที่เที่ยว',viewpoint:'จุดชมวิว',museum:'พิพิธภัณฑ์',townhall:'หน่วยงานราชการ',government:'หน่วยงานราชการ',post_office:'ไปรษณีย์',toilets:'ห้องน้ำ',
+  stadium:'สนามกีฬา',sports_centre:'ศูนย์กีฬา',peak:'ยอดเขา',waterfall:'น้ำตก',reservoir:'อ่างเก็บน้ำ',hardware:'ร้านวัสดุ',car_repair:'อู่ซ่อมรถ',motorcycle:'ร้านมอเตอร์ไซค์'};
+// common Thai shorthands and brand spellings → the spelling the map data uses
+const SR_ALIAS=[[/^รพ\.?\s*สต\.?/,'โรงพยาบาลส่งเสริมสุขภาพตำบล'],[/^รพ\.?\s*/,'โรงพยาบาล'],[/^ร\.?ร\.?\s*/,'โรงเรียน'],[/^อบต\.?\s*/,'องค์การบริหารส่วนตำบล'],[/^อบจ\.?\s*/,'องค์การบริหารส่วนจังหวัด'],
+  [/^ม\.\s*/,'มหาวิทยาลัย'],[/^สภ\.?\s*/,'สถานีตำรวจภูธร'],[/^เซเว่น(อีเลฟเว่น)?\s*/,'7-Eleven '],[/^7-?11\s*/,'7-Eleven '],[/^โลตัส\s*/,'Lotus '],[/^แม็?คโคร\s*/,'Makro '],
+  [/^บิ๊กซี\s*/,'Big C '],[/^คาเฟ่อเมซอน|^อเมซอน\s*/,'Café Amazon '],[/^ปตท\.?\s*/,'PTT ']];
+// category words → nearest places of that kind
+const SR_NEAR=[[/^(ปั๊ม|ปั้ม|ปั๊มน้ำมัน|เติมน้ำมัน|ปั๊มแก๊ส)$/,'["amenity"="fuel"]','ปั๊มน้ำมัน'],[/^(ร้านกาแฟ|คาเฟ่|กาแฟ|cafe|coffee)$/i,'["amenity"="cafe"]','ร้านกาแฟ'],
+  [/^(ร้านอาหาร|อาหาร|ร้านข้าว|ข้าว|ก๋วยเตี๋ยว)$/,'["amenity"~"^(restaurant|fast_food|food_court)$"]','ร้านอาหาร'],[/^(ร้านสะดวกซื้อ|เซเว่น|7-?11|มินิมาร์ท|ร้านค้า)$/,'["shop"~"^(convenience|supermarket)$"]','ร้านสะดวกซื้อ'],
+  [/^(ร้านจักรยาน|ซ่อมจักรยาน|จักรยาน)$/,'["shop"="bicycle"]','ร้านจักรยาน'],[/^(ห้องน้ำ|สุขา)$/,'["amenity"="toilets"]','ห้องน้ำ'],[/^(โรงพยาบาล|รพ\.?|คลินิก|หมอ)$/,'["amenity"~"^(hospital|clinic|doctors)$"]','โรงพยาบาล/คลินิก'],
+  [/^(ร้านขายยา|ขายยา)$/,'["amenity"="pharmacy"]','ร้านขายยา'],[/^(วัด)$/,'["amenity"="place_of_worship"]','วัด'],[/^(atm|เอทีเอ็ม|ตู้เอทีเอ็ม|ตู้atm)$/i,'["amenity"="atm"]','ตู้ ATM'],
+  [/^(ที่พัก|โรงแรม|รีสอร์ท|รีสอร์ต)$/,'["tourism"~"^(hotel|guest_house|motel|hostel)$"]','ที่พัก'],[/^(ตลาด)$/,'["amenity"="marketplace"]','ตลาด'],[/^(โรงเรียน)$/,'["amenity"="school"]','โรงเรียน']];
+function srCenter(){ if(lastFix) return {lat:lastFix.lat,lng:lastFix.lng,me:true}; const c=MAIN?MAIN.m.getCenter():null; return c?{lat:c.lat,lng:c.lng}:{lat:13.75,lng:100.5}; }
+function srNorm(t){ return String(t||'').toLowerCase().replace(/[\s\-_.()]/g,''); }
+function srAlias(q){ for(const [re,to] of SR_ALIAS) if(re.test(q)) return q.replace(re,to).trim(); return null; }
+function srItem(name,sub,cat,lat,lng,src){ return {name:String(name||'').trim(),sub:String(sub||'').trim(),cat:cat||'',lat:+lat,lng:+lng,src}; }
+// coordinates or a Google Maps link typed/pasted into the box
+function srParse(q){ let m;
+  const ok=(a,b)=>isFinite(a)&&isFinite(b)&&Math.abs(a)<=90&&Math.abs(b)<=180;
+  if((m=q.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/))&&ok(+m[1],+m[2])) return {lat:+m[1],lng:+m[2],name:srLinkName(q)};
+  if((m=q.match(/[?&](?:q|query|ll|destination|daddr|center)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/))&&ok(+m[1],+m[2])) return {lat:+m[1],lng:+m[2],name:srLinkName(q)};
+  if((m=q.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/))&&ok(+m[1],+m[2])) return {lat:+m[1],lng:+m[2],name:srLinkName(q)};
+  if((m=q.match(/^\s*(-?\d{1,2}\.\d{3,})\s*[,\s]\s*(-?\d{1,3}\.\d{3,})\s*$/))&&ok(+m[1],+m[2])) return {lat:+m[1],lng:+m[2],name:'พิกัด '+(+m[1]).toFixed(5)+', '+(+m[2]).toFixed(5)};
+  if(/^https?:\/\/(maps\.app\.goo\.gl|goo\.gl\/maps|g\.co\/kgs)\//i.test(q.trim())) return {short:q.trim()};
+  return null; }
+function srLinkName(q){ const m=q.match(/\/place\/([^/@?]+)/); if(m){ try{ return decodeURIComponent(m[1].replace(/\+/g,' ')); }catch(e){} } return 'ตำแหน่งจากลิงก์ Google Maps'; }
+async function srExpand(u){ const w=window.PK_STRAVA&&window.PK_STRAVA.worker; if(!w) return null;
+  try{ const r=await fetchT(w+'/expand?u='+encodeURIComponent(u),{},12000); const j=await r.json(); return j.url?srParse(j.url):null; }catch(e){ return null; } }
+async function srPhoton(q,c,limit){ const k='p|'+q+'|'+c.lat.toFixed(2)+','+c.lng.toFixed(2); if(SR.cache.has(k)) return SR.cache.get(k);
+  const u='https://photon.komoot.io/api/?limit='+(limit||8)+'&lang=default&lat='+c.lat+'&lon='+c.lng+'&location_bias_scale=0.05&zoom=12&bbox=92,5,110,22&q='+encodeURIComponent(q);
+  const r=await fetchT(u,{},10000); const j=await r.json();
+  const out=(j.features||[]).map(f=>{ const p=f.properties||{}, g=f.geometry&&f.geometry.coordinates; if(!g) return null;
+    const nm=p.name||[p.housenumber,p.street].filter(Boolean).join(' ')||p.city; const sub=[p.street&&p.name?p.street:'',p.district,p.city!==nm?p.city:'',p.county,p.state].filter(Boolean);
+    return srItem(nm,[...new Set(sub)].slice(0,3).join(', '),SR_CAT[p.osm_value]||'',g[1],g[0],'osm'); }).filter(x=>x&&x.name);
+  SR.cache.set(k,out); return out; }
+async function srNominatim(q,c){ let u='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8&countrycodes=th&accept-language=th&q='+encodeURIComponent(q);
+  u+='&viewbox='+(c.lng-1)+','+(c.lat+1)+','+(c.lng+1)+','+(c.lat-1);
+  const r=await fetchT(u,{},12000); const j=await r.json();
+  return j.map(x=>{ const parts=String(x.display_name).split(',').map(t=>t.trim()); return srItem(parts[0],parts.slice(1,4).join(', '),SR_CAT[x.type]||'',x.lat,x.lon,'osm'); }); }
+async function srLongdo(q,c){ const key=window.PK_LONGDO; if(!key) return [];
+  const u='https://search.longdo.com/mapsearch/json/search?limit=12&locale=th&span=300km&lat='+c.lat+'&lon='+c.lng+'&keyword='+encodeURIComponent(q)+'&key='+encodeURIComponent(key);
+  const r=await fetchT(u,{},10000); const j=await r.json();
+  return (j.data||[]).filter(x=>isFinite(x.lat)&&isFinite(x.lon)).map(x=>srItem(x.name,x.address||'',(x.tag&&x.tag[0])||'',x.lat,x.lon,'longdo')); }
+async function srNearby(sel,label,c){ const run=async R=>{ const q='[out:json][timeout:15];nwr'+sel+'(around:'+R+','+c.lat+','+c.lng+');out center tags 60;';
+    const r=await fetchT('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(q)},20000); const j=await r.json();
+    return (j.elements||[]).map(el=>{ const t=el.tags||{}, la=el.lat!=null?el.lat:el.center&&el.center.lat, lo=el.lon!=null?el.lon:el.center&&el.center.lon; if(!isFinite(la)) return null;
+      return srItem(t.name||t['name:th']||t.brand||label,[t['addr:street'],t['addr:subdistrict']||t['addr:city']].filter(Boolean).join(', '),label,la,lo,'near'); }).filter(Boolean); };
+  let out=await run(4000); if(out.length<4) out=await run(15000); return out; }
+function srRank(list,q,c){ const nq=srNorm(q), seen=[];
+  list.forEach(x=>{ const nn=srNorm(x.name), km=hav(c.lat,c.lng,x.lat,x.lng)/1000;
+    const txt=nn===nq?4:nn.startsWith(nq)?3:nn.includes(nq)?2.4:nq.includes(nn)&&nn.length>2?1.6:1;
+    x.km=km; x.score=txt+(x.src==='longdo'?0.4:0)-Math.log10(km+1)*(x.src==='near'?3:0.9); });
+  list.sort((a,b)=>b.score-a.score);
+  return list.filter(x=>{ const nn=srNorm(x.name); if(seen.some(y=>hav(y.lat,y.lng,x.lat,x.lng)<(srNorm(y.name)===nn?250:20))) return false; seen.push(x); return true; }); }
+function srRow(x){ const k=lastFix?x.km:null;
+  return '<button class="ri" data-lat="'+x.lat+'" data-lng="'+x.lng+'" data-name="'+esc(x.name)+'">'+esc(x.name)+(x.cat&&x.cat!==x.name?'<span class="cat">'+esc(x.cat)+'</span>':'')+
+    '<small>'+esc(x.sub||'')+(k!=null?(x.sub?' · ':'')+fmtKm(k):'')+'</small></button>'; }
+function srTail(){ return '<button class="ri" data-o="me">◎ ตำแหน่งของฉัน</button><button class="ri" data-o="pick">📍 เลือกบนแผนที่</button>'; }
 function showOpts(){ if(!act) return; const q=act.el.value.trim(), isMe=q==='ตำแหน่งของฉัน';
-  resBox.innerHTML=(q&&!isMe?'<button class="ri" data-o="search">🔍 ค้นหา “'+esc(q)+'”</button>':'')+
-    '<button class="ri" data-o="me">◎ ตำแหน่งของฉัน</button><button class="ri" data-o="pick">📍 เลือกบนแผนที่</button>';
+  resBox.innerHTML=(q&&!isMe?'<button class="ri" data-o="search">🔍 ค้นหา “'+esc(q)+'”</button>':'<div class="ri hd">พิมพ์ชื่อสถานที่ ประเภท (เช่น ปั๊ม ร้านกาแฟ) พิกัด หรือวางลิงก์ Google Maps</div>')+srTail();
   resBox.classList.add('show'); }
+// suggestions while typing (Photon only, so the free services aren't flooded)
+function srSuggest(){ clearTimeout(SR.timer); if(!act) return; const q=act.el.value.trim();
+  if(q.length<2||q==='ตำแหน่งของฉัน'||srParse(q)||SR_NEAR.some(n=>n[0].test(q))){ showOpts(); return; }
+  const my=++SR.seq; SR.timer=setTimeout(async()=>{ const c=srCenter(); let list=[];
+    try{ const qa=srAlias(q); const rs=await Promise.all([srPhoton(q,c,7)].concat(qa?[srPhoton(qa,c,5)]:[])); list=srRank(rs.flat(),qa||q,c).slice(0,7); }catch(e){}
+    if(my!==SR.seq||!act||act.el.value.trim()!==q) return;
+    resBox.innerHTML='<button class="ri" data-o="search">🔍 ค้นหาทั้งหมด “'+esc(q)+'”<small>ค้นหาจากทุกแหล่ง แสดงที่ใกล้ก่อน</small></button>'+list.map(srRow).join('')+srTail(); resBox.classList.add('show'); },350); }
 function bindSearch(el,setter){
   el.addEventListener('focus',()=>{ act={el,setter}; if(isMobile()) setSheet('max'); showOpts(); setTimeout(()=>{ try{ el.select(); }catch(e){} },0); });
-  el.addEventListener('input',()=>{ act={el,setter}; showOpts(); });
+  el.addEventListener('input',()=>{ act={el,setter}; srSuggest(); });
   el.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); act={el,setter}; doSearch(el.value.trim()); } });
 }
 bindSearch($('#inA'),p=>{ R.a=p; });
 bindSearch($('#inB'),p=>{ R.b=p; });
 document.addEventListener('pointerdown',e=>{ if(!e.target.closest('.rform')) { resBox.classList.remove('show'); if(act){ syncInputs(); act=null; } } });
 resBox.addEventListener('click',async e=>{
-  const b=e.target.closest('.ri'); if(!b||!act) return; const cur=act;
+  const b=e.target.closest('.ri'); if(!b||!act||b.classList.contains('hd')||b.classList.contains('muted')) return; const cur=act;
   if(b.dataset.o==='search'){ doSearch(cur.el.value.trim()); return; }
   if(b.dataset.o==='me'){ cur.setter({me:true}); if(!R.a||!R.a.me){ /* used for B or via */ }
     if(cur.el!==$('#inA')){ if(!lastFix){ toast('ยังไม่มีสัญญาณ GPS'); return; } cur.setter({lat:lastFix.lat,lng:lastFix.lng,name:'ตำแหน่งของฉัน'}); } }
   else if(b.dataset.o==='pick'){ resBox.classList.remove('show'); act=null; const p=await pickLocation('เลื่อนแผนที่ให้เป้าตรงจุดที่ต้องการ'); if(isMobile()) setSheet('mid'); if(!p){ syncInputs(); return; } cur.setter(Object.assign(p,{name:'จุดบนแผนที่'})); }
   else if(b.dataset.lat){ cur.setter({lat:+b.dataset.lat,lng:+b.dataset.lng,name:b.dataset.name}); }
+  else return;
   resBox.classList.remove('show'); act=null; cur.el.blur(); syncInputs(); if(isMobile()) setSheet('mid'); setTimeout(()=>computeRoute(true),280);
 });
 async function doSearch(q){
+  clearTimeout(SR.timer); const my=++SR.seq;
   if(!q||q==='ตำแหน่งของฉัน'){ showOpts(); return; }
   resBox.innerHTML='<div class="ri muted">กำลังค้นหา…</div>'; resBox.classList.add('show');
-  let u='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&countrycodes=th&accept-language=th&q='+encodeURIComponent(q);
-  const c=lastFix||(MAIN?MAIN.m.getCenter():null); if(c) u+='&viewbox='+(c.lng-0.6)+','+(c.lat+0.6)+','+(c.lng+0.6)+','+(c.lat-0.6);
-  let html='';
-  try{ const r=await fetchT(u,{},15000); const j=await r.json();
-    html=j.map(x=>{ const parts=String(x.display_name).split(','); const k=kmFrom(+x.lat,+x.lon);
-      return '<button class="ri" data-lat="'+x.lat+'" data-lng="'+x.lon+'" data-name="'+esc(parts[0])+'">'+esc(parts[0])+'<small>'+esc(parts.slice(1,4).join(',').trim())+(k!=null?' · '+fmtKm(k):'')+'</small></button>'; }).join('');
-    if(!j.length) html='<div class="ri muted">ไม่พบ “'+esc(q)+'” ลองคำอื่น หรือเลือกบนแผนที่</div>';
-  }catch(err){ html='<div class="ri muted">ค้นหาไม่ได้ตอนนี้ (อาจไม่มีอินเทอร์เน็ต)</div>'; }
-  if(!act) return;
-  resBox.innerHTML=html+'<button class="ri" data-o="pick">📍 เลือกบนแผนที่</button>';
+  const c=srCenter(); let html='';
+  // coordinates / Google Maps links
+  let pp=srParse(q); if(pp&&pp.short){ resBox.innerHTML='<div class="ri muted">กำลังอ่านลิงก์ Google Maps…</div>'; pp=await srExpand(pp.short);
+    if(!pp){ if(my===SR.seq&&act) resBox.innerHTML='<div class="ri muted">อ่านลิงก์นี้ไม่ได้ ลองเปิดลิงก์ใน Google Maps แล้วกดค้างที่หมุดเพื่อคัดลอกพิกัดมาวางแทน</div>'+srTail(); return; } }
+  if(pp){ if(my!==SR.seq||!act) return; resBox.innerHTML='<div class="ri hd">ตำแหน่งจากพิกัด/ลิงก์</div>'+srRow(Object.assign(srItem(pp.name,(+pp.lat).toFixed(5)+', '+(+pp.lng).toFixed(5),'',pp.lat,pp.lng,'link'),{km:hav(c.lat,c.lng,pp.lat,pp.lng)/1000}))+srTail(); return; }
+  const qn=q.replace(/\s*(ใกล้ฉัน|ใกล้ๆ|ใกล้ ๆ|แถวนี้|ใกล้ที่สุด|near me)$/i,'').trim(), near=SR_NEAR.find(n=>n[0].test(qn)), qa=srAlias(qn);
+  const jobs=[srPhoton(qn,c,10),srNominatim(qn,c),srLongdo(qn,c)];
+  if(qa) jobs.push(srPhoton(qa,c,8),srNominatim(qa,c));
+  if(near) jobs.push(srNearby(near[1],near[2],c));
+  const rs=await Promise.all(jobs.map(j=>j.catch(()=>null)));
+  if(my!==SR.seq||!act) return;
+  if(rs.every(x=>x===null)){ resBox.innerHTML='<div class="ri muted">ค้นหาไม่ได้ตอนนี้ (อาจไม่มีอินเทอร์เน็ต)</div>'+srTail(); return; }
+  let list=srRank(rs.filter(Boolean).flat(),qa||qn,c);
+  if(near){ const nb=list.filter(x=>x.src==='near').sort((a,b)=>a.km-b.km).slice(0,10), rest=list.filter(x=>x.src!=='near').slice(0,6);
+    html=(nb.length?'<div class="ri hd">'+esc(near[2])+'ใกล้'+(c.me?'คุณ':'จุดกลางแผนที่')+' (เรียงจากใกล้ที่สุด)</div>'+nb.map(srRow).join(''):'')+(rest.length?'<div class="ri hd">ชื่อที่ตรงกับ “'+esc(qn)+'”</div>'+rest.map(srRow).join(''):''); }
+  else html=list.slice(0,12).map(srRow).join('');
+  if(!html) html='<div class="ri muted">ไม่พบ “'+esc(q)+'” ลองพิมพ์สั้นลง พิมพ์ชื่ออำเภอต่อท้าย วางลิงก์ Google Maps หรือเลือกบนแผนที่</div>';
+  else html+='<div class="ri hd">ไม่เจอที่ต้องการ? วางลิงก์ Google Maps หรือพิกัดในช่องค้นหาได้</div>';
+  resBox.innerHTML=html+srTail();
 }
 
 /* =================== bike infrastructure + shops (Overpass, by viewport) =================== */
@@ -3029,7 +3119,7 @@ async function statsForget(){ const r=await stRefs(); if(r) await r.db.ref('stat
 /* =================== app updates (แจ้งอัปเดต) =================== */
 // The Android app and installed copies can keep an old page open for days, so the app asks the server for
 // version.json and offers a one-tap update that clears the saved copy and reloads.
-const APP_VERSION='2026.11.24.4', UPD={remote:null,last:0,hide:null};
+const APP_VERSION='2026.11.24.5', UPD={remote:null,last:0,hide:null};
 function verCmp(a,b){ const x=String(a).split(/[.\-]/).map(Number), y=String(b).split(/[.\-]/).map(Number); for(let i=0;i<Math.max(x.length,y.length);i++){ const d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; }
 async function updCheck(loud){ if(!loud&&Date.now()-UPD.last<10*60e3) return; UPD.last=Date.now();
   try{ const r=await fetch('./version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json();

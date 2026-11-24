@@ -3,6 +3,7 @@
 //   POST /token        { code } or { refresh_token }  → Strava OAuth token response
 //   POST /deauthorize  { access_token }               → disconnects the athlete
 //   GET  /api/<path>   (Authorization: Bearer …)      → read-only Strava API calls the app needs
+//   GET  /expand?u=<maps.app.goo.gl link>             → the full Google Maps link it points to (so the app can read the place's position)
 // Nothing is stored here. Set these in the worker's settings (Variables and Secrets):
 //   STRAVA_CLIENT_ID      your Strava API application's Client ID
 //   STRAVA_CLIENT_SECRET  its Client Secret (add it as a Secret, never in code)
@@ -43,6 +44,22 @@ export default {
       if (!/^Bearer \S+$/.test(auth)) return json({ error: 'missing token' }, 401);
       const r = await fetch('https://www.strava.com/api/v3/' + path + url.search, { headers: { Authorization: auth } });
       return new Response(r.body, { status: r.status, headers: { ...cors, 'Content-Type': 'application/json' } });
+    }
+    if (url.pathname === '/expand' && req.method === 'GET') {
+      // follow a Google Maps short link (redirects only, nothing else is fetched or kept)
+      let u = url.searchParams.get('u') || '';
+      const ok = x => { try { const h = new URL(x).hostname; return /^(maps\.app\.goo\.gl|goo\.gl|g\.co)$/.test(h); } catch (e) { return false; } };
+      if (!ok(u)) return json({ error: 'only Google Maps short links' }, 400);
+      for (let i = 0; i < 6; i++) {
+        const r = await fetch(u, { redirect: 'manual', headers: { 'User-Agent': 'Mozilla/5.0 (pankrai link expander)' } });
+        const loc = r.headers.get('Location');
+        if (!loc || r.status < 300 || r.status > 399) break;
+        u = new URL(loc, u).toString();
+        const h = new URL(u).hostname;
+        if (/^consent\.google\./.test(h)) { const c = new URL(u).searchParams.get('continue'); if (c) u = c; break; }
+        if (/google\.[a-z.]+$/.test(h) && /\/maps/.test(new URL(u).pathname)) break;
+      }
+      return json({ url: u });
     }
     return json({ error: 'not found' }, 404);
   }
