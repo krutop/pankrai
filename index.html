@@ -1681,7 +1681,7 @@ async function doSearch(q){
     if(near){ const nb=st.nearList.slice().sort((a,b)=>a.km-b.km).slice(0,10);
       html+='<div class="ri hd">'+esc(near[2])+'ใกล้'+(c.me?'คุณ':'จุดกลางแผนที่')+' (เรียงจากใกล้ที่สุด)</div>'+
         (nb.length?nb.map(srRow).join('')+(st.near==='wait'?'<div class="ri muted">กำลังหาเพิ่มเติม…</div>':''):st.near==='wait'?'<div class="ri muted">กำลังหา'+esc(near[2])+'ที่ใกล้ที่สุด…</div>':'<div class="ri muted">'+(st.near==='fail'?'เซิร์ฟเวอร์ข้อมูลแผนที่ไม่ว่าง ลองค้นหาใหม่อีกครั้ง':'ไม่พบ'+esc(near[2])+'ในระยะ 15 กม.')+'</div>');
-      if(list.length) html+='<div class="ri hd">ชื่อที่ตรงกับ “'+esc(qn)+'”</div>'+list.slice(0,6).map(srRow).join(''); }
+      const named=list.filter(x=>x.km<60); if(named.length) html+='<div class="ri hd">ชื่อที่ตรงกับ “'+esc(qn)+'”</div>'+named.slice(0,6).map(srRow).join(''); }
     else html+=list.slice(0,12).map(srRow).join('');
     if(st.left>0&&!near) html+='<div class="ri muted">กำลังค้นหาเพิ่ม…</div>';
     if(!st.left&&!got.length&&!(near&&st.nearList.length)) html=st.fail&&!near?'<div class="ri muted">ค้นหาไม่ได้ตอนนี้ (อาจไม่มีอินเทอร์เน็ต)</div>':(near?html:'')+'<div class="ri muted">ไม่พบ “'+esc(q)+'” ลองพิมพ์สั้นลง พิมพ์ชื่ออำเภอต่อท้าย วางลิงก์ Google Maps หรือเลือกบนแผนที่</div>';
@@ -3142,7 +3142,7 @@ async function statsForget(){ const r=await stRefs(); if(r) await r.db.ref('stat
 /* =================== app updates (แจ้งอัปเดต) =================== */
 // The Android app and installed copies can keep an old page open for days, so the app asks the server for
 // version.json and offers a one-tap update that clears the saved copy and reloads.
-const APP_VERSION='2026.11.24.7', UPD={remote:null,last:0,hide:null};
+const APP_VERSION='2026.11.24.8', UPD={remote:null,last:0,hide:null};
 function verCmp(a,b){ const x=String(a).split(/[.\-]/).map(Number), y=String(b).split(/[.\-]/).map(Number); for(let i=0;i<Math.max(x.length,y.length);i++){ const d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; }
 async function updCheck(loud){ if(!loud&&Date.now()-UPD.last<10*60e3) return; UPD.last=Date.now();
   try{ const r=await fetch('./version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json();
