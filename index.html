@@ -1581,7 +1581,7 @@ function rtCatOSM(t){ const a=t.amenity, sh=t.shop;
   if(sh==='bicycle'||a==='bicycle_repair_station') return 'bike'; if(a==='hospital'||a==='clinic'||a==='doctors'||a==='pharmacy') return 'med'; return null; }
 function rtCatLongdo(tags){ tags=tags||[]; if(tags.includes('gas_station')) return 'fuel'; if(tags.includes('convenience_store')) return 'shop'; if(tags.includes('coffee_shop')) return 'cafe';
   if(tags.includes('restaurant')) return 'food'; if(tags.includes('hospital')) return 'med'; return null; }
-async function rtFetchAmen(r){
+async function rtFetchAmen(r,onPart){
   const cum=r.cum||(r.cum=cumOf(r.coords)), D=cum[cum.length-1], found=[];
   const add=(cat,name,lat,lng,src)=>{ if(!cat||!isFinite(lat)) return; const pr=rtProject(r,lat,lng); if(pr.off>300) return;
     if(found.some(f=>hav(f.lat,f.lng,lat,lng)<(srNorm(f.name)===srNorm(name)?150:30))) return; found.push({cat,name:name||RT_CAT[cat][1],lat,lng,at:pr.at,off:pr.off,src}); };
@@ -1589,20 +1589,21 @@ async function rtFetchAmen(r){
   // OpenStreetMap: everything within 300 m of the line
   const pts=rtSample(r,Math.max(300,D/220),220).map(p=>p[0].toFixed(5)+','+p[1].toFixed(5)).join(',');
   const A='(around:300,'+pts+')';
-  jobs.push(overpassQ('[out:json][timeout:40];(nwr["amenity"~"^(fuel|cafe|restaurant|fast_food|food_court|drinking_water|water_point|toilets|hospital|clinic|doctors|pharmacy|bicycle_repair_station)$"]'+A+
+  const part=p=>p.then(()=>{ if(onPart) onPart(found.slice().sort((a,b)=>a.at-b.at)); });
+  jobs.push(part(overpassQ('[out:json][timeout:40];(nwr["amenity"~"^(fuel|cafe|restaurant|fast_food|food_court|drinking_water|water_point|toilets|hospital|clinic|doctors|pharmacy|bicycle_repair_station)$"]'+A+
     ';nwr["shop"~"^(convenience|supermarket|bicycle)$"]'+A+';);out center tags 400;',45000).then(j=>{ (j.elements||[]).forEach(el=>{ const t=el.tags||{};
-      add(rtCatOSM(t),t.name||t['name:th']||t.brand,el.lat!=null?el.lat:el.center&&el.center.lat,el.lon!=null?el.lon:el.center&&el.center.lon,'osm'); }); }));
+      add(rtCatOSM(t),t.name||t['name:th']||t.brand,el.lat!=null?el.lat:el.center&&el.center.lat,el.lon!=null?el.lon:el.center&&el.center.lon,'osm'); }); })));
   // Longdo Map: better coverage of Thai petrol stations, 7-Elevens and cafés
   if(window.PK_LONGDO){ const sp=rtSample(r,2500,40); let k=0;
     const worker=async()=>{ while(k<sp.length){ const p=sp[k++];
       try{ const u='https://search.longdo.com/mapsearch/json/search?limit=30&locale=th&span=1.5km&lat='+p[0]+'&lon='+p[1]+'&tag=gas_station,convenience_store,coffee_shop,restaurant,hospital&key='+encodeURIComponent(window.PK_LONGDO);
         const j=await (await fetchT(u,{},12000)).json(); (j.data||[]).forEach(x=>{ if(!x.obsoleted) add(rtCatLongdo(x.tag),x.name,+x.lat,+x.lon,'longdo'); }); }catch(e){} } };
-    jobs.push(Promise.all([worker(),worker(),worker(),worker()])); }
+    jobs.push(part(Promise.all([worker(),worker(),worker(),worker()]))); }
   const res=await Promise.allSettled(jobs); if(res.every(x=>x.status==='rejected')) throw new Error('ไม่มีข้อมูล');
   return found.sort((a,b)=>a.at-b.at); }
 function rtEnsure(r){ const key=rtKey(r); if(!key) return;
   if(RT.key!==key){ RT.key=key; RT.amen=null; RT.state=null; RT.ele=null; RT.eleState=null; if(layers.amen) layers.amen.clearLayers(); }
-  if(!RT.state){ RT.state='loading'; const k0=key; rtFetchAmen(r).then(l=>{ if(RT.key!==k0) return; RT.amen=l; RT.state='ok'; }).catch(()=>{ if(RT.key!==k0) return; RT.state='fail'; }).finally(()=>{ if(RT.key===k0){ rtRender(r); rtDrawAmen(); } }); }
+  if(!RT.state){ RT.state='loading'; const k0=key; rtFetchAmen(r,l=>{ if(RT.key!==k0||RT.state==='ok') return; RT.amen=l; RT.state='partial'; rtRender(r); rtDrawAmen(); }).then(l=>{ if(RT.key!==k0) return; RT.amen=l; RT.state='ok'; }).catch(()=>{ if(RT.key!==k0) return; RT.state=RT.amen?'ok':'fail'; }).finally(()=>{ if(RT.key===k0){ rtRender(r); rtDrawAmen(); } }); }
   if(!RT.eleState){ const pf=plProfile(r,null); if(pf){ RT.ele=pf; RT.eleState='ok'; } else { RT.eleState='loading'; const k0=key; rtFetchEle(r).then(pf2=>{ if(RT.key!==k0) return; RT.ele=pf2; RT.eleState=pf2?'ok':'fail'; }).catch(()=>{ if(RT.key===k0) RT.eleState='fail'; }).finally(()=>{ if(RT.key===k0) rtRender(r); }); } } }
 // elevation from Open-Meteo when the routing service didn't send any (same source the ride planner uses)
 async function rtFetchEle(r){ const cum=r.cum||(r.cum=cumOf(r.coords)), D=cum[cum.length-1], step=Math.max(100,Math.ceil(D/1000/50)*50), pts=rtSample(r,step,1000), vals=[];
@@ -1614,7 +1615,8 @@ function rtExtras(r){ rtEnsure(r); rtRender(r); rtDrawAmen(); }
 function rtRender(r){ const box=$('#rtExtra'); if(!box||rtKey(r)!==RT.key) return; let h='';
   // elevation
   const pf=RT.ele;
-  if(pf){ const e=pf.e, mn=Math.min(...e), mx=Math.max(...e); let up=0, dn=0; for(let i=1;i<e.length;i++){ const d=e[i]-e[i-1]; if(d>0) up+=d; else dn-=d; }
+  if(pf){ const e=pf.e, mn=Math.min(...e), mx=Math.max(...e); let up=0, dn=0, ref=e[0]; for(let i=1;i<e.length;i++){ const d=e[i]-ref; if(d>=5){ up+=d; ref=e[i]; } else if(d<=-5){ dn-=d; ref=e[i]; } }
+    if(r.ascend!=null&&isFinite(r.ascend)){ dn=Math.max(0,dn+(r.ascend-up)); up=r.ascend; }
     const cl=plClimbs(pf).up;
     h+='<div class="rt-card"><div class="rt-h"><b>⛰ ความสูงตลอดเส้นทาง</b><small>แตะกราฟเพื่อดูตำแหน่ง</small></div>'+rtSvg(pf)+
       '<div class="rt-stats"><span>ต่ำสุด <b>'+Math.round(mn)+'</b> ม.</span><span>สูงสุด <b>'+Math.round(mx)+'</b> ม.</span><span>ขึ้นรวม <b>'+Math.round(up)+'</b> ม.</span><span>ลงรวม <b>'+Math.round(dn)+'</b> ม.</span></div>'+
@@ -1623,8 +1625,8 @@ function rtRender(r){ const box=$('#rtExtra'); if(!box||rtKey(r)!==RT.key) retur
   else if(RT.eleState==='fail') h+='<div class="rt-card"><div class="rt-h"><b>⛰ ความสูงตลอดเส้นทาง</b></div><div class="rt-sub">โหลดข้อมูลความสูงไม่ได้ตอนนี้</div></div>';
   // facilities
   h+='<div class="rt-card"><div class="rt-h"><b>🏪 สิ่งอำนวยความสะดวกตลอดเส้นทาง</b><small>ห่างเส้นทางไม่เกิน 300 ม.</small></div>';
-  if(RT.state==='loading') h+='<div class="rt-sub">กำลังค้นหาปั๊ม ร้านค้า ร้านกาแฟ ห้องน้ำ ตลอดเส้นทาง… (เส้นทางยาวอาจใช้เวลาครึ่งนาที)</div>';
-  else if(RT.state==='fail') h+='<div class="rt-sub">ค้นหาไม่ได้ตอนนี้ <button class="btn" id="rtRetry">ลองใหม่</button></div>';
+  if(RT.state==='loading'&&!RT.amen) h+='<div class="rt-sub">กำลังค้นหาปั๊ม ร้านค้า ร้านกาแฟ ห้องน้ำ ตลอดเส้นทาง… (เส้นทางยาวอาจใช้เวลาครึ่งนาที)</div>';
+  else if(RT.state==='fail'&&!RT.amen) h+='<div class="rt-sub">ค้นหาไม่ได้ตอนนี้ <button class="btn" id="rtRetry">ลองใหม่</button></div>';
   else if(RT.amen){ const A=RT.amen, cnt={}; A.forEach(x=>cnt[x.cat]=(cnt[x.cat]||0)+1);
     h+='<div class="rt-chips">'+RT_ORDER.map(c=>'<button class="rt-chip'+(RT.show.has(c)?' on':'')+'" data-rc="'+c+'" aria-pressed="'+RT.show.has(c)+'">'+RT_CAT[c][0]+' '+RT_CAT[c][1]+' <b>'+(cnt[c]||0)+'</b></button>').join('')+'</div>';
     // longest stretch without a place to buy water or food
@@ -1634,6 +1636,7 @@ function rtRender(r){ const box=$('#rtExtra'); if(!box||rtKey(r)!==RT.key) retur
     const vis=A.filter(x=>RT.show.has(x.cat));
     h+=vis.length?'<div class="rt-list">'+vis.slice(0,RT.more?400:30).map(x=>'<button class="rt-it" data-rl="'+A.indexOf(x)+'"><span class="rt-km">กม. '+(x.at/1000).toFixed(1)+'</span><span class="rt-ic">'+RT_CAT[x.cat][0]+'</span><span class="rt-nm">'+esc(x.name)+'<small>'+RT_CAT[x.cat][1]+(x.off>40?' · ห่างเส้นทาง '+Math.round(x.off/10)*10+' ม.':' · ติดเส้นทาง')+'</small></span></button>').join('')+'</div>'+
       (vis.length>30&&!RT.more?'<button class="btn" id="rtMore" style="width:100%;margin-top:6px">แสดงทั้งหมด '+vis.length+' แห่ง</button>':''):'<div class="rt-sub">'+(A.length?'เลือกประเภทด้านบนเพื่อแสดง':'ไม่พบข้อมูลสิ่งอำนวยความสะดวกใกล้เส้นทางนี้ในแผนที่')+'</div>';
+    if(RT.state==='partial') h+='<div class="rt-sub">กำลังค้นหาเพิ่มจากแหล่งข้อมูลอื่น…</div>';
     h+='<div class="rt-sub">ข้อมูลจาก OpenStreetMap และ Longdo Map อาจไม่ครบหรือร้านอาจปิดแล้ว ควรเผื่อน้ำและอาหารเสมอ</div>'; }
   h+='</div>';
   box.innerHTML=h;
@@ -3329,7 +3332,7 @@ async function statsForget(){ const r=await stRefs(); if(r) await r.db.ref('stat
 /* =================== app updates (แจ้งอัปเดต) =================== */
 // The Android app and installed copies can keep an old page open for days, so the app asks the server for
 // version.json and offers a one-tap update that clears the saved copy and reloads.
-const APP_VERSION='2026.11.24.12', UPD={remote:null,last:0,hide:null};
+const APP_VERSION='2026.11.24.13', UPD={remote:null,last:0,hide:null};
 function verCmp(a,b){ const x=String(a).split(/[.\-]/).map(Number), y=String(b).split(/[.\-]/).map(Number); for(let i=0;i<Math.max(x.length,y.length);i++){ const d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; }
 async function updCheck(loud){ if(!loud&&Date.now()-UPD.last<10*60e3) return; UPD.last=Date.now();
   try{ const r=await fetch('./version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json();
