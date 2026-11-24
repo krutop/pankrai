@@ -1158,6 +1158,7 @@ function onPos(p){
   if(!demo){ if(acc<=10) setGps('good','GPS ดีมาก (±'+Math.round(acc)+' ม.)'); else if(acc<=25) setGps('mid','GPS พอใช้ (±'+Math.round(acc)+' ม.)');
     else setGps('bad','สัญญาณ GPS อ่อน (±'+Math.round(acc)+' ม.)'); } else setGps('good','โหมดจำลอง');
   const prev=lastFix; lastFix={lat,lng,acc,t:now};
+  if(!demo&&(!onPos.saved||now-onPos.saved>120e3)){ onPos.saved=now; try{ localStorage.setItem('pk_lastpos',JSON.stringify({lat,lng,t:now})); }catch(e){} }
   updHeading(c,lat,lng,acc,now);
   setPos(MAIN,lat,lng,acc,!rideMode&&follow&&rec&&rec.state==='rec');
   rideArrow(); navCam(prev?Math.min(1000,Math.max(250,now-prev.t)):0);
@@ -1580,7 +1581,16 @@ const SR_NEAR=[[/^(ปั๊ม|ปั้ม|ปั๊มน้ำมัน|เ�
   [/^(ที่พัก|โรงแรม|รีสอร์ท|รีสอร์ต)$/,'["tourism"~"^(hotel|guest_house|motel|hostel)$"]','ที่พัก',['tourism:hotel','tourism:guest_house'],'hotel'],
   [/^(ตลาด)$/,'["amenity"="marketplace"]','ตลาด',['amenity:marketplace'],'ตลาด'],
   [/^(โรงเรียน)$/,'["amenity"="school"]','โรงเรียน',['amenity:school'],'โรงเรียน']];
-function srCenter(){ if(lastFix) return {lat:lastFix.lat,lng:lastFix.lng,me:true}; const c=MAIN?MAIN.m.getCenter():null; return c?{lat:c.lat,lng:c.lng}:{lat:13.75,lng:100.5}; }
+// where to search around: live GPS → a quick one-off position → the last place the app saw you → the map centre
+function srCenter(){ if(lastFix) return {lat:lastFix.lat,lng:lastFix.lng,me:true};
+  if(SR.pos&&Date.now()-SR.pos.t<15*60e3) return {lat:SR.pos.lat,lng:SR.pos.lng,me:true};
+  try{ const s=JSON.parse(localStorage.getItem('pk_lastpos')||'null'); if(s&&isFinite(s.lat)&&Date.now()-s.t<3*864e5) return {lat:s.lat,lng:s.lng,me:true,old:true}; }catch(e){}
+  const c=MAIN?MAIN.m.getCenter():null; return c?{lat:c.lat,lng:c.lng}:{lat:13.75,lng:100.5}; }
+function srLocate(ms){ if(lastFix||!navigator.geolocation) return Promise.resolve();
+  if(SR.pos&&Date.now()-SR.pos.t<15*60e3) return Promise.resolve();
+  return new Promise(res=>{ const t=setTimeout(res,ms||3500);
+    try{ navigator.geolocation.getCurrentPosition(p=>{ SR.pos={lat:p.coords.latitude,lng:p.coords.longitude,t:Date.now()}; try{ localStorage.setItem('pk_lastpos',JSON.stringify(SR.pos)); }catch(e){} clearTimeout(t); res(); },
+      ()=>{ clearTimeout(t); res(); },{enableHighAccuracy:false,maximumAge:600e3,timeout:ms||3500}); }catch(e){ clearTimeout(t); res(); } }); }
 function srNorm(t){ return String(t||'').toLowerCase().replace(/[\s\-_.()]/g,''); }
 function srAlias(q){ for(const [re,to] of SR_ALIAS) if(re.test(q)) return q.replace(re,to).trim(); return null; }
 function srItem(name,sub,cat,lat,lng,src){ return {name:String(name||'').trim(),sub:String(sub||'').trim(),cat:cat||'',lat:+lat,lng:+lng,src}; }
@@ -1634,10 +1644,10 @@ async function srPhotonNear(n,c){ const u='https://photon.komoot.io/api/?limit=1
 function srRank(list,q,c){ const nq=srNorm(q), seen=[];
   list.forEach(x=>{ const nn=srNorm(x.name), km=hav(c.lat,c.lng,x.lat,x.lng)/1000;
     const txt=nn===nq?4:nn.startsWith(nq)?3:nn.includes(nq)?2.4:1+1.3*srBigram(nq,nn+srNorm(x.sub));
-    x.km=km; x.score=txt+(x.src==='longdo'?0.4:0)-Math.log10(km+1)*(x.src==='near'?3:1.4); });
+    x.km=km; x.rel=txt>=2||srBigram(nq,nn)>=0.7; x.score=txt+(x.src==='longdo'?0.4:0)-Math.log10(km+1)*(x.src==='near'?3:1.4); });
   list.sort((a,b)=>b.score-a.score);
   return list.filter(x=>{ const nn=srNorm(x.name); if(seen.some(y=>hav(y.lat,y.lng,x.lat,x.lng)<(srNorm(y.name)===nn?250:20))) return false; seen.push(x); return true; }); }
-function srRow(x){ const k=lastFix?x.km:null;
+function srRow(x){ const k=SR.me?x.km:null;
   return '<button class="ri" data-lat="'+x.lat+'" data-lng="'+x.lng+'" data-name="'+esc(x.name)+'">'+esc(x.name)+(x.cat&&x.cat!==x.name?'<span class="cat">'+esc(x.cat)+'</span>':'')+
     '<small>'+esc(x.sub||'')+(k!=null?(x.sub?' · ':'')+fmtKm(k):'')+'</small></button>'; }
 function srTail(){ return '<button class="ri" data-o="me">◎ ตำแหน่งของฉัน</button><button class="ri" data-o="pick">📍 เลือกบนแผนที่</button>'; }
@@ -1647,7 +1657,7 @@ function showOpts(){ if(!act) return; const q=act.el.value.trim(), isMe=q==='ต
 // suggestions while typing (Photon only, so the free services aren't flooded)
 function srSuggest(){ clearTimeout(SR.timer); if(!act) return; const q=act.el.value.trim();
   if(q.length<2||q==='ตำแหน่งของฉัน'||srParse(q)||SR_NEAR.some(n=>n[0].test(q))){ showOpts(); return; }
-  const my=++SR.seq; SR.timer=setTimeout(async()=>{ const c=srCenter(); let list=[];
+  const my=++SR.seq; SR.timer=setTimeout(async()=>{ await srLocate(2500); const c=srCenter(); SR.me=!!c.me; let list=[];
     try{ const qa=srAlias(q); const rs=await Promise.all([srPhoton(q,c,7).catch(()=>[]),srLongdo(q,c).catch(()=>[])].concat(qa?[srPhoton(qa,c,5).catch(()=>[])]:[])); list=srRank(rs.flat(),qa||q,c).slice(0,8); }catch(e){}
     if(my!==SR.seq||!act||act.el.value.trim()!==q) return;
     resBox.innerHTML='<button class="ri" data-o="search">🔍 ค้นหาทั้งหมด “'+esc(q)+'”<small>ค้นหาจากทุกแหล่ง แสดงที่ใกล้ก่อน</small></button>'+list.map(srRow).join('')+srTail(); resBox.classList.add('show'); },350); }
@@ -1673,7 +1683,8 @@ async function doSearch(q){
   clearTimeout(SR.timer); const my=++SR.seq;
   if(!q||q==='ตำแหน่งของฉัน'){ showOpts(); return; }
   resBox.innerHTML='<div class="ri muted">กำลังค้นหา…</div>'; resBox.classList.add('show');
-  const c=srCenter(); let html='';
+  if(!lastFix) await srLocate(3500); if(my!==SR.seq) return;
+  const c=srCenter(); SR.me=!!c.me; let html='';
   // coordinates / Google Maps links
   let pp=srParse(q); if(pp&&pp.short){ resBox.innerHTML='<div class="ri muted">กำลังอ่านลิงก์ Google Maps…</div>'; pp=await srExpand(pp.short);
     if(!pp){ if(my===SR.seq&&act) resBox.innerHTML='<div class="ri muted">อ่านลิงก์นี้ไม่ได้ ลองเปิดลิงก์ใน Google Maps แล้วกดค้างที่หมุดเพื่อคัดลอกพิกัดมาวางแทน</div>'+srTail(); return; } }
@@ -1686,7 +1697,10 @@ async function doSearch(q){
       html+='<div class="ri hd">'+esc(near[2])+'ใกล้'+(c.me?'คุณ':'จุดกลางแผนที่')+' (เรียงจากใกล้ที่สุด)</div>'+
         (nb.length?nb.map(srRow).join('')+(st.near==='wait'?'<div class="ri muted">กำลังหาเพิ่มเติม…</div>':''):st.near==='wait'?'<div class="ri muted">กำลังหา'+esc(near[2])+'ที่ใกล้ที่สุด…</div>':'<div class="ri muted">'+(st.near==='fail'?'เซิร์ฟเวอร์ข้อมูลแผนที่ไม่ว่าง ลองค้นหาใหม่อีกครั้ง':'ไม่พบ'+esc(near[2])+'ในระยะ 15 กม.')+'</div>');
       const named=list.filter(x=>x.km<60); if(named.length) html+='<div class="ri hd">ชื่อที่ตรงกับ “'+esc(qn)+'”</div>'+named.slice(0,6).map(srRow).join(''); }
-    else html+=list.slice(0,12).map(srRow).join('');
+    else { const top=list.slice(0,12), rel=top.filter(x=>x.rel), nearest=rel.length?Math.min(...rel.map(x=>x.km)):0;
+      // put close matches first; when even the closest is far away, say so instead of pretending
+      if(rel.length&&!st.left&&nearest>30) html+='<div class="ri hd">ไม่พบ “'+esc(qn)+'” ในระยะ 30 กม. จาก'+(c.me?'ตำแหน่งของคุณ':'จุดกลางแผนที่')+' — ที่ใกล้ที่สุดห่าง '+fmtKm(nearest)+' (ข้อมูลแผนที่อาจยังไม่มีสาขาใกล้คุณ ลองวางลิงก์ Google Maps แทน)</div>';
+      const close=x=>x.rel&&x.km<30?0:1; html+=top.slice().sort((a,b)=>close(a)-close(b)||b.score-a.score).map(srRow).join(''); }
     if(st.left>0&&!near) html+='<div class="ri muted">กำลังค้นหาเพิ่ม…</div>';
     if(!st.left&&!got.length&&!(near&&st.nearList.length)) html=st.fail&&!near?'<div class="ri muted">ค้นหาไม่ได้ตอนนี้ (อาจไม่มีอินเทอร์เน็ต)</div>':(near?html:'')+'<div class="ri muted">ไม่พบ “'+esc(q)+'” ลองพิมพ์สั้นลง พิมพ์ชื่ออำเภอต่อท้าย วางลิงก์ Google Maps หรือเลือกบนแผนที่</div>';
     else if(!st.left) html+='<div class="ri hd">ไม่เจอที่ต้องการ? วางลิงก์ Google Maps หรือพิกัดในช่องค้นหาได้</div>';
@@ -3147,7 +3161,7 @@ async function statsForget(){ const r=await stRefs(); if(r) await r.db.ref('stat
 /* =================== app updates (แจ้งอัปเดต) =================== */
 // The Android app and installed copies can keep an old page open for days, so the app asks the server for
 // version.json and offers a one-tap update that clears the saved copy and reloads.
-const APP_VERSION='2026.11.24.9', UPD={remote:null,last:0,hide:null};
+const APP_VERSION='2026.11.24.10', UPD={remote:null,last:0,hide:null};
 function verCmp(a,b){ const x=String(a).split(/[.\-]/).map(Number), y=String(b).split(/[.\-]/).map(Number); for(let i=0;i<Math.max(x.length,y.length);i++){ const d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; }
 async function updCheck(loud){ if(!loud&&Date.now()-UPD.last<10*60e3) return; UPD.last=Date.now();
   try{ const r=await fetch('./version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json();
