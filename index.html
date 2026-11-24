@@ -737,6 +737,14 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
   .btn.sv-btn{width:100%;background:#FC5200;color:#fff;font-weight:700}
   .sv-on{display:flex;flex-direction:column;gap:2px} .sv-on small{font-size:12.5px;color:var(--muted)}
   .sv-link{color:#FC5200;font-weight:700}
+  /* ---------- update banner ---------- */
+  .updbar{position:fixed;left:10px;right:10px;top:calc(var(--sat) + 8px);z-index:975;display:none;align-items:center;gap:10px;background:#0f5b4d;color:#fff;border-radius:14px;padding:8px 8px 8px 14px;box-shadow:0 6px 20px rgba(0,0,0,.25);font-size:14.5px;font-weight:600}
+  .updbar.show{display:flex}
+  .updbar span{flex:1}
+  .updbar .btn{background:#fff;color:#0f5b4d;font-weight:700;min-height:40px;padding:0 16px}
+  .updx{width:40px;height:40px;border:0;background:transparent;color:#fff;font-size:16px}
+  body.ridemode .updbar{display:none}
+  @media (min-width:760px){ .updbar{left:auto;right:14px;width:380px} }
 </style>
 </head>
 <body>
@@ -945,11 +953,13 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
     </div>
     <div class="menu">
       <button class="mitem" data-m="donate" id="meDonate" style="display:none"><span class="mic">♥</span><span class="mt"><b>สนับสนุนค่าเซิร์ฟเวอร์</b></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
+      <button class="mitem" data-m="version"><span class="mic">🔄</span><span class="mt"><b>เวอร์ชันแอป <span id="meVer"></span></b><small>แตะเพื่อตรวจหาเวอร์ชันใหม่</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
       <button class="mitem" data-m="privacy"><span class="mic">🔒</span><span class="mt"><b>นโยบายความเป็นส่วนตัว</b></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
     </div>
   </section>
 </main>
 
+<div class="updbar" id="updBar" role="status"><span>🎉 มีเวอร์ชันใหม่ของปั่นไกล</span><button class="btn" id="updGo">อัปเดต</button><button class="updx" id="updX" aria-label="ปิดแจ้งเตือน">✕</button></div>
 <div class="planv" id="planView" role="dialog" aria-modal="true" aria-label="วางแผนการปั่น"></div>
 
 <nav class="bnav" id="bnav" aria-label="เมนูหลัก">
@@ -2986,6 +2996,29 @@ function plText(res,c,nm){ const L2=[];
   L2.push(''); L2.push('⏱ เวลาแต่ละช่วง'); res.splits.forEach(s=>L2.push('กม. '+(s.x0/1000).toFixed(0)+'–'+(s.x1/1000).toFixed(s.x1%1000?1:0)+': '+s.v.toFixed(1)+' กม./ชม. ถึง '+plClockOf(c.start,s.eta)));
   L2.push(''); L2.push('💧 น้ำ ~600 มล./ชม.'+(res.carb[1]?' · คาร์บ '+res.carb[0]+'–'+res.carb[1]+' ก./ชม.':''));
   L2.push('(ค่าประมาณจากแอปปั่นไกล)'); return L2.join('\n'); }
+/* =================== app updates (แจ้งอัปเดต) =================== */
+// The Android app and installed copies can keep an old page open for days, so the app asks the server for
+// version.json and offers a one-tap update that clears the saved copy and reloads.
+const APP_VERSION='2026.11.24.1', UPD={remote:null,last:0,hide:null};
+function verCmp(a,b){ const x=String(a).split(/[.\-]/).map(Number), y=String(b).split(/[.\-]/).map(Number); for(let i=0;i<Math.max(x.length,y.length);i++){ const d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; }
+async function updCheck(loud){ if(!loud&&Date.now()-UPD.last<10*60e3) return; UPD.last=Date.now();
+  try{ const r=await fetch('./version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json();
+    if(j&&j.version&&verCmp(j.version,APP_VERSION)>0){ UPD.remote=j; if(loud) updModal(); else updShow(); }
+    else if(loud) toast('✅ ใช้เวอร์ชันล่าสุดอยู่แล้ว ('+APP_VERSION+')'); }
+  catch(e){ if(loud) toast(navigator.onLine===false?'ไม่มีอินเทอร์เน็ต ตรวจเวอร์ชันไม่ได้':'ตรวจเวอร์ชันไม่สำเร็จ ลองใหม่อีกครั้ง'); } }
+function updShow(){ const j=UPD.remote; if(!j) return; if(UPD.hide===j.version) return; const b=$('#updBar'); if(!b) return;
+  b.classList.toggle('rec',!!(rec&&rec.state!=='stopped')); b.classList.add('show'); }
+function updModal(){ const j=UPD.remote; if(!j) return; const riding=!!rec;
+  openModal('<h3>🎉 มีเวอร์ชันใหม่</h3><div class="sub">เวอร์ชัน '+esc(j.version)+' (ที่ใช้อยู่ '+APP_VERSION+')</div>'+
+    (Array.isArray(j.notes)&&j.notes.length?'<h4>มีอะไรใหม่</h4><ul class="bc-ol">'+j.notes.slice(0,8).map(n=>'<li>'+esc(n)+'</li>').join('')+'</ul>':'')+
+    (riding?'<div class="pl-note warn">กำลังบันทึกการปั่นอยู่ — กดอัปเดตได้ แอปจะเปิดการปั่นนี้ต่อให้หลังโหลดใหม่ แต่แนะนำให้อัปเดตตอนจอดพัก</div>':'')+
+    '<div class="stack"><button class="btn pri" id="updNow">อัปเดตเลย</button><button class="btn" id="updLater">ไว้ทีหลัง</button></div>');
+  $('#updNow').onclick=updApply; $('#updLater').onclick=()=>{ closeModal(); UPD.hide=j.version; $('#updBar').classList.remove('show'); }; }
+async function updApply(){ const v=UPD.remote?UPD.remote.version:Date.now(); closeModal(); toast('⏳ กำลังอัปเดต…',8000);
+  try{ if(navigator.serviceWorker){ const reg=await navigator.serviceWorker.getRegistration(); if(reg){ await reg.update().catch(()=>{}); if(reg.waiting) reg.waiting.postMessage('skipWaiting'); } } }catch(e){}
+  try{ const ks=await caches.keys(); await Promise.all(ks.filter(k=>/^pankrai-shell/.test(k)).map(k=>caches.delete(k))); }catch(e){}
+  try{ await Promise.all(['./','./index.html','./manifest.webmanifest','./sw.js'].map(u=>fetch(u,{cache:'reload'}).catch(()=>{}))); }catch(e){}
+  location.replace(location.pathname+'?u='+encodeURIComponent(v)+location.hash); }
 /* =================== bike computers (ไมล์จักรยาน) =================== */
 // Bike computers talk only to their own brand apps, so ปั่นไกล links to them through files and Strava:
 // routes go out as GPX / TCX course files, rides come in as shared files or from Strava.
@@ -4032,6 +4065,7 @@ $('#pages').addEventListener('click',e=>{ const g=e.target.closest('[data-go]');
     else if(k==='goal') openGoal('month'); else if(k==='mymap') openMyMap(period);
     else if(k==='donate') $('#pillDonate').click();
     else if(k==='privacy') window.open('privacy.html','_blank','noopener');
+    else if(k==='version') updCheck(true);
   } });
 $('#devImport').onclick=()=>$('#fileImport').click(); $('#devSend').onclick=()=>openSendRoute(); $('#devGuide').onclick=()=>openBrandGuide();
 function sumOf(list){ return {dist:list.reduce((a,r)=>a+r.dist,0),moving:list.reduce((a,r)=>a+r.moving,0),gain:list.reduce((a,r)=>a+(r.gain||0),0),count:list.length}; }
@@ -4055,7 +4089,7 @@ function renderHome(){ const el=$('#homeSum'); if(!el) return;
     :'<div class="empty">ยังไม่มีกิจกรรม — กด ▶ เริ่มปั่น หรือนำเข้าไฟล์จากไมล์ที่หน้า อุปกรณ์</div>';
 }
 $('#homeRides').addEventListener('click',e=>{ const b=e.target.closest('[data-rid]'); if(b) openRide(b.dataset.rid); });
-function renderMe(){ if(!$('#meName')) return; $('#meName').textContent=(settings.name||'').trim()||'นักปั่น';
+function renderMe(){ if(!$('#meName')) return; const mv=$('#meVer'); if(mv) mv.textContent=APP_VERSION; $('#meName').textContent=(settings.name||'').trim()||'นักปั่น';
   const u=typeof acctUser==='function'?acctUser():null; $('#meAcct').textContent=u?'☁️ '+acctLabel(u):'ยังไม่ได้เข้าสู่ระบบ · ข้อมูลอยู่ในเครื่องนี้เท่านั้น';
   const y=new Date(); y.setMonth(0,1); y.setHours(0,0,0,0); const t=sumOf(rides.filter(r=>r.start>=y.getTime())), all=sumOf(rides);
   $('#meStat').innerHTML='<div><b>'+(t.dist/1000).toFixed(0)+'</b><small>กม. ปีนี้</small></div><div><b>'+t.count+'</b><small>ครั้ง ปีนี้</small></div><div><b>'+(all.dist/1000).toFixed(0)+'</b><small>กม. ทั้งหมด</small></div>';
@@ -4501,7 +4535,7 @@ function beaconViewer(id){
 const bMatch=location.hash.match(/^#b-([0-9a-f]{16,40})$/);
 if(bMatch){ beaconViewer(bMatch[1]); }
 else {
-render(); renderHistory(); renderGroups(); renderIncidents(); renderPresence(); renderShops(); renderDevs(); renderAvatars(); syncInputs(); setSheet('peek'); (function(){ let p='home'; try{ p=sessionStorage.getItem('pk_page')||'home'; }catch(e){} goPage(p); })(); setTimeout(()=>{ bcShared(); svCallback(); svAuto(); },600); document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') svAuto(); });
+render(); renderHistory(); renderGroups(); renderIncidents(); renderPresence(); renderShops(); renderDevs(); renderAvatars(); syncInputs(); setSheet('peek'); (function(){ let p='home'; try{ p=sessionStorage.getItem('pk_page')||'home'; }catch(e){} goPage(p); })(); setTimeout(()=>{ bcShared(); svCallback(); svAuto(); },600); setTimeout(()=>updCheck(false),2500); setInterval(()=>updCheck(false),30*60e3); document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'){ svAuto(); updCheck(false); } }); { const uq=new URLSearchParams(location.search).get('u'); if(uq!=null){ history.replaceState(null,'',location.pathname+location.hash); if(verCmp(uq,APP_VERSION)>0){ UPD.hide=uq; setTimeout(()=>toast('เซิร์ฟเวอร์ยังส่งเวอร์ชันใหม่ไม่ครบ ลองกดอัปเดตอีกครั้งในอีกไม่กี่นาที',6000),900); } else setTimeout(()=>toast('✅ อัปเดตเป็นเวอร์ชัน '+APP_VERSION+' แล้ว',4000),900); } } $('#updGo').onclick=updModal; $('#updX').onclick=()=>{ if(UPD.remote) UPD.hide=UPD.remote.version; $('#updBar').classList.remove('show'); };
 startGeo(); switchBackend();
 const live=store.get(K_LIVE,null);
 if(live&&live.start&&Array.isArray(live.segs)){
