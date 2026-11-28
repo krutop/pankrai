@@ -777,6 +777,115 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
   .rc{border:1px solid var(--line);background:#fff;border-radius:12px;padding:8px 10px;text-align:left;min-height:56px;display:flex;flex-direction:column;gap:1px}
   .rc b{font-size:14px} .rc span{font-size:13px} .rc small{font-size:11.5px;color:var(--muted)}
   .rc.on{border-color:#7c3aed;box-shadow:0 0 0 1.5px #7c3aed inset;background:#f5f3ff}
+  /* ---------- health & training ---------- */
+  .linkbtn{background:none;border:0;color:var(--pri);font:inherit;font-weight:600;padding:6px 2px;text-decoration:underline;text-underline-offset:3px;min-height:36px}
+  .chk{display:flex;align-items:center;gap:8px;font-size:14px;margin:8px 0;line-height:1.4}
+  .chk input{width:20px;height:20px;flex:none}
+  .two>.field,.two>select,.two>input{flex:1;min-width:0}
+  .pre-ride{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;width:100%;margin-top:6px}
+  .bk-pick{display:flex;align-items:center;gap:6px;font-size:14px}
+  .bk-pick select{font:inherit;border:1px solid var(--line);border-radius:10px;padding:6px 8px;background:#fff;min-height:38px;max-width:190px}
+  .rd-card .rd-top{display:flex;gap:14px;align-items:center}
+  .rd-ring{--p:50;--c:#0f766e;width:104px;height:104px;border-radius:50%;flex:none;background:conic-gradient(var(--c) calc(var(--p)*1%),#e8eeec 0);display:grid;place-items:center}
+  .rd-ring>div{width:82px;height:82px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .rd-ring b{font-size:32px;line-height:1;font-variant-numeric:tabular-nums}
+  .rd-ring small{font-size:10.5px;color:var(--muted);margin-top:2px}
+  .rd-ring.empty{background:#e8eeec}
+  .rd-side{flex:1;min-width:0}
+  .rd-lab{display:inline-block;font-weight:700;font-size:17px;margin-bottom:6px}
+  .rd-mini{display:flex;flex-direction:column;gap:3px;font-size:14px}
+  .rd-tip{font-size:13.5px;color:var(--muted);margin:10px 0 0;line-height:1.5}
+  .rd-warn{font-size:13.5px;color:#b45309;margin:10px 0 0;line-height:1.5}
+  .rd-acts{display:flex;gap:8px;margin-top:12px} .rd-acts .btn{flex:1}
+  .rd-det{margin-top:10px} .rd-det summary{color:var(--pri);font-weight:600;cursor:pointer;min-height:36px;display:flex;align-items:center}
+  .rd-sig{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+  .rd-sig small{grid-column:1/-1;color:var(--muted);font-size:12.5px}
+  .rd-sig i{grid-column:1/-1;height:5px;border-radius:3px;background:linear-gradient(90deg,#14705f var(--s),#e8eeec var(--s))}
+  .pn-h{display:flex;justify-content:space-between;align-items:center}
+  .pn-k{font-size:13px;font-weight:700;color:var(--pri)}
+  .pn-main{display:flex;justify-content:space-between;gap:10px;align-items:flex-end;margin-top:4px}
+  .pn-n{display:block;font-size:22px} .pn-main small{color:var(--muted);font-size:13px}
+  .pn-tg{text-align:right;display:flex;flex-direction:column} .pn-tg b{font-size:24px;line-height:1.1;font-variant-numeric:tabular-nums}
+  .pn-d{font-size:14px;line-height:1.55;margin:8px 0 0}
+  .pn-hr{font-size:14px;margin:6px 0 0;font-weight:600;color:#be123c}
+  .pn-chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0 4px;margin-bottom:6px}
+  .pn-chips .rt-chip{flex:none}
+  .pn-card .btn,.rd-card .btn{min-height:44px}
+  .pn-card>.btn{width:100%}
+  .gear-due{background:#fff7ed}
+  .gd-row{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px solid #fde3c7}
+  .gd-row small{color:#9a3412}
+  .hr-how{display:flex;gap:12px;align-items:center}
+  .hr-ic{width:56px;height:56px;border-radius:50%;background:#fde2e8;color:#be123c;display:grid;place-items:center;font-size:26px;flex:none}
+  .hr-steps{margin:12px 0 0;padding-left:22px;font-size:14px;line-height:1.7}
+  .hr-go{width:100%;min-height:54px;font-size:17px;background:#db2777!important;border-color:#db2777!important;margin-bottom:12px}
+  .hr-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line);font-size:13.5px}
+  .hr-row span:first-child{flex:1;color:var(--muted)}
+  .hr-live{background:#111;color:#fff;border-radius:20px;padding:16px;text-align:center;min-height:60vh;display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center}
+  .hr-live.front{background:#fff;color:#111;box-shadow:0 0 0 100vmax #fff}
+  .hr-live video{width:84px;height:84px;border-radius:50%;object-fit:cover;opacity:.85}
+  .hr-live canvas{width:100%;max-width:520px;height:110px}
+  .hr-big b{font-size:72px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1} .hr-big span{font-size:16px;margin-left:6px}
+  .hr-st{font-size:15px;min-height:22px}
+  .hr-prog{width:100%;height:8px;border-radius:4px;background:rgba(127,127,127,.25);overflow:hidden}
+  .hr-prog i{display:block;height:100%;width:0;background:#db2777;transition:width .3s}
+  .hr-res b{font-size:64px;font-weight:800;line-height:1} .hr-res span{font-size:16px;margin-left:6px;color:var(--muted)}
+  .ld-z{margin:10px 0} .ld-z>div:first-child{display:flex;align-items:baseline;gap:6px;font-size:14px} .ld-z small{color:var(--muted);font-size:12px;flex:1} .ld-z span{font-weight:700}
+  .ld-bar{position:relative;height:10px;border-radius:5px;background:#eef2f1;margin-top:6px;overflow:hidden}
+  .ld-bar em{position:absolute;top:0;bottom:0;background:#bbf7d0}
+  .ld-bar i{position:absolute;left:0;top:2px;bottom:2px;border-radius:4px}
+  .ld-leg{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:4px}
+  .ld-leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .ld-tri{display:grid;grid-template-columns:repeat(3,1fr);text-align:center;margin:6px 0 8px}
+  .ld-tri b{display:block;font-size:26px;font-variant-numeric:tabular-nums} .ld-tri small{font-size:12px;color:var(--muted)}
+  .bk-it{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:10px 0;min-height:56px}
+  .bk-ic{font-size:24px} .bk-t{flex:1;min-width:0} .bk-t b{display:block;font-size:15px} .bk-t em{font-style:normal;font-size:11px;background:#e7f2ef;color:#0f5b4d;border-radius:6px;padding:1px 6px;margin-left:4px}
+  .bk-t small{color:var(--muted);font-size:13px} .bk-due{color:#b45309;font-weight:600}
+  .pt-row{padding:8px 0;border-bottom:1px solid var(--line)} .pt-h{display:flex;justify-content:space-between;font-size:14px} .pt-h small{color:var(--muted)}
+  .pt-bar{height:8px;background:#eef2f1;border-radius:4px;margin:6px 0;overflow:hidden} .pt-bar i{display:block;height:100%;border-radius:4px}
+  .pt-a{display:flex;gap:8px;align-items:center} .pt-a small{color:var(--muted);font-size:12px}
+  .fit-sum{display:flex;gap:14px;align-items:center}
+  .fit-ctl{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;font-size:13.5px}
+  .fit-it{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line)} .fit-it b{display:block;font-size:14px} .fit-it small{font-size:13px;color:var(--muted);line-height:1.5}
+  .fit-it.bad small{color:#b91c1c} .fit-it.warn small{color:#b45309}
+  .wo-mus{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+  .wo-mus>div{display:flex;flex-direction:column;align-items:center;text-align:center;font-size:12.5px;gap:2px}
+  .wo-mus i{width:34px;height:34px;border-radius:50%;border:1px solid rgba(0,0,0,.08)} .wo-mus small{color:var(--muted);font-size:11.5px}
+  .wo-list{margin-top:8px}
+  .wo-it{display:flex;gap:12px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+  .wo-it b{display:block;font-size:15px} .wo-it em{font-style:normal;font-size:11px;background:#fef3c7;color:#92400e;border-radius:6px;padding:1px 6px;margin-left:4px} .wo-it small{color:var(--muted);font-size:13px}
+  .wo-th{width:58px;height:58px;flex:none;background:#f1f5f4;border-radius:12px}
+  .wo-play{text-align:center}
+  .wo-big{width:100%;max-width:300px;height:auto;aspect-ratio:1;background:#f1f5f4;border-radius:16px}
+  .wo-cnt b{font-size:56px;font-weight:800;font-variant-numeric:tabular-nums} .wo-cnt span{font-size:16px;margin-left:6px;color:var(--muted)}
+  .wo-cue{font-size:15px;line-height:1.55;margin:6px 0 0}
+  .sl-v{text-align:center;font-size:30px;font-weight:800;color:#7c3aed;margin:10px 0}
+  .sl-ax{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+  /* ride screen themes */
+  .rzone{margin:0 0 8px}
+  .rz-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+  .rz-bar i{font-style:normal;text-align:center;font-size:12px;font-weight:700;padding:6px 0;border-radius:8px;background:color-mix(in srgb,var(--zc) 22%,#fff);color:#334155}
+  .rz-bar i.on{background:var(--zc);color:#fff;transform:scaleY(1.15)}
+  .rz-lab{text-align:center;font-weight:700;font-size:15px;margin-top:6px}
+  .rz-msg{font-size:13px;color:#b45309;text-align:center;padding:4px 0}
+  .rz-plan{font-size:13.5px;font-weight:600;text-align:center;margin-top:6px;color:#0f5b4d}
+  #rideUI.th-dark .rcard{background:#0f1514;color:#f1f5f4}
+  #rideUI.th-dark .rmain b,#rideUI.th-dark .rrw b,#rideUI.th-dark .rmore b{color:#f8fafc}
+  #rideUI.th-dark .rmain span,#rideUI.th-dark .rrw span,#rideUI.th-dark .rmore span{color:#94a3b8}
+  #rideUI.th-dark .rrw,#rideUI.th-dark .rrw>div+div{border-color:#26302e}
+  #rideUI.th-big .rmain b{font-size:44px} #rideUI.th-big .rmain .rbig b{font-size:96px} #rideUI.th-big .rmore{display:none}
+  #rideUI.th-hr .rmain .rbig b{font-size:60px}
+  .th-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .th-card{border:1px solid var(--line);border-radius:14px;background:#fff;padding:8px;text-align:left;display:flex;flex-direction:column;gap:2px}
+  .th-card.on{border-color:#7c3aed;box-shadow:0 0 0 2px #7c3aed inset}
+  .th-card small{color:var(--muted);font-size:11.5px;line-height:1.35}
+  .th-prev{display:flex;flex-direction:column;align-items:center;justify-content:center;height:64px;border-radius:10px;background:#f8fafc;margin-bottom:4px;gap:3px}
+  .th-prev b{font-size:22px;font-style:italic;font-weight:800} .th-prev i{width:60%;height:5px;border-radius:3px;background:#cbd5e1} .th-prev em{width:40%;height:4px;border-radius:2px;background:#e2e8f0}
+  .th-dark .th-prev{background:#0f1514;color:#fff} .th-dark .th-prev i{background:#334155}
+  .th-hr .th-prev i{background:linear-gradient(90deg,#94a3b8,#38bdf8,#22c55e,#f59e0b,#ef4444)}
+  .th-big .th-prev b{font-size:30px} .th-big .th-prev em{display:none}
+  .th-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:6px} .th-slots label{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+  .th-slots select{font-size:13px;padding:6px 4px}
 </style>
 </head>
 <body>
@@ -798,6 +907,7 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
   <div class="rcard" id="rcard">
     <button class="rhandle" id="ruHandle" aria-label="ดูค่าเพิ่มเติม"><i></i></button>
     <div class="rhint" id="rcHint"></div>
+    <div class="rzone" id="ruZone" style="display:none"></div>
     <div class="rmain"><div><b class="rnum" id="ruHr">--</b><span>ชีพจร (bpm)</span></div><div class="rbig"><b class="rnum" id="ruSpd">0.0</b><span>ความเร็ว (กม./ชม.)</span></div><div><b class="rnum" id="ruCad">--</b><span>รอบขา (rpm)</span></div></div>
     <div class="rrw"><div><b class="rnum" id="ruAvg">0.0</b><span>เฉลี่ย (กม./ชม.)</span></div><div><b class="rnum" id="ruTime">0:00:00</b><span>เวลาปั่น</span></div><div><b class="rnum" id="ruDist">0.00</b><span>ระยะทาง (กม.)</span></div></div>
     <div class="rmore"><div><b class="rnum" id="ruMax">0.0</b><span>สูงสุด (กม./ชม.)</span></div><div><b class="rnum" id="ruGain">0</b><span>ไต่ระดับ (ม.)</span></div><div><b class="rnum" id="ruKcal">0</b><span>แคลอรี่*</span></div>
@@ -877,6 +987,7 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
       <button class="pill" id="pillSet" title="ตั้งค่า"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     </header>
     <div class="hcard hsum" id="homeSum"></div>
+    <div id="homeFx"></div>
     <div class="hcard">
       <h4>กิจกรรมล่าสุด <button class="mini" data-go="act">ดูทั้งหมด</button></h4>
       <div id="homeRides"></div>
@@ -950,6 +1061,10 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
       <div id="devList"></div>
     </div>
     <div class="hcard">
+      <h4>🚲 จักรยานของฉัน <small>ระยะทางและรอบดูแล</small></h4>
+      <div id="bikeBox"></div>
+    </div>
+    <div class="hcard">
       <h4>ไมล์จักรยาน / นาฬิกา</h4>
       <div class="note" style="margin-top:0">ไมล์จักรยานเชื่อมกับแอปของยี่ห้อตัวเอง ปั่นไกลจึงรับกิจกรรมเป็นไฟล์ .fit .gpx .tcx หรือผ่าน Strava และส่งเส้นทางไปนำทางบนไมล์เป็นไฟล์</div>
       <div class="bc-acts"><button class="btn" id="devImport">📥 นำเข้าไฟล์กิจกรรม</button><button class="btn" id="devSend">📤 ส่งเส้นทางไปไมล์</button></div>
@@ -976,6 +1091,9 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
     <div class="menu">
       <button class="mitem" data-m="acct"><span class="mic">👤</span><span class="mt"><b>บัญชีและการซิงก์</b><small>เข้าสู่ระบบเพื่อเก็บข้อมูลไว้ใช้ข้ามเครื่อง</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
       <button class="mitem" data-m="stats"><span class="mic">📊</span><span class="mt"><b>สถิติและสถิติส่วนตัว</b><small>ระยะทางรายสัปดาห์ รายเดือน สถิติดีที่สุด</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
+      <button class="mitem" data-m="load"><span class="mic">📈</span><span class="mt"><b>โหลดการฝึกและความพร้อม</b><small>หนักเบา ฟิต/ล้า แผนปั่นวันนี้</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
+      <button class="mitem" data-m="heart"><span class="mic">❤</span><span class="mt"><b>ข้อมูลหัวใจ</b><small>อายุ ชีพจรสูงสุด โซนชีพจร</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
+      <button class="mitem" data-m="rtheme"><span class="mic">📱</span><span class="mt"><b>หน้าจอระหว่างปั่น</b><small>ธีมและค่าที่แสดง</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
       <button class="mitem" data-m="goal" id="meGoal"><span class="mic">🎯</span><span class="mt"><b>เป้าหมายรายเดือน</b></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
       <button class="mitem" data-m="mymap"><span class="mic">🗺</span><span class="mt"><b>แผนที่การปั่นของฉัน</b><small>ทุกเส้นทางที่เคยปั่นบนแผนที่เดียว</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
       <button class="mitem" data-m="settings"><span class="mic">⚙️</span><span class="mt"><b>ตั้งค่า</b><small>หยุดอัตโนมัติ เสียงแจ้ง หน้าจอ การแสดงตัว</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
@@ -994,6 +1112,7 @@ if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostnam
 
 <div class="updbar" id="updBar" role="status"><span>🎉 มีเวอร์ชันใหม่ของปั่นไกล</span><button class="btn" id="updGo">อัปเดต</button><button class="updx" id="updX" aria-label="ปิดแจ้งเตือน">✕</button></div>
 <div class="planv" id="planView" role="dialog" aria-modal="true" aria-label="วางแผนการปั่น"></div>
+<div class="planv" id="fxView" role="dialog" aria-modal="true" aria-label="ฝึกและสุขภาพ"></div>
 
 <nav class="bnav" id="bnav" aria-label="เมนูหลัก">
   <button data-pg="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h4.5v-5.5h4V20h4.5V9.5"/></svg><span>หน้าแรก</span></button>
@@ -2169,7 +2288,7 @@ function clearLive(){ liveLines.forEach(l=>l.remove()); liveLines=[]; curLine=nu
 function newLine(){ if(!MAIN) return; curLine=L.polyline([],LINE).addTo(layers.track); liveLines.push(curLine); }
 function drawSegs(segs){ clearLive(); if(!MAIN) return; segs.forEach(s=>{ newLine(); curLine.setLatLngs(s.map(p=>[p[0],p[1]])); }); }
 function newRec(){ const now=Date.now(); return {start:now,segs:[[]],dist:0,moving:0,max:0,gain:0,altS:null,altRef:null,lastPt:null,state:'rec',autoPaused:false,slowSince:null,lastTick:now,demo:demo,hrS:0,hrN:0,hrMax:0,cadS:0,cadN:0,pwrS:0,pwrN:0,pwrMax:0}; }
-function startRide(){ R.follow=null; rec=newRec(); ruPics=0; setTimeout(()=>enterRideMode(),0); clearLive(); newLine(); follow=true; $('#btnLocate').classList.add('on');
+function startRide(){ R.follow=null; rec=newRec(); { const b=bikeActive(); if(b) rec.bike=b.id; } ruPics=0; setTimeout(()=>enterRideMode(),0); clearLive(); newLine(); follow=true; $('#btnLocate').classList.add('on');
   requestWake(); render(); saveLive(); presenceTick(true); if(isMobile()) setSheet('mid'); setTimeout(scrollToTabs,280);
   setTimeout(()=>{ if(lastFix) centerOn(lastFix.lat,lastFix.lng,Math.max(MAIN?MAIN.m.getZoom():16,16)); },320); if(!lastFix) toast('เริ่มแล้ว — กำลังรอสัญญาณ GPS'); }
 function pauseRide(){ if(!rec) return; rec.pauseAt=Date.now(); rec.state='pause'; rec.autoPaused=false; rec.slowSince=null; rec.lastPt=null; render(); saveLive(); }
@@ -2212,14 +2331,14 @@ function updateStats(){
 }
 function render(){
   const c=$('#controls');
-  if(!rec) c.innerHTML='<button class="btn pri" data-a="start">▶ เริ่มปั่น</button>';
+  if(!rec){ c.innerHTML='<button class="btn pri" data-a="start">▶ เริ่มปั่น</button><div class="pre-ride">'+bikePickHtml()+'<button class="linkbtn" data-a="theme">📱 หน้าจอระหว่างปั่น: '+RTHEMES.find(x=>x[0]===rideTheme())[1]+'</button></div>'; bikePickWire(); }
   else if(rec.state==='rec') c.innerHTML='<button class="btn" data-a="pause">❚❚ พัก</button><button class="btn red" data-a="stop">■ จบ</button><button class="btn" data-a="ui" title="เปิดหน้าจอปั่น">⛶</button>';
   else c.innerHTML='<button class="btn pri" data-a="resume">▶ ปั่นต่อ</button><button class="btn red" data-a="stop">■ จบ</button><button class="btn" data-a="ui" title="เปิดหน้าจอปั่น">⛶</button>';
   renderRideCtl();
   updateStats();
   document.body.classList.toggle('recording',!!rec); if(page==='home') renderHome();
 }
-$('#controls').addEventListener('click',e=>{ const a=e.target.closest('[data-a]'); if(!a) return; ({start:startRide,pause:pauseRide,resume:resumeRide,stop:askFinish,ui:enterRideMode})[a.dataset.a](); });
+$('#controls').addEventListener('click',e=>{ const a=e.target.closest('[data-a]'); if(!a) return; ({start:startRide,pause:pauseRide,resume:resumeRide,stop:askFinish,ui:enterRideMode,theme:openRideTheme})[a.dataset.a](); });
 function statGrid(o){ return '<div class="grid" style="margin-bottom:12px">'+
   '<div class="stat"><div class="v">'+(o.dist/1000).toFixed(2)+'</div><div class="l">กม.</div></div>'+
   '<div class="stat"><div class="v">'+fmtClock(o.moving)+'</div><div class="l">เวลาปั่น</div></div>'+
@@ -2243,6 +2362,7 @@ function saveRide(name){
   const id='r'+rec.start, end=Date.now();
   const ride=Object.assign({id,name,start:rec.start,end,dist:Math.round(rec.dist),moving:Math.round(rec.moving),elapsed:Math.round((end-rec.start)/1000),
     max:+rec.max.toFixed(1),gain:Math.round(rec.gain),kcal:Math.round(kcal(rec.dist,rec.moving,settings.weight)),demo:!!rec.demo},sensorSummary(rec));
+  if(rec.bike) ride.bike=rec.bike;
   const segs=rec.segs.filter(s=>s.length>1).map(thin);
   const r=storeRide(ride,segs); if(r===false) return false;
   if(!ride.demo) statsRide(ride.dist);
@@ -2250,13 +2370,14 @@ function saveRide(name){
   endRec(); renderHistory(); return true;
 }
 function storeRide(ride,segs){
+  if(!ride.bike&&!ride.demo){ const b=bikeActive(); if(b) ride.bike=b.id; }
   rides.unshift(ride); rides.sort((a,b)=>b.start-a.start);
   if(!store.set(K_RIDES,rides)){ rides=rides.filter(x=>x!==ride); toast('บันทึกไม่ได้ — พื้นที่ในเบราว์เซอร์เต็ม ลองลบประวัติเก่าก่อน',4000); return false; }
   if(segs.length&&!store.set(K_TRK+ride.id,segs)){ ride.noTrack=true; store.set(K_RIDES,rides); cloudPutRide(ride); return 'notrack'; }
   setTimeout(()=>segScanRide(ride,true),800); cloudPutRide(ride);
   return true;
 }
-function endRec(){ exitRideMode(true); R.follow=null; setTimeout(renderRoute,0); rec=null; store.del(K_LIVE); releaseWake(); follow=false; $('#btnLocate').classList.remove('on'); render(); presenceTick(true);
+function endRec(){ FX.activePlan=null; exitRideMode(true); R.follow=null; setTimeout(renderRoute,0); rec=null; store.del(K_LIVE); releaseWake(); follow=false; $('#btnLocate').classList.remove('on'); render(); presenceTick(true);
   if(beacon&&beacon.autoStop) stopBeacon('จบการปั่นแล้ว หยุดแชร์ตำแหน่งสดให้อัตโนมัติ'); }
 
 /* =================== sensors (Web Bluetooth) =================== */
@@ -2486,7 +2607,7 @@ const ICO={pause:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4"
   mute:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>',
   arrow:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 3 20 20l-8-4-8 4z"/></svg>'};
 let rideMode=false, arrowMk=null, ruPics=0;
-function enterRideMode(){ if(!rec) return; rideMode=true; closeModal(); document.body.classList.add('ridemode'); follow=true; $('#ruLoc').classList.add('on');
+function enterRideMode(){ if(!rec) return; rideThemeApply(); rideMode=true; closeModal(); document.body.classList.add('ridemode'); follow=true; $('#ruLoc').classList.add('on');
   setRideH(); renderRideCtl(); rideTick(Date.now()); rideArrow(); voiceBtn(); requestWake(); navBanner();
   viewBtn(); if(MAIN){ setTimeout(()=>{ MAIN.m.invalidateSize(); if(lastFix){ centerOn(lastFix.lat,lastFix.lng,Math.max(MAIN.m.getZoom(),16)); navCam(0); } },60); } }
 function exitRideMode(ended){ if(ended) hudClose(); if(!rideMode&&!ended) return; rideMode=false; document.body.classList.remove('ridemode','locked','navon'); rideArrow(); if(MAIN) camReset();
@@ -2562,11 +2683,11 @@ function rideTick(now){
     return; }
   if(!rideMode||!rec) return;
   const sv=sensorNow()||{}, r=rec;
-  $('#ruSpd').textContent=sSpd.toFixed(1); $('#ruHr').textContent=sv.hr!=null?Math.round(sv.hr):'--'; $('#ruCad').textContent=sv.cad!=null?Math.round(sv.cad):'--';
   $('#ruAvg').textContent=avgKmh(r.dist,r.moving).toFixed(1); $('#ruTime').textContent=fmtClock(r.moving); $('#ruDist').textContent=(r.dist/1000).toFixed(2);
   $('#ruMax').textContent=r.max.toFixed(1); $('#ruGain').textContent=Math.round(r.gain); $('#ruKcal').textContent=Math.round(kcal(r.dist,r.moving,settings.weight));
   $('#ruPwr').textContent=sv.pwr!=null?Math.round(sv.pwr):'--'; $('#ruEl').textContent=fmtHM((now-r.start)/1000);
   const d=new Date(now); $('#ruClock').textContent=pad(d.getHours())+':'+pad(d.getMinutes());
+  rideSlotsFill(sv,r,now);
   const g=$('#ruGps'), acc=lastFix&&now-lastFix.t<10000?lastFix.acc:null; g.className='rgps'+(acc==null?'':acc<=10?' g3':acc<=25?' g2':' g1');
   g.setAttribute('aria-label',acc==null?'ยังไม่มีสัญญาณ GPS':'GPS ±'+Math.round(acc)+' ม.');
   const hint=$('#routeHint'), rh=$('#rcHint'); const ht=R.res?hint.textContent:''; if(rh.textContent!==ht){ rh.textContent=ht; setRideH(); } rh.className='rhint'+(hint.classList.contains('off')?' off':hint.classList.contains('on')?' on':'');
@@ -3372,10 +3493,585 @@ async function statsRide(m){ const r=await stRefs(); if(!r) return; const km=Mat
   up['stats/d/'+stDay()+'/'+id+'/rides']=r.SV.increment(1); up['stats/d/'+stDay()+'/'+id+'/km']=r.SV.increment(km);
   r.db.ref().update(up).catch(e=>console.warn('stats',e)); }
 async function statsForget(){ const r=await stRefs(); if(r) await r.db.ref('stats/u/'+r.u.uid).remove().catch(()=>{}); }
+/* =================== health & training (ความพร้อม · ชีพจร · โหลด · แผนวันนี้ · จักรยาน · ท่าปั่น · เวท · ธีมหน้าจอ) =================== */
+// Everything here stays on this phone (localStorage) and is an estimate for exercise, not a medical device.
+const K_HRLOG='pk_hrlog_v1', K_SLEEP='pk_sleep_v1', K_BIKES='pk_bikes_v1', K_WO='pk_workouts_v1', K_FIT='pk_fit_v1';
+const DAY=864e5;
+function dayKey(t){ const d=new Date(t==null?Date.now():t); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function dayStart(t){ const d=new Date(t==null?Date.now():t); d.setHours(0,0,0,0); return d.getTime(); }
+function median(a){ if(!a.length) return null; const s=a.slice().sort((x,y)=>x-y), m=s.length>>1; return s.length%2?s[m]:(s[m-1]+s[m])/2; }
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+// full-screen panel shared by the new features
+function fxOpen(html,onClose){ const v=$('#fxView'); v.innerHTML='<div class="pl-wrap">'+html+'</div>'; v.classList.add('show'); v.scrollTop=0; document.body.classList.add('planon'); FX.onClose=onClose||null;
+  const x=v.querySelector('[data-fxclose]'); if(x) x.onclick=fxClose; }
+function fxClose(){ const v=$('#fxView'); if(FX.onClose){ try{ FX.onClose(); }catch(e){} FX.onClose=null; } v.classList.remove('show'); v.innerHTML=''; if(!$('#planView').classList.contains('show')) document.body.classList.remove('planon'); if(page==='home') renderHome(); }
+const FX={onClose:null};
+function fxTop(title,sub){ return '<div class="pl-top"><button class="pl-back" data-fxclose aria-label="ปิด">✕</button><div class="pl-tt"><b>'+title+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</div></div>'; }
+
+/* ---------- heart data: max HR, zones ---------- */
+function hrMaxOf(){ if(+settings.hrMax>100) return +settings.hrMax; if(+settings.age>8) return Math.round(208-0.7*settings.age); return null; }
+function hrRest(){ const l=hrLog().filter(x=>x.bpm&&x.rest!==false); const recent=l.filter(x=>x.t>Date.now()-30*DAY); return recent.length?Math.round(median(recent.slice(0,7).map(x=>x.bpm))):null; }
+const ZONES=[['Z1','ฟื้นตัว',0.5,0.6,'#94a3b8'],['Z2','แอโรบิกเบา',0.6,0.7,'#38bdf8'],['Z3','เทมโป',0.7,0.8,'#22c55e'],['Z4','เทรชโฮลด์',0.8,0.9,'#f59e0b'],['Z5','สูงสุด',0.9,1.01,'#ef4444']];
+function hrZone(bpm){ const mx=hrMaxOf(); if(!mx||!bpm) return null; const p=bpm/mx; let z=0; for(let i=0;i<ZONES.length;i++) if(p>=ZONES[i][2]) z=i; return {i:z,z:ZONES[z],pct:p}; }
+function zoneRange(i){ const mx=hrMaxOf(); if(!mx) return null; return [Math.round(ZONES[i][2]*mx),Math.round(Math.min(1,ZONES[i][3])*mx)]; }
+function openHeartSettings(after){
+  openModal('<h3>❤ ข้อมูลหัวใจ</h3><div class="sub">ใช้คำนวณโซนชีพจร โหลดการฝึก และแผนปั่น ใส่อายุอย่างเดียวก็ได้ ถ้ารู้ชีพจรสูงสุดจริง (จากการปั่นเต็มที่) ให้ใส่ช่องที่สอง</div>'+
+    '<div class="two"><div class="field"><label>อายุ (ปี)</label><input class="txt" id="hsAge" type="number" inputmode="numeric" min="10" max="99" value="'+(settings.age||'')+'"></div>'+
+    '<div class="field"><label>ชีพจรสูงสุด (ถ้ารู้)</label><input class="txt" id="hsMax" type="number" inputmode="numeric" min="120" max="230" value="'+(settings.hrMax||'')+'" placeholder="'+(settings.age?Math.round(208-0.7*settings.age):'เช่น 180')+'"></div></div>'+
+    '<div class="sub">ถ้าไม่ใส่ชีพจรสูงสุด แอปประมาณจาก 208 − 0.7 × อายุ</div>'+
+    '<div class="stack"><button class="btn pri" id="hsOk">บันทึก</button><button class="btn ghost" id="hsX">ยกเลิก</button></div>');
+  $('#hsX').onclick=closeModal;
+  $('#hsOk').onclick=()=>{ const a=+$('#hsAge').value, m=+$('#hsMax').value; settings.age=a>=10&&a<=99?a:''; settings.hrMax=m>=120&&m<=230?m:''; saveSettings(); closeModal(); toast('บันทึกข้อมูลหัวใจแล้ว'); if(after) after(); }; }
+
+/* ---------- logs ---------- */
+function hrLog(){ const v=store.get(K_HRLOG,[]); return Array.isArray(v)?v.sort((a,b)=>b.t-a.t):[]; }
+function hrLogAdd(e){ const l=hrLog(); l.unshift(e); store.set(K_HRLOG,l.slice(0,400)); }
+function sleepLog(){ const v=store.get(K_SLEEP,{}); return v&&typeof v==='object'?v:{}; }
+function sleepSet(day,h){ const s=sleepLog(); if(h==null) delete s[day]; else s[day]=h; const keys=Object.keys(s).sort(); while(keys.length>120) delete s[keys.shift()]; store.set(K_SLEEP,s); }
+function sleepToday(){ return sleepLog()[dayKey()]; }
+
+/* ---------- camera heart rate (PPG) ---------- */
+// Signal processing kept separate so it can be checked on recorded or synthetic data.
+const PPG={
+  // samples: [{t (ms), v (mean red)}] → beats per minute from autocorrelation of the cleaned signal
+  clean(s){ if(s.length<30) return null; const t=s.map(x=>x.t), v=s.map(x=>x.v), n=v.length, fs=1000*(n-1)/(t[n-1]-t[0]);
+    const w=Math.max(3,Math.round(fs*0.9)), out=new Array(n); let acc=0; const q=[];
+    // remove the slow drift (moving average over ~0.9 s), then smooth over ~0.1 s
+    for(let i=0;i<n;i++){ q.push(v[i]); acc+=v[i]; if(q.length>w) acc-=q.shift(); out[i]=v[i]-acc/q.length; }
+    const k=Math.max(1,Math.round(fs*0.08)), sm=out.map((_,i)=>{ let a=0,c=0; for(let j=i-k;j<=i+k;j++) if(j>=0&&j<n){ a+=out[j]; c++; } return -a/c; });
+    return {fs,y:sm,t}; },
+  bpm(s){ const c=PPG.clean(s); if(!c) return null; const {fs,y}=c, n=y.length; const mean=y.reduce((a,b)=>a+b,0)/n, z=y.map(x=>x-mean), e=z.reduce((a,b)=>a+b*b,0); if(!e) return null;
+    const lo=Math.floor(fs*60/200), hi=Math.ceil(fs*60/40); let best=0, bl=0; const ac=[];
+    for(let l=lo;l<=hi&&l<n-5;l++){ let a=0; for(let i=0;i+l<n;i++) a+=z[i]*z[i+l]; a/=e; ac[l]=a; if(a>best){ best=a; bl=l; } }
+    if(!bl) return null;
+    // prefer the shortest lag that is nearly as strong (avoids reading half the true rate)
+    for(let l=lo;l<bl;l++) if(ac[l]>best*0.85&&ac[l]>=(ac[l-1]||0)&&ac[l]>=(ac[l+1]||0)){ bl=l; best=ac[l]; break; }
+    let fl=bl; if(ac[bl-1]!=null&&ac[bl+1]!=null){ const a=ac[bl-1],b=ac[bl],d=ac[bl+1], den=a-2*b+d; if(den) fl=bl+0.5*(a-d)/den; }
+    return {bpm:60*fs/fl, q:best}; },
+  // beat-to-beat intervals → RMSSD (ms), only from clean stretches
+  hrv(s,bpm){ const c=PPG.clean(s); if(!c||!bpm) return null; const {fs,y,t}=c, gap=Math.round(fs*60/bpm*0.6), pk=[];
+    for(let i=2;i<y.length-2;i++){ if(y[i]>y[i-1]&&y[i]>=y[i+1]&&y[i]>y[i-2]&&y[i]>=y[i+2]){ if(pk.length&&i-pk[pk.length-1]<gap){ if(y[i]>y[pk[pk.length-1]]) pk[pk.length-1]=i; } else pk.push(i); } }
+    const ibi=[]; for(let i=1;i<pk.length;i++) ibi.push(t[pk[i]]-t[pk[i-1]]);
+    const m=60000/bpm, ok=ibi.filter(x=>Math.abs(x-m)<m*0.25); if(ok.length<20||ok.length<ibi.length*0.7) return null;
+    let a=0, c2=0; for(let i=1;i<ok.length;i++){ const d=ok[i]-ok[i-1]; if(Math.abs(d)<m*0.2){ a+=d*d; c2++; } } return c2>10?Math.sqrt(a/c2):null; }
+};
+const CAM={stream:null,raf:0,samples:[],t0:0};
+function camHrOpen(){ const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  const st={src:ios?'front':'back',mode:'hr'};
+  const draw=()=>{ fxOpen(fxTop('❤ วัดชีพจรด้วยกล้อง','ค่าประมาณเพื่อการออกกำลังกาย')+
+    '<div class="pl-card"><div class="hr-how"><span class="hr-ic">❤</span><div><b>ชีพจรตอนนี้</b><div class="pl-mute" style="margin:2px 0 0">วัดชีพจร 30 วินาที หรือ HRV 2 นาที เพื่ออัปเดตคะแนนความพร้อม</div></div></div>'+
+      '<ol class="hr-steps"><li>นั่งนิ่ง ๆ วางมือบนโต๊ะหรือตัก หายใจปกติ</li><li>'+(st.src==='back'?'ปิดกล้องหลังและไฟแฟลชด้วยปลายนิ้วชี้ กดเบา ๆ ให้มิด':'ปิดกล้องหน้าด้วยปลายนิ้ว แล้วพาดนิ้วลงบนจอ จอจะสว่างขาวเป็นไฟส่องนิ้ว')+'</li><li>ไม่พูด ไม่ขยับ จนครบเวลา</li></ol></div>'+
+    '<div class="pl-card"><b>แหล่งวัด</b><div class="seg" id="hrSrc" style="margin-top:8px"><button data-v="back"'+(st.src==='back'?' class="on"':'')+'>กล้องหลัง + แฟลช</button><button data-v="front"'+(st.src==='front'?' class="on"':'')+'>กล้องหน้า + จอสว่าง</button></div>'+
+      '<div class="pl-mute">'+(ios?'iPhone เปิดไฟแฟลชจากหน้าเว็บไม่ได้ จึงแนะนำกล้องหน้า':'Android ส่วนใหญ่เปิดแฟลชได้ ถ้าไฟไม่ติดให้เปลี่ยนเป็นกล้องหน้า')+'</div>'+
+      '<div class="seg" id="hrMode" style="margin-top:12px"><button data-v="hr"'+(st.mode==='hr'?' class="on"':'')+'>ชีพจร · 30 วินาที</button><button data-v="hrv"'+(st.mode==='hrv'?' class="on"':'')+'>HRV · 2 นาที</button></div></div>'+
+    '<button class="btn pri hr-go" id="hrGo">❤ เริ่มวัด</button>'+
+    hrHistoryHtml()+
+    '<p class="pl-mute" style="text-align:center">ค่าประมาณเพื่อการออกกำลังกาย ไม่ใช่อุปกรณ์ทางการแพทย์ · ภาพจากกล้องวิเคราะห์ในเครื่องเท่านั้น ไม่ถูกบันทึกหรือส่งออกไปไหน</p>');
+    $('#hrSrc').onclick=e=>{ const b=e.target.closest('[data-v]'); if(b){ st.src=b.dataset.v; draw(); } };
+    $('#hrMode').onclick=e=>{ const b=e.target.closest('[data-v]'); if(b){ st.mode=b.dataset.v; draw(); } };
+    $('#hrGo').onclick=()=>camHrRun(st);
+    $$('#fxView [data-hrdel]').forEach(b=>b.onclick=()=>{ const l=hrLog(); l.splice(+b.dataset.hrdel,1); store.set(K_HRLOG,l); draw(); }); };
+  draw(); }
+function hrHistoryHtml(){ const l=hrLog().slice(0,8); if(!l.length) return '';
+  return '<div class="pl-card"><b>ผลที่วัดล่าสุด</b>'+l.map((x,i)=>'<div class="hr-row"><span>'+new Date(x.t).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+'</span><b>'+x.bpm+' bpm</b><span>'+(x.hrv?'HRV '+Math.round(x.hrv)+' ms':'')+'</span><button class="mini" data-hrdel="'+i+'" aria-label="ลบผลนี้">✕</button></div>').join('')+'</div>'; }
+async function camHrRun(st){ const dur=st.mode==='hrv'?120:30;
+  fxOpen(fxTop('❤ กำลังวัดชีพจร',st.mode==='hrv'?'HRV 2 นาที':'30 วินาที')+
+    '<div class="hr-live'+(st.src==='front'?' front':'')+'" id="hrLive"><video id="hrV" playsinline muted></video><canvas id="hrWave" width="600" height="140" aria-hidden="true"></canvas>'+
+    '<div class="hr-big"><b id="hrNow">--</b><span>bpm</span></div><div class="hr-st" id="hrSt">กำลังเปิดกล้อง…</div>'+
+    '<div class="hr-prog"><i id="hrBar"></i></div><button class="btn" id="hrStop">ยกเลิก</button></div>', camHrStop);
+  $('#hrStop').onclick=()=>{ camHrStop(); camHrOpen(); };
+  const v=$('#hrV');
+  try{ CAM.stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:st.src==='back'?'environment':'user',width:{ideal:320},height:{ideal:240},frameRate:{ideal:30}}}); }
+  catch(e){ $('#hrSt').textContent='เปิดกล้องไม่ได้ — อนุญาตให้ใช้กล้องในการตั้งค่าเบราว์เซอร์ก่อน'; return; }
+  v.srcObject=CAM.stream; try{ await v.play(); }catch(e){}
+  const tr=CAM.stream.getVideoTracks()[0];
+  if(st.src==='back'){ try{ const cap=tr.getCapabilities?tr.getCapabilities():{}; if(cap.torch) await tr.applyConstraints({advanced:[{torch:true}]}); else $('#hrSt').textContent='เปิดแฟลชไม่ได้ — ลองใช้กล้องหน้า หรืออยู่ในที่สว่าง'; }catch(e){} }
+  if('wakeLock' in navigator){ try{ CAM.wl=await navigator.wakeLock.request('screen'); }catch(e){} }
+  const cv=document.createElement('canvas'); cv.width=40; cv.height=30; const cx=cv.getContext('2d',{willReadFrequently:true});
+  CAM.samples=[]; CAM.t0=0; let good=0, lastEst=0, est=null, okSince=0;
+  const wave=$('#hrWave'), wx=wave.getContext('2d');
+  const step=()=>{ if(!CAM.stream) return; CAM.raf=requestAnimationFrame(step); if(v.readyState<2) return;
+    cx.drawImage(v,0,0,40,30); const d=cx.getImageData(0,0,40,30).data; let r=0,g=0,b=0; for(let i=0;i<d.length;i+=4){ r+=d[i]; g+=d[i+1]; b+=d[i+2]; } const n=d.length/4; r/=n; g/=n; b/=n;
+    const now=performance.now(), covered=r>60&&r>g*1.25&&r>b*1.25;
+    if(!covered){ okSince=0; CAM.samples=[]; CAM.t0=0; $('#hrSt').textContent=r<25?'มืดเกินไป — '+(st.src==='back'?'ไฟแฟลชไม่ติด ลองเปลี่ยนเป็นกล้องหน้า':'ขยับนิ้วให้แสงจากจอส่องผ่าน'):'วางนิ้วให้ปิดกล้องมิด'; $('#hrBar').style.width='0%'; return; }
+    if(!okSince) okSince=now; if(now-okSince<1500){ $('#hrSt').textContent='นิ่งไว้… กำลังเริ่ม'; return; }
+    if(!CAM.t0) CAM.t0=now; CAM.samples.push({t:now,v:r});
+    const el=(now-CAM.t0)/1000; $('#hrBar').style.width=Math.min(100,el/dur*100)+'%';
+    // waveform of the last 5 s
+    const w=CAM.samples.filter(s=>now-s.t<5000); if(w.length>10){ const c=PPG.clean(w); if(c){ const y=c.y, mn=Math.min(...y), mx=Math.max(...y); wx.clearRect(0,0,600,140); wx.strokeStyle=st.src==='front'?'#be123c':'#fff'; wx.lineWidth=3; wx.beginPath();
+      y.forEach((q,i)=>{ const X=i/(y.length-1)*600, Y=130-(q-mn)/((mx-mn)||1)*120; i?wx.lineTo(X,Y):wx.moveTo(X,Y); }); wx.stroke(); } }
+    if(now-lastEst>1500&&el>6){ lastEst=now; const r8=PPG.bpm(CAM.samples.filter(s=>now-s.t<10000)); if(r8&&r8.q>0.3&&r8.bpm>38&&r8.bpm<200){ est=r8.bpm; good++; $('#hrNow').textContent=Math.round(est); $('#hrSt').textContent='สัญญาณดี — นิ่งไว้'; } else $('#hrSt').textContent='สัญญาณยังไม่นิ่ง — กดนิ้วเบา ๆ อย่าขยับ'; }
+    if(el>=dur){ const res=PPG.bpm(CAM.samples), all=CAM.samples.slice(); camHrStop();
+      if(!res||res.q<0.25||res.bpm<38||res.bpm>200){ fxOpen(fxTop('❤ วัดชีพจร')+'<div class="pl-card"><b>วัดไม่สำเร็จ</b><p class="pl-mute">สัญญาณไม่ชัดพอ ลองใหม่: นั่งนิ่ง ๆ กดนิ้วเบา ๆ ให้ปิดกล้องมิด และอย่าพูดระหว่างวัด</p></div><button class="btn pri" id="hrAgain">ลองอีกครั้ง</button>'); $('#hrAgain').onclick=camHrOpen; return; }
+      const bpm=Math.round(res.bpm), hrv=st.mode==='hrv'?PPG.hrv(all,res.bpm):null;
+      camHrResult({t:Date.now(),bpm,hrv:hrv?Math.round(hrv):null,src:'cam',q:+res.q.toFixed(2)},st.mode==='hrv'&&!hrv); } };
+  step(); }
+function camHrStop(){ cancelAnimationFrame(CAM.raf); if(CAM.stream){ CAM.stream.getTracks().forEach(t=>{ try{ t.stop(); }catch(e){} }); CAM.stream=null; } if(CAM.wl){ try{ CAM.wl.release(); }catch(e){} CAM.wl=null; } }
+function camHrResult(e,hrvFailed){ const base=median(hrLog().filter(x=>x.t>Date.now()-15*DAY).map(x=>x.bpm));
+  fxOpen(fxTop('❤ ผลการวัด')+'<div class="pl-card" style="text-align:center"><div class="hr-res"><b>'+e.bpm+'</b><span>bpm</span></div>'+
+    (e.hrv?'<div class="pl-mute">HRV (RMSSD) ประมาณ <b>'+e.hrv+' ms</b></div>':hrvFailed?'<div class="pl-mute">ได้ชีพจรแต่สัญญาณยังไม่ละเอียดพอสำหรับ HRV</div>':'')+
+    (base?'<div class="pl-mute">ค่าปกติของคุณ (15 วัน) ประมาณ '+Math.round(base)+' bpm</div>':'')+
+    '<label class="chk" style="justify-content:center;margin-top:10px"><input type="checkbox" id="hrRest" checked> เป็นชีพจรขณะพัก (ใช้คำนวณความพร้อม)</label></div>'+
+    '<div class="stack"><button class="btn pri" id="hrSave">บันทึก</button><button class="btn ghost" id="hrDrop">ไม่บันทึก</button></div>'+
+    '<p class="pl-mute" style="text-align:center">ค่าประมาณเพื่อการออกกำลังกาย ไม่ใช่อุปกรณ์ทางการแพทย์ ถ้าชีพจรผิดปกติหรือมีอาการเจ็บหน้าอก ใจสั่น เวียนหัว ควรพบแพทย์</p>');
+  $('#hrSave').onclick=()=>{ e.rest=$('#hrRest').checked; hrLogAdd(e); toast('บันทึกชีพจร '+e.bpm+' bpm แล้ว'); fxClose(); };
+  $('#hrDrop').onclick=fxClose; }
+
+/* ---------- training load ---------- */
+// Per ride: with heart-rate data, a TRIMP-style load from average HR; otherwise from how fast the ride was
+// compared with your own usual speed, plus climbing. 100 ≈ one hour of hard steady riding.
+function refSpeed(){ const l=rides.filter(r=>!r.demo&&r.moving>=1200&&r.dist>3000&&r.start>Date.now()-120*DAY).map(r=>r.dist/r.moving*3.6).sort((a,b)=>a-b);
+  return l.length>=3?l[Math.floor(l.length*0.75)]:22; }
+function rideLoad(r,ref){ const h=(r.moving||0)/3600; if(!(h>0.05)) return null;
+  const mx=hrMaxOf(), rest=hrRest()||60;
+  if(r.hrAvg&&mx&&r.hrAvg>rest){ const x=clamp((r.hrAvg-rest)/(mx-rest),0,1), trimp=h*60*x*0.64*Math.exp(1.92*x);
+    return {load:Math.round(trimp*0.6),zone:x<0.6?0:x<0.82?1:2,by:'hr',ifv:x}; }
+  const v=r.dist/r.moving*3.6, IF=clamp(v/(ref||refSpeed()),0.45,1.25);
+  return {load:Math.round(h*100*IF*IF+(r.gain||0)*0.04),zone:IF<0.85?0:IF<1.03?1:2,by:'speed',ifv:IF}; }
+function loadDays(n){ const ref=refSpeed(), from=dayStart(Date.now()-(n+42)*DAY), days={};
+  rides.forEach(r=>{ if(r.demo||r.start<from) return; const L=rideLoad(r,ref); if(!L) return; const k=dayKey(r.start); const d=days[k]||(days[k]={load:0,z:[0,0,0],rides:0}); d.load+=L.load; d.z[L.zone]+=L.load; d.rides++; });
+  (store.get(K_WO,[])||[]).forEach(w=>{ if(w.t<from) return; const k=dayKey(w.t); const d=days[k]||(days[k]={load:0,z:[0,0,0],rides:0}); d.load+=w.load||0; d.z[0]+=w.load||0; d.wo=(d.wo||0)+1; });
+  // fitness (42-day) and fatigue (7-day) as exponentially weighted averages of daily load
+  const out=[]; let ctl=0, atl=0;
+  for(let i=n+41;i>=0;i--){ const k=dayKey(Date.now()-i*DAY), d=days[k]||{load:0,z:[0,0,0],rides:0}; ctl+=(d.load-ctl)/42; atl+=(d.load-atl)/7; if(i<n) out.push(Object.assign({k,ctl,atl},d)); }
+  return out; }
+function lastHardRide(){ const ref=refSpeed(); for(const r of rides){ if(r.demo) continue; if(r.end<Date.now()-4*DAY) break; const L=rideLoad(r,ref); if(L&&L.load>=40) return {r,L}; } return null; }
+
+/* ---------- readiness ---------- */
+function readiness(){ const sig=[], log=hrLog(), now=Date.now();
+  const today=log.find(x=>x.rest!==false&&x.t>now-20*3600e3), base=log.filter(x=>x.rest!==false&&x.t<=(today?today.t-6*3600e3:now)&&x.t>now-16*DAY);
+  if(today){ const b=base.length>=3?median(base.map(x=>x.bpm)):null;
+    sig.push({k:'rhr',ic:'❤',name:'ชีพจรขณะพัก',val:today.bpm+' bpm',sub:b?(today.bpm-b>=0?'+':'')+Math.round(today.bpm-b)+' จากค่าปกติ '+Math.round(b):'ยังไม่มีค่าปกติ (วัด 3 วันขึ้นไป)',s:b?clamp(78-7*(today.bpm-b),10,100):70,w:0.3});
+    if(today.hrv){ const hb=base.filter(x=>x.hrv); const bh=hb.length>=3?median(hb.map(x=>x.hrv)):null;
+      sig.push({k:'hrv',ic:'〰',name:'HRV',val:today.hrv+' ms',sub:bh?'ค่าปกติ '+Math.round(bh)+' ms':'ยังไม่มีค่าปกติ',s:bh?clamp(75+60*Math.log(today.hrv/bh),10,100):70,w:0.25}); } }
+  const sl=sleepToday(); if(sl!=null) sig.push({k:'sleep',ic:'🛏',name:'นอน',val:fmtSleep(sl),sub:sl<6?'น้อยกว่าที่ร่างกายต้องการ':sl<7?'พอใช้':'เพียงพอ',s:clamp(20+(sl-4.5)*22,15,100),w:0.25});
+  const D=loadDays(28), last=D[D.length-1], hasRides=D.some(d=>d.load>0);
+  if(hasRides){ const acwr=last.ctl>1?last.atl/last.ctl:1; const s=acwr<0.8?85:acwr<=1.3?82-(acwr-0.8)*40:acwr<=1.6?62-(acwr-1.3)*80:30;
+    sig.push({k:'load',ic:'📈',name:'โหลด 7 วันเทียบ 6 สัปดาห์',val:'×'+acwr.toFixed(2),sub:acwr>1.3?'หนักกว่าที่ร่างกายชินเร็วเกินไป':acwr<0.8?'เบากว่าปกติ ร่างกายสดชื่น':'อยู่ในช่วงเหมาะสม',s:clamp(s,10,100),w:0.2}); }
+  const hr=lastHardRide(); let rec=null;
+  if(hr){ const need=clamp(hr.L.load*0.45,6,72), since=(now-hr.r.end)/3600e3; if(since<need) rec={left:Math.round(need-since),r:hr.r}; }
+  if(!sig.length) return {score:null,sig,rec};
+  const W=sig.reduce((a,x)=>a+x.w,0); let score=sig.reduce((a,x)=>a+x.s*x.w,0)/W;
+  if(rec) score=Math.min(score,rec.left>24?48:rec.left>10?62:75);
+  score=Math.round(score);
+  const lab=score>=75?['พร้อมเต็มที่','🚀','#16a34a']:score>=60?['ปั่นได้ตามปกติ','🙂','#0f766e']:score>=45?['ปั่นเบา','🐢','#d97706']:['ควรพัก','😴','#dc2626'];
+  return {score,lab,sig,rec,partial:sig.length<2}; }
+function fmtSleep(h){ const H=Math.floor(h), M=Math.round((h-H)*60); return H+' ชม. '+M+' น.'; }
+function openSleep(after){ const cur=sleepToday()||7.5;
+  openModal('<h3>🛏 เมื่อคืนนอนกี่ชั่วโมง</h3><div class="sub">ใช้คำนวณความพร้อมวันนี้</div><div class="sl-v" id="slV">'+fmtSleep(cur)+'</div>'+
+    '<input type="range" id="slR" min="3" max="11" step="0.25" value="'+cur+'" aria-label="ชั่วโมงนอน" style="width:100%">'+
+    '<div class="sl-ax"><span>3 ชม.</span><span>7 ชม.</span><span>11 ชม.</span></div>'+
+    '<div class="stack"><button class="btn pri" id="slOk">บันทึก</button>'+(sleepToday()!=null?'<button class="btn ghost" id="slDel">ลบค่าวันนี้</button>':'')+'<button class="btn ghost" id="slX">ยกเลิก</button></div>');
+  $('#slR').oninput=()=>{ $('#slV').textContent=fmtSleep(+$('#slR').value); };
+  $('#slX').onclick=closeModal; const d=$('#slDel'); if(d) d.onclick=()=>{ sleepSet(dayKey(),null); closeModal(); if(after) after(); };
+  $('#slOk').onclick=()=>{ sleepSet(dayKey(),+$('#slR').value); closeModal(); if(after) after(); }; }
+
+/* ---------- today's plan ---------- */
+const PLAN_TYPES={
+  rest:{n:'พัก / ยืดเหยียด',ic:'😴',z:0,min:[0,20],d:'ให้ร่างกายฟื้นตัว ยืดเหยียด 15 นาที หรือเดินเบา ๆ'},
+  rec:{n:'ปั่นฟื้นตัว',ic:'🌿',z:0,min:[20,40],d:'ปั่นเบามาก ทางเรียบ รอบขาเร็วสบาย ๆ ไม่ต้องออกแรง'},
+  easy:{n:'ปั่นสบาย',ic:'🙂',z:1,min:[45,75],d:'โซน 2 คุยได้เป็นประโยค เป็นฐานความอึดที่ทำให้ฟื้นเร็ว'},
+  long:{n:'ปั่นยาว',ic:'🛣',z:1,min:[120,180],d:'โซน 2 ยาว ๆ กินและดื่มทุก 20–30 นาที'},
+  tempo:{n:'เทมโป',ic:'💪',z:2,min:[50,70],d:'วอร์ม 15 นาที → โซน 3 2×15 นาที พัก 5 นาที → คูลดาวน์'},
+  intv:{n:'อินเทอร์วัล',ic:'⚡',z:3,min:[50,65],d:'วอร์ม 15 นาที → โซน 4 4×4 นาที พัก 3 นาที → คูลดาวน์ 10 นาที'}
+};
+function planPick(){ const R0=readiness(), D=loadDays(28), tot=D.reduce((a,d)=>a+d.load,0), z=[0,1,2].map(i=>tot?D.reduce((a,d)=>a+d.z[i],0)/tot:0);
+  const wd=new Date().getDay(), weekend=wd===0||wd===6, s=R0.score;
+  const yd=D[D.length-2], hardYesterday=yd&&yd.load>=70;
+  let k;
+  if(s==null) k=weekend?'long':'easy';
+  else if(s<45) k=R0.rec&&R0.rec.left>24?'rest':'rec';
+  else if(s<60) k='easy';
+  else if(s<75) k=z[0]<0.7&&tot>0?'easy':(hardYesterday?'easy':'tempo');
+  else k=weekend?'long':(z[2]<0.1&&!hardYesterday?'intv':'tempo');
+  return {k,R0,z,tot}; }
+function planTargets(k){ const P=PLAN_TYPES[k], ref=refSpeed(), f=[[0.6,0.72],[0.78,0.9],[0.9,1.0],[1.0,1.1]][P.z];
+  const zi=[0,1,2,3][P.z], zr=zoneRange(P.z===0?0:P.z===1?1:P.z===2?2:3);
+  return {spd:[Math.round(ref*f[0]),Math.round(ref*f[1])],hr:zr,zi:P.z===0?0:P.z===1?1:P.z===2?2:3,ref}; }
+
+/* ---------- home cards ---------- */
+function fxHome(){ const box=$('#homeFx'); if(!box) return; const R0=readiness(), pk=planPick(), k=FX.planK||pk.k, P=PLAN_TYPES[k], T=planTargets(k);
+  let h='';
+  // readiness
+  h+='<div class="hcard rd-card"><div class="rd-top">'+
+    (R0.score!=null?'<div class="rd-ring" style="--p:'+R0.score+';--c:'+R0.lab[2]+'"><div><b>'+R0.score+'</b><small>ความพร้อม</small></div></div>':'<div class="rd-ring empty"><div><b>–</b><small>ความพร้อม</small></div></div>')+
+    '<div class="rd-side">'+(R0.score!=null?'<span class="rd-lab" style="color:'+R0.lab[2]+'">'+R0.lab[1]+' '+R0.lab[0]+'</span>':'<span class="rd-lab">ยังไม่มีข้อมูลวันนี้</span>')+
+    '<div class="rd-mini"><span>❤ '+(R0.sig.find(x=>x.k==='rhr')?R0.sig.find(x=>x.k==='rhr').val:'–')+'</span><span>〰 HRV '+(R0.sig.find(x=>x.k==='hrv')?R0.sig.find(x=>x.k==='hrv').val:'–')+'</span><span>🛏 '+(sleepToday()!=null?fmtSleep(sleepToday()):'–')+'</span></div></div></div>'+
+    (R0.score==null?'<p class="rd-tip">วัดชีพจรตอนเช้าหลังตื่นนอน และกรอกชั่วโมงนอน แอปจะบอกว่าวันนี้ควรปั่นหนักหรือเบา</p>':R0.partial?'<p class="rd-tip">คิดจากข้อมูลบางส่วน — วัดชีพจรทุกเช้าเพื่อให้แม่นขึ้น</p>':'')+
+    (R0.rec&&R0.rec.left>0?'<p class="rd-warn">⏱ เวลาฟื้นตัว: ยังต้องฟื้นอีกประมาณ '+R0.rec.left+' ชม. (ปั่น '+(R0.rec.r.dist/1000).toFixed(1)+' กม. '+fmtDate(R0.rec.r.start)+')</p>':'')+
+    '<div class="rd-acts"><button class="btn" id="rdHr">❤ วัดชีพจร</button><button class="btn" id="rdSleep">🛏 '+(sleepToday()!=null?'แก้ชั่วโมงนอน':'กรอกชั่วโมงนอน')+'</button></div>'+
+    (R0.sig.length?'<details class="rd-det"><summary>ดูสัญญาณแต่ละตัว</summary>'+R0.sig.map(x=>'<div class="rd-sig"><span>'+x.ic+' '+x.name+'</span><b>'+x.val+'</b><small>'+x.sub+'</small><i style="--s:'+Math.round(x.s)+'%"></i></div>').join('')+
+      '<p class="pl-mute">ค่าประมาณเพื่อวางแผนการปั่น ไม่ใช่การวินิจฉัยทางการแพทย์</p></details>':'')+'</div>';
+  // today's plan
+  h+='<div class="hcard pn-card"><div class="pn-h"><span class="pn-k">แผนวันนี้</span>'+(FX.planK&&FX.planK!==pk.k?'<button class="mini" id="pnReset">ใช้แผนที่แนะนำ</button>':'')+'</div>'+
+    '<div class="pn-main"><div><b class="pn-n">'+P.ic+' '+P.n+'</b><small>'+(P.min[1]?P.min[0]+'–'+P.min[1]+' นาที':'')+'</small></div>'+
+    (k!=='rest'?'<div class="pn-tg"><small>ความเร็วทางเรียบ</small><b>'+T.spd[0]+'–'+T.spd[1]+'</b><small>กม./ชม.</small></div>':'')+'</div>'+
+    '<p class="pn-d">'+P.d+'</p>'+
+    (k!=='rest'?(T.hr?'<p class="pn-hr">❤ โซน '+(T.zi+1)+' · '+T.hr[0]+'–'+T.hr[1]+' bpm</p>':'<p class="pn-hr">❤ <button class="linkbtn" id="pnHrSet">ใส่อายุ</button> เพื่อดูช่วงชีพจรเป้าหมาย</p>'):'')+
+    '<p class="pl-mute" style="margin-top:4px">ความเร็วอ้างอิงจากทริปของคุณ ('+T.ref.toFixed(0)+' กม./ชม.) ปรับตามลม เนิน และการจราจร</p>'+
+    '<div class="pn-chips" role="group" aria-label="เปลี่ยนแผน">'+Object.keys(PLAN_TYPES).map(x=>'<button class="rt-chip'+(x===k?' on':'')+'" data-pk="'+x+'">'+PLAN_TYPES[x].ic+' '+PLAN_TYPES[x].n+'</button>').join('')+'</div>'+
+    (k==='rest'?'<button class="btn" id="pnWo">🧘 เปิดท่ายืดเหยียด 15 นาที</button>':'<button class="btn pri" id="pnGo">'+(rec?'⛶ กลับไปหน้าจอปั่น':'▶ เริ่มปั่นตามแผน')+'</button>')+'</div>';
+  // parts due
+  const due=bikesDue(); if(due.length) h+='<div class="hcard gear-due"><b>🔧 ถึงรอบดูแลจักรยาน</b>'+due.slice(0,3).map(d=>'<div class="gd-row"><span>'+esc(d.part.name)+' · '+esc(d.bike.name)+'</span><small>'+Math.round(d.used)+' / '+d.part.interval+' กม.</small></div>').join('')+'<button class="mini" id="gdOpen">ดูจักรยาน</button></div>';
+  // training tools
+  h+='<div class="hcard"><h4>ฝึกและสุขภาพ</h4><div class="qgrid">'+
+    '<button class="qbtn" data-fx="load"><span>📈</span><b>โหลดการฝึก</b><small>หนักเบา ฟิต/ล้า</small></button>'+
+    '<button class="qbtn" data-fx="hr"><span>❤</span><b>วัดชีพจร</b><small>กล้องมือถือ 30 วินาที</small></button>'+
+    '<button class="qbtn" data-fx="wo"><span>🏋️</span><b>เวท / ยืดเหยียด</b><small>สำหรับนักปั่น</small></button>'+
+    '<button class="qbtn" data-fx="fit"><span>🎥</span><b>วิเคราะห์ท่าปั่น</b><small>มุมเข่า ความสูงเบาะ</small></button></div></div>';
+  box.innerHTML=h;
+  $('#rdHr').onclick=camHrOpen; $('#rdSleep').onclick=()=>openSleep(fxHome);
+  $$('#homeFx [data-pk]').forEach(b=>b.onclick=()=>{ FX.planK=b.dataset.pk===pk.k?null:b.dataset.pk; fxHome(); });
+  const rs=$('#pnReset'); if(rs) rs.onclick=()=>{ FX.planK=null; fxHome(); };
+  const hs=$('#pnHrSet'); if(hs) hs.onclick=()=>openHeartSettings(fxHome);
+  const go=$('#pnGo'); if(go) go.onclick=()=>{ if(rec){ enterRideMode(); return; } FX.activePlan={k,T,t:Date.now()}; goPage('act'); startRide(); };
+  const wo=$('#pnWo'); if(wo) wo.onclick=()=>woOpen('C');
+  const gd=$('#gdOpen'); if(gd) gd.onclick=()=>goPage('dev');
+  $$('#homeFx [data-fx]').forEach(b=>b.onclick=()=>({load:loadOpen,hr:camHrOpen,wo:()=>woOpen(),fit:fitOpen})[b.dataset.fx]()); }
+
+/* ---------- load trends page ---------- */
+const LD={n:90,tab:'load'};
+function loadOpen(){ const n=LD.n, D=loadDays(n), last=D[D.length-1], tot4=loadDays(28), T=tot4.reduce((a,d)=>a+d.load,0), z=[0,1,2].map(i=>T?tot4.reduce((a,d)=>a+d.z[i],0)/T:0);
+  const byHr=rides.some(r=>r.hrAvg&&r.start>Date.now()-n*DAY)&&hrMaxOf();
+  const ZN=[['แอโรบิกต่ำ','Z1–Z2 · ฐานความอึด','#60a5fa',[0.7,0.85]],['แอโรบิกสูง','Z3–Z4 · เทมโป/เทรชโฮลด์','#1d4ed8',[0.1,0.25]],['แอนแอโรบิก','Z5 · สปีด','#db2777',[0,0.1]]];
+  const advice=!T?'ยังไม่มีทริปใน 4 สัปดาห์ — เริ่มจากปั่นสบาย 45–60 นาที สัปดาห์ละ 3 ครั้ง':z[0]<0.7?'เพิ่มปั่นสบายโซน 2 ยาว ๆ — ฐานที่ทำให้ฟื้นเร็วและอึดขึ้น':z[1]<0.1&&z[0]>0.85?'ฐานแน่นแล้ว เพิ่มเทมโปหรืออินเทอร์วัลสัปดาห์ละครั้ง':z[2]>0.12?'ปั่นหนักมากเกินไป ระวังล้าสะสม เพิ่มวันปั่นสบาย':'สัดส่วนกำลังดี ทำต่อเนื่องแบบนี้';
+  const form=last.ctl-last.atl;
+  // daily bars
+  const W=640,H=180,pl=30,pb=20,mx=Math.max(100,...D.map(d=>d.load)), bw=(W-pl-6)/D.length;
+  let bars=''; D.forEach((d,i)=>{ if(!d.load) return; let y=H-pb; const x=pl+i*bw;
+    [0,1,2].forEach(j=>{ const hgt=d.z[j]/mx*(H-pb-10); if(hgt<=0) return; y-=hgt; bars+='<rect x="'+(x+0.5).toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+Math.max(1.5,bw-1.5).toFixed(1)+'" height="'+hgt.toFixed(1)+'" fill="'+ZN[j][2]+'" rx="1"><title>'+d.k+' · โหลด '+Math.round(d.load)+'</title></rect>'; }); });
+  let ax=''; [0,0.5,1].forEach(f=>{ const v=Math.round(mx*f), y=H-pb-f*(H-pb-10); ax+='<line x1="'+pl+'" x2="'+W+'" y1="'+y+'" y2="'+y+'" stroke="#e5ece9"/><text x="0" y="'+(y+4)+'">'+v+'</text>'; });
+  const lab=[0,Math.floor(D.length/2),D.length-1].map(i=>'<text x="'+(pl+i*bw+bw/2).toFixed(1)+'" y="'+(H-4)+'" text-anchor="middle">'+D[i].k.slice(5).replace('-','/')+'</text>').join('');
+  // fitness / fatigue lines
+  const W2=640,H2=150,mx2=Math.max(20,...D.map(d=>Math.max(d.ctl,d.atl))), X=i=>pl+i*(W2-pl-6)/(D.length-1), Y=v=>H2-pb-v/mx2*(H2-pb-10);
+  const line=(k,c)=>'<path d="'+D.map((d,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(d[k]).toFixed(1)).join(' ')+'" fill="none" stroke="'+c+'" stroke-width="2.2"/>';
+  fxOpen(fxTop('📈 โหลดการฝึก','จากทริปที่บันทึกในแอป')+
+    '<div class="seg" id="ldN" style="margin-bottom:12px">'+[[30,'30 วัน'],[90,'90 วัน'],[180,'6 เดือน'],[365,'1 ปี']].map(x=>'<button data-n="'+x[0]+'"'+(x[0]===n?' class="on"':'')+'>'+x[1]+'</button>').join('')+'</div>'+
+    '<div class="pl-card"><div class="rt-h"><b>🎯 สัดส่วนความหนัก 4 สัปดาห์</b></div>'+ZN.map((q,i)=>'<div class="ld-z"><div><b>'+q[0]+'</b> <small>'+q[1]+'</small><span style="color:'+(z[i]<q[3][0]||z[i]>q[3][1]?'#c2410c':'#15803d')+'">'+Math.round(z[i]*100)+'%</span></div>'+
+      '<div class="ld-bar"><em style="left:'+q[3][0]*100+'%;width:'+(q[3][1]-q[3][0])*100+'%"></em><i style="width:'+Math.round(z[i]*100)+'%;background:'+q[2]+'"></i></div></div>').join('')+
+      '<p class="pl-mute">แถบเขียว = ช่วงที่เหมาะสม · คิดจากโหลดของแต่ละทริป '+(byHr?'(ใช้ชีพจรเฉลี่ยเมื่อมี)':'(ยังไม่มีชีพจร จึงประมาณจากความเร็วเทียบกับความเร็วปกติของคุณ)')+'</p>'+
+      '<div class="pl-note">💡 '+advice+'</div></div>'+
+    '<div class="pl-card"><div class="rt-h"><b>🔥 โหลดรายวัน</b><small>'+n+' วัน</small></div><svg viewBox="0 0 '+W+' '+H+'" class="pl-svg" role="img" aria-label="กราฟโหลดรายวัน">'+ax+bars+lab+'</svg>'+
+      '<div class="ld-leg">'+ZN.map(q=>'<span><i style="background:'+q[2]+'"></i>'+q[0]+'</span>').join('')+'</div></div>'+
+    '<div class="pl-card"><div class="rt-h"><b>⚖️ ความฟิต กับ ความล้า</b></div><div class="ld-tri"><div><b>'+Math.round(last.ctl)+'</b><small>ฟิต (42 วัน)</small></div><div><b>'+Math.round(last.atl)+'</b><small>ล้า (7 วัน)</small></div><div><b style="color:'+(form<-25?'#c2410c':form>5?'#15803d':'#0f766e')+'">'+(form>0?'+':'')+Math.round(form)+'</b><small>ฟอร์ม</small></div></div>'+
+      '<svg viewBox="0 0 '+W2+' '+H2+'" class="pl-svg" role="img" aria-label="กราฟความฟิตและความล้า">'+line('ctl','#0f766e')+line('atl','#ea580c')+'</svg><div class="ld-leg"><span><i style="background:#0f766e"></i>ฟิต</span><span><i style="background:#ea580c"></i>ล้า</span></div>'+
+      '<p class="pl-mute">ฟอร์มติดลบมาก (ต่ำกว่า −25) = ล้าสะสม ควรเบาลง · ฟอร์มบวกเล็กน้อย = สดพร้อมแข่ง</p></div>'+
+    '<div class="pl-card"><b>ข้อมูลหัวใจ</b><p class="pl-mute">'+(hrMaxOf()?'ชีพจรสูงสุด '+hrMaxOf()+' bpm':'ยังไม่ได้ใส่อายุหรือชีพจรสูงสุด')+(hrRest()?' · ชีพจรขณะพัก '+hrRest()+' bpm':'')+'</p><button class="btn" id="ldHeart">แก้ไขข้อมูลหัวใจ</button></div>');
+  $('#ldN').onclick=e=>{ const b=e.target.closest('[data-n]'); if(b){ LD.n=+b.dataset.n; loadOpen(); } };
+  $('#ldHeart').onclick=()=>openHeartSettings(loadOpen); }
+
+/* ---------- bikes & parts ---------- */
+const PART_KINDS=[['chain','โซ่',3000],['tire_f','ยางหน้า',4000],['tire_r','ยางหลัง',3000],['pads','ผ้าเบรก',2000],['cassette','เฟืองหลัง',8000],['cables','สายเบรก/สายเกียร์',5000],['service','เช็กระยะ/ล้างอัดจาระบี',2000],['tape','ผ้าพันแฮนด์',5000],['other','อื่น ๆ',3000]];
+const BIKE_TYPES=['เสือหมอบ','เสือภูเขา','ไฮบริด/ทัวริ่ง','กราเวล','พับ','ไฟฟ้า','อื่น ๆ'];
+function bikesData(){ const v=store.get(K_BIKES,null); return v&&Array.isArray(v.list)?v:{list:[],active:null}; }
+function bikesSave(b){ store.set(K_BIKES,b); if(typeof rec!=='undefined'&&!rec&&$('#controls')) render(); }
+function bikeKm(bk){ let m=0; rides.forEach(r=>{ if(r.bike===bk.id&&!r.demo) m+=r.dist||0; }); return (+bk.startKm||0)+m/1000; }
+function bikeActive(){ const b=bikesData(); return b.list.find(x=>x.id===b.active&&!x.retired)||b.list.find(x=>!x.retired)||null; }
+function bikesDue(){ const out=[]; bikesData().list.forEach(bk=>{ if(bk.retired) return; const km=bikeKm(bk); (bk.parts||[]).forEach(p=>{ const used=km-(+p.at||0); if(used>=p.interval*0.9) out.push({bike:bk,part:p,used}); }); }); return out.sort((a,b)=>b.used/b.part.interval-a.used/a.part.interval); }
+function bikesRender(){ const box=$('#bikeBox'); if(!box) return; const B=bikesData(), act=bikeActive();
+  box.innerHTML=(B.list.filter(x=>!x.retired).length?B.list.filter(x=>!x.retired).map(bk=>{ const km=bikeKm(bk), due=(bk.parts||[]).filter(p=>km-(+p.at||0)>=p.interval*0.9).length;
+    return '<button class="bk-it" data-bk="'+bk.id+'"><span class="bk-ic">🚲</span><span class="bk-t"><b>'+esc(bk.name)+(act&&act.id===bk.id?' <em>ใช้อยู่</em>':'')+'</b><small>'+esc(bk.type||'')+' · '+km.toFixed(0)+' กม.'+(due?' · <span class="bk-due">🔧 ถึงรอบ '+due+' รายการ</span>':'')+'</small></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>'; }).join(''):
+    '<div class="empty" style="padding:8px 0">ยังไม่มีจักรยาน — เพิ่มคันที่ใช้ เพื่อนับระยะทางและเตือนเปลี่ยนโซ่ ยาง ผ้าเบรก</div>')+
+    '<button class="btn" id="bkAdd" style="width:100%;margin-top:8px">+ เพิ่มจักรยาน</button>';
+  $('#bkAdd').onclick=()=>bikeEdit(null);
+  $$('#bikeBox [data-bk]').forEach(b=>b.onclick=()=>bikeOpen(b.dataset.bk)); }
+function bikeEdit(id){ const B=bikesData(), bk=id?B.list.find(x=>x.id===id):null, first=!B.list.length;
+  openModal('<h3>'+(bk?'แก้ไขจักรยาน':'เพิ่มจักรยาน')+'</h3>'+
+    '<div class="field"><label>ชื่อ *</label><input class="txt" id="bkN" maxlength="40" value="'+esc(bk?bk.name:'')+'" placeholder="เช่น เสือหมอบคันดำ"></div>'+
+    '<div class="field"><label>ประเภท</label><select class="txt" id="bkT">'+BIKE_TYPES.map(t=>'<option'+(bk&&bk.type===t?' selected':'')+'>'+t+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>ระยะทางที่ใช้ไปแล้วก่อนเริ่มนับในแอป (กม.)</label><input class="txt" id="bkS" type="number" inputmode="numeric" min="0" value="'+(bk?bk.startKm||0:0)+'"></div>'+
+    (!bk&&rides.some(r=>!r.bike&&!r.demo)?'<label class="chk"><input type="checkbox" id="bkPast"'+(first?' checked':'')+'> นับทริปเก่าที่ยังไม่ได้ระบุจักรยานให้คันนี้ ('+rides.filter(r=>!r.bike&&!r.demo).length+' ทริป)</label>':'')+
+    (!bk?'<label class="chk"><input type="checkbox" id="bkParts" checked> เพิ่มรายการดูแลพื้นฐาน (โซ่ ยาง ผ้าเบรก เช็กระยะ)</label>':'')+
+    '<div class="stack"><button class="btn pri" id="bkOk">บันทึก</button><button class="btn ghost" id="bkX">ยกเลิก</button></div>');
+  $('#bkX').onclick=closeModal;
+  $('#bkOk').onclick=()=>{ const name=$('#bkN').value.trim(); if(!name){ toast('ใส่ชื่อจักรยานก่อน'); return; } const B2=bikesData(); let b2=id?B2.list.find(x=>x.id===id):null;
+    if(!b2){ b2={id:'b'+Date.now().toString(36),parts:[],created:Date.now()}; B2.list.push(b2); if(!B2.active) B2.active=b2.id; }
+    b2.name=name; b2.type=$('#bkT').value; b2.startKm=Math.max(0,+$('#bkS').value||0);
+    const past=$('#bkPast'); if(past&&past.checked){ rides.forEach(r=>{ if(!r.bike&&!r.demo) r.bike=b2.id; }); store.set(K_RIDES,rides); }
+    const ps=$('#bkParts'); if(ps&&ps.checked){ const km=0; ['chain','tire_f','tire_r','pads','service'].forEach(k=>{ const pk=PART_KINDS.find(x=>x[0]===k); b2.parts.push({id:'p'+Math.random().toString(36).slice(2,8),kind:k,name:pk[1],interval:pk[2],at:km,since:Date.now()}); }); }
+    bikesSave(B2); closeModal(); bikesRender(); if(id) bikeOpen(id); toast('บันทึกจักรยานแล้ว'); }; }
+function bikeOpen(id){ const B=bikesData(), bk=B.list.find(x=>x.id===id); if(!bk) return; const km=bikeKm(bk), n=rides.filter(r=>r.bike===id).length;
+  openModal('<h3>🚲 '+esc(bk.name)+'</h3><div class="sub">'+esc(bk.type||'')+' · ใช้ไป '+km.toFixed(0)+' กม. · '+n+' ทริปในแอป</div>'+
+    (B.active===id?'<div class="pl-note" style="margin-top:6px">✓ คันที่ใช้อยู่ — ทริปใหม่จะนับให้คันนี้</div>':'<button class="btn" id="bkUse" style="width:100%;margin-top:6px">ใช้คันนี้ในทริปถัดไป</button>')+
+    '<h4 style="margin:14px 0 6px">รายการดูแล</h4>'+((bk.parts||[]).length?bk.parts.map((p,i)=>{ const used=km-(+p.at||0), f=clamp(used/p.interval,0,1.2);
+      return '<div class="pt-row"><div class="pt-h"><b>'+esc(p.name)+'</b><small>'+Math.round(used)+' / '+p.interval+' กม.</small></div><div class="pt-bar"><i style="width:'+Math.min(100,f*100)+'%;background:'+(f>=1?'#dc2626':f>=0.9?'#f59e0b':'#14705f')+'"></i></div>'+
+        '<div class="pt-a"><button class="mini" data-pdone="'+i+'">✓ เปลี่ยน/ทำแล้ว</button><button class="mini" data-pdel="'+i+'">ลบ</button>'+(p.last?'<small>ล่าสุด '+new Date(p.last).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'})+'</small>':'')+'</div></div>'; }).join(''):'<div class="sub">ยังไม่มีรายการ</div>')+
+    '<div class="two" style="margin-top:8px"><select class="txt" id="ptK">'+PART_KINDS.map(k=>'<option value="'+k[0]+'">'+k[1]+' ('+k[2]+' กม.)</option>').join('')+'</select><input class="txt" id="ptI" type="number" inputmode="numeric" placeholder="รอบ กม." aria-label="รอบเปลี่ยน (กม.)"></div>'+
+    '<button class="btn" id="ptAdd" style="width:100%;margin-top:6px">+ เพิ่มรายการ</button>'+
+    '<div class="stack"><button class="btn ghost" id="bkEd">แก้ไขข้อมูลจักรยาน</button><button class="btn ghost" id="bkRet">เลิกใช้คันนี้</button><button class="btn" id="bkClose">ปิด</button></div>');
+  const save=fn=>{ const B2=bikesData(), b2=B2.list.find(x=>x.id===id); fn(b2,B2); bikesSave(B2); bikeOpen(id); bikesRender(); };
+  const u=$('#bkUse'); if(u) u.onclick=()=>save((b2,B2)=>{ B2.active=id; });
+  $$('#modal [data-pdone]').forEach(b=>b.onclick=()=>save(b2=>{ const p=b2.parts[+b.dataset.pdone]; p.at=bikeKm(b2); p.last=Date.now(); }));
+  $$('#modal [data-pdel]').forEach(b=>b.onclick=()=>save(b2=>{ b2.parts.splice(+b.dataset.pdel,1); }));
+  $('#ptAdd').onclick=()=>save(b2=>{ const k=PART_KINDS.find(x=>x[0]===$('#ptK').value), iv=+$('#ptI').value>0?+$('#ptI').value:k[2]; b2.parts.push({id:'p'+Math.random().toString(36).slice(2,8),kind:k[0],name:k[1],interval:iv,at:bikeKm(b2),since:Date.now()}); });
+  $('#bkEd').onclick=()=>bikeEdit(id); $('#bkClose').onclick=closeModal;
+  $('#bkRet').onclick=()=>{ if(!confirm('เลิกใช้ '+bk.name+'? ประวัติทริปยังอยู่ครบ')) return; save((b2,B2)=>{ b2.retired=true; if(B2.active===id){ const o=B2.list.find(x=>!x.retired&&x.id!==id); B2.active=o?o.id:null; } }); closeModal(); }; }
+// small picker under the start button (like choosing shoes before a run)
+function bikePickHtml(){ const B=bikesData(), L=B.list.filter(x=>!x.retired); if(!L.length) return ''; const a=bikeActive();
+  return '<label class="bk-pick">🚲 <select id="bkSel" aria-label="จักรยานที่ใช้รอบนี้">'+L.map(b=>'<option value="'+b.id+'"'+(a&&a.id===b.id?' selected':'')+'>'+esc(b.name)+'</option>').join('')+'</select></label>'; }
+function bikePickWire(){ const s=$('#bkSel'); if(s) s.onchange=()=>{ const B=bikesData(); B.active=s.value; bikesSave(B); bikesRender(); }; }
+
+/* ---------- pedaling form (bike fit) from a side-view video ---------- */
+// Pose estimation runs in the browser (MediaPipe Pose Landmarker, downloaded once from Google's CDN); the video never leaves the phone.
+const MP_VER='0.10.14', MP_URL='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@'+MP_VER, MP_MODEL='https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task';
+const FIT={lm:null,frames:[],i:0};
+function fitOpen(){ const past=(store.get(K_FIT,[])||[]).slice(0,5);
+  fxOpen(fxTop('🎥 วิเคราะห์ท่าปั่น','มุมเข่า สะโพก ลำตัว · ความสูงเบาะ')+
+    '<div class="pl-card"><b>ถ่ายคลิปแบบนี้</b><ol class="hr-steps"><li>ตั้งจักรยานบนเทรนเนอร์ (หรือให้เพื่อนถ่ายขณะปั่นช้า ๆ ทางเรียบ)</li><li>ตั้งกล้องด้านข้าง ระดับเดียวกับสะโพก ห่าง 2–3 เมตร เห็นทั้งตัวและจักรยาน</li><li>ใส่ชุดรัดรูป ปั่นรอบขาปกติ 15–30 วินาที</li><li>ถ่ายฝั่งที่ใกล้กล้อง (ซ้ายหรือขวา) ฝั่งเดียว</li></ol>'+
+      '<div class="stack"><button class="btn pri" id="fitRec">🎥 ถ่ายคลิปตอนนี้</button><button class="btn" id="fitPick">📂 เลือกคลิปจากเครื่อง</button></div>'+
+      '<input type="file" id="fitFile" accept="video/*" hidden><input type="file" id="fitCap" accept="video/*" capture="environment" hidden>'+
+      '<p class="pl-mute">วิเคราะห์ในเครื่องนี้ ไม่อัปโหลดคลิป · ครั้งแรกต้องโหลดตัววิเคราะห์ท่าทางประมาณ 10 MB</p></div>'+
+    (past.length?'<div class="pl-card"><b>ผลครั้งก่อน</b>'+past.map(p=>'<div class="hr-row"><span>'+new Date(p.t).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'})+'</span><b>เข่าเหยียด '+p.ext+'°</b><span>'+esc(p.verdict||'')+'</span></div>').join('')+'</div>':'')+
+    '<p class="pl-mute" style="text-align:center">ผลเป็นแนวทางเบื้องต้น ถ้าเจ็บเข่า หลัง หรือชาเท้า ควรปรึกษาผู้เชี่ยวชาญ bike fit</p>');
+  $('#fitRec').onclick=()=>$('#fitCap').click(); $('#fitPick').onclick=()=>$('#fitFile').click();
+  const on=e=>{ const f=e.target.files&&e.target.files[0]; e.target.value=''; if(f) fitRun(f); };
+  $('#fitFile').onchange=on; $('#fitCap').onchange=on; }
+async function fitLoad(set){ if(FIT.lm) return FIT.lm; set('กำลังโหลดตัววิเคราะห์ท่าทาง… (ครั้งแรกเท่านั้น)');
+  const vis=await import(MP_URL+'/vision_bundle.mjs'); const fs=await vis.FilesetResolver.forVisionTasks(MP_URL+'/wasm');
+  FIT.lm=await vis.PoseLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:MP_MODEL,delegate:'GPU'},runningMode:'VIDEO',numPoses:1}).catch(()=>vis.PoseLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:MP_MODEL,delegate:'CPU'},runningMode:'VIDEO',numPoses:1}));
+  return FIT.lm; }
+function ang(a,b,c){ const v1=[a.x-b.x,a.y-b.y], v2=[c.x-b.x,c.y-b.y], d=Math.hypot(...v1)*Math.hypot(...v2); if(!d) return null; return Math.acos(clamp((v1[0]*v2[0]+v1[1]*v2[1])/d,-1,1))*180/Math.PI; }
+async function fitRun(file){
+  fxOpen(fxTop('🎥 กำลังวิเคราะห์ท่าปั่น')+'<div class="pl-card" style="text-align:center"><p id="fitSt">กำลังเตรียม…</p><div class="hr-prog"><i id="fitBar"></i></div><video id="fitV" playsinline muted style="width:100%;max-height:50vh;border-radius:12px;background:#000;margin-top:10px"></video></div>');
+  const set=t=>{ const e=$('#fitSt'); if(e) e.textContent=t; };
+  let lm; try{ lm=await fitLoad(set); }catch(e){ set('โหลดตัววิเคราะห์ไม่ได้ — ตรวจอินเทอร์เน็ตแล้วลองใหม่'); return; }
+  const v=$('#fitV'); if(!v) return; const url=URL.createObjectURL(file); v.src=url; await new Promise((res,rej)=>{ v.onloadeddata=res; v.onerror=rej; }).catch(()=>{});
+  if(!(v.duration>1)){ set('เปิดคลิปนี้ไม่ได้ ลองถ่ายใหม่เป็นไฟล์ MP4'); return; }
+  const dur=Math.min(v.duration,25), fps=12, N=Math.floor(dur*fps), frames=[];
+  set('กำลังวิเคราะห์ '+N+' ภาพ…');
+  const cv=document.createElement('canvas'), sc=Math.min(1,720/Math.max(v.videoWidth,v.videoHeight)); cv.width=Math.round(v.videoWidth*sc); cv.height=Math.round(v.videoHeight*sc); const cx=cv.getContext('2d');
+  for(let i=0;i<N;i++){ if(!$('#fitV')) return; const t=i/fps; v.currentTime=t; await new Promise(r=>{ const f=()=>{ v.removeEventListener('seeked',f); r(); }; v.addEventListener('seeked',f); setTimeout(r,1500); });
+    cx.drawImage(v,0,0,cv.width,cv.height); let res=null; try{ res=lm.detectForVideo(cv,Math.round(t*1000)+1); }catch(e){}
+    const p=res&&res.landmarks&&res.landmarks[0]; if(p) frames.push({t,p,img:null}); const bar=$('#fitBar'); if(bar) bar.style.width=Math.round((i+1)/N*100)+'%'; }
+  if(frames.length<fps*3){ set('เจอคนในคลิปน้อยเกินไป — ถ่ายด้านข้างให้เห็นทั้งตัว และปั่นอย่างน้อย 10 วินาที'); return; }
+  // the side facing the camera has the more confident landmarks
+  const vis=(f,ids)=>ids.reduce((a,i)=>a+(f.p[i].visibility||0),0), L=[11,23,25,27,31,13,15], Rr=[12,24,26,28,32,14,16];
+  const side=frames.reduce((a,f)=>a+vis(f,L)-vis(f,Rr),0)>0?L:Rr;
+  const [S,H,K,A,F,E,W]=side; const asp=cv.width/cv.height;
+  const P=(f,i)=>({x:f.p[i].x*asp,y:f.p[i].y});
+  frames.forEach(f=>{ f.knee=ang(P(f,H),P(f,K),P(f,A)); f.hip=ang(P(f,S),P(f,H),P(f,K)); f.elbow=ang(P(f,S),P(f,E),P(f,W)); f.ankle=ang(P(f,K),P(f,A),P(f,F));
+    const sh=P(f,S), hp=P(f,H); f.torso=Math.abs(Math.atan2(hp.y-sh.y,Math.abs(hp.x-sh.x))*180/Math.PI); });
+  const pct=(k,q)=>{ const a=frames.map(f=>f[k]).filter(x=>x!=null).sort((x,y)=>x-y); return a.length?a[Math.min(a.length-1,Math.floor(a.length*q))]:null; };
+  const ext=Math.round(pct('knee',0.92)), flexTop=Math.round(pct('knee',0.06)), hipMin=Math.round(pct('hip',0.06)), torso=Math.round(pct('torso',0.5)), elbow=Math.round(pct('elbow',0.5)), ankle=Math.round(pct('ankle',0.5));
+  const items=[];
+  // knee angle at the bottom of the stroke: about 140–150° (25–40° of bend) is the usual guide
+  const kd=ext>152?{lv:'bad',t:'เข่าเหยียดเกือบสุด ('+ext+'°) — เบาะน่าจะสูงไป ลองลดลงประมาณ '+Math.round((ext-148)*2.5)+' มม. แล้ววัดใหม่'}:ext<138?{lv:'bad',t:'เข่างอมากตอนลงสุด ('+ext+'°) — เบาะน่าจะต่ำไป ลองเพิ่มประมาณ '+Math.round((145-ext)*2.5)+' มม. แล้ววัดใหม่'}:ext>149||ext<141?{lv:'warn',t:'มุมเข่าตอนลงสุด '+ext+'° ใกล้ขอบช่วงที่แนะนำ (140–150°)'}:{lv:'ok',t:'มุมเข่าตอนลงสุด '+ext+'° อยู่ในช่วงที่แนะนำ (140–150°)'};
+  items.push(['ความสูงเบาะ (มุมเข่าตอนลงสุด)',kd]);
+  items.push(['เข่าตอนขึ้นสุด',flexTop<65?{lv:'warn',t:'เข่างอมาก ('+flexTop+'°) ตอนบันไดขึ้นสุด อาจเบียดสะโพก — ตรวจความสูงเบาะหรือความยาวขาจาน'}:{lv:'ok',t:'มุมเข่าตอนขึ้นสุด '+flexTop+'°'}]);
+  items.push(['มุมสะโพก',hipMin<45?{lv:'warn',t:'สะโพกปิดมาก ('+hipMin+'°) อาจหายใจลำบากหรือปวดหลัง — ลองยกแฮนด์หรือขยับเบาะ'}:{lv:'ok',t:'มุมสะโพกต่ำสุด '+hipMin+'°'}]);
+  items.push(['ลำตัว',{lv:'ok',t:'ลำตัวเอียง '+torso+'° จากแนวนอน'+(torso<30?' (ก้มมาก แบบแข่ง)':torso>55?' (ตั้งตรง แบบท่องเที่ยว)':'')}]);
+  items.push(['ข้อศอก',elbow>168?{lv:'warn',t:'แขนเหยียดตึง ('+elbow+'°) ควรงอข้อศอกเล็กน้อยเพื่อรับแรงสะเทือน'}:{lv:'ok',t:'ข้อศอกงอ '+elbow+'°'}]);
+  const good=items.filter(x=>x[1].lv==='ok').length, bad=items.filter(x=>x[1].lv==='bad').length, score=Math.round(good/items.length*100-bad*10);
+  const verdict=bad?'ควรปรับ':items.some(x=>x[1].lv==='warn')?'มีจุดที่ควรระวัง':'ท่าดี';
+  const hist=store.get(K_FIT,[])||[]; hist.unshift({t:Date.now(),ext,flexTop,hipMin,torso,elbow,verdict}); store.set(K_FIT,hist.slice(0,20));
+  // frame at the bottom of the stroke for the picture
+  let bi=0; frames.forEach((f,i)=>{ if(f.knee!=null&&Math.abs(f.knee-ext)<Math.abs((frames[bi].knee||0)-ext)) bi=i; });
+  FIT.frames=frames; FIT.i=bi; FIT.side=side; FIT.cv=cv; FIT.v=v; FIT.url=url;
+  fxOpen(fxTop('🎥 ผลท่าปั่น',new Date().toLocaleDateString('th-TH',{day:'numeric',month:'short'}))+
+    '<div class="pl-card fit-sum"><div class="rd-ring" style="--p:'+clamp(score,0,100)+';--c:'+(bad?'#dc2626':verdict==='ท่าดี'?'#16a34a':'#d97706')+'"><div><b>'+clamp(score,0,100)+'</b><small>คะแนน</small></div></div>'+
+      '<div><b style="font-size:18px">'+verdict+'</b><p class="pl-mute" style="margin:4px 0 0">ควรแก้ '+bad+' · ควรระวัง '+items.filter(x=>x[1].lv==='warn').length+' · ดี '+good+'</p>'+(bad?'<p class="rd-warn" style="margin:6px 0 0">🎯 เรื่องแรกที่ควรแก้: '+items.find(x=>x[1].lv==='bad')[0]+'</p>':'')+'</div></div>'+
+    '<div class="pl-card"><canvas id="fitC" style="width:100%;border-radius:12px;background:#000"></canvas>'+
+      '<div class="fit-ctl"><button class="btn" id="fitPrev" aria-label="ภาพก่อนหน้า">◀</button><span id="fitInfo"></span><button class="btn" id="fitNext" aria-label="ภาพถัดไป">▶</button></div>'+
+      '<div class="fit-ctl"><button class="mini" id="fitBdc">ไปจังหวะเท้าลงสุด</button><button class="mini" id="fitTdc">ไปจังหวะเท้าขึ้นสุด</button></div></div>'+
+    '<div class="pl-card"><b>ค่าที่วัดได้</b>'+items.map(x=>'<div class="fit-it '+x[1].lv+'"><span>'+(x[1].lv==='ok'?'✅':x[1].lv==='warn'?'⚠️':'🔴')+'</span><div><b>'+x[0]+'</b><small>'+x[1].t+'</small></div></div>').join('')+
+      '<p class="pl-mute">ตัวเลขประมาณจากภาพ 2 มิติ มุมกล้องที่ไม่ตั้งฉากทำให้คลาดได้ 3–5° ปรับเบาะทีละ 3–5 มม. แล้วถ่ายวัดซ้ำ</p></div>'+
+    '<button class="btn" id="fitAgain" style="width:100%">🎥 วิเคราะห์คลิปใหม่</button>', ()=>{ try{ URL.revokeObjectURL(url); }catch(e){} });
+  $('#fitAgain').onclick=fitOpen;
+  $('#fitPrev').onclick=()=>fitShow(FIT.i-1); $('#fitNext').onclick=()=>fitShow(FIT.i+1);
+  $('#fitBdc').onclick=()=>fitShow(bi);
+  $('#fitTdc').onclick=()=>{ let ti=0; frames.forEach((f,i)=>{ if(f.knee!=null&&f.knee<(frames[ti].knee||999)) ti=i; }); fitShow(ti); };
+  fitShow(bi); }
+async function fitShow(i){ const F=FIT.frames; if(!F.length) return; i=(i+F.length)%F.length; FIT.i=i; const f=F[i], v=FIT.v, c=$('#fitC'); if(!c) return;
+  v.currentTime=f.t; await new Promise(r=>{ const g=()=>{ v.removeEventListener('seeked',g); r(); }; v.addEventListener('seeked',g); setTimeout(r,800); });
+  c.width=FIT.cv.width; c.height=FIT.cv.height; const x=c.getContext('2d'); x.drawImage(v,0,0,c.width,c.height);
+  const [S,H,K,A,Fo,E,W]=FIT.side, pt=j=>[f.p[j].x*c.width,f.p[j].y*c.height];
+  x.lineWidth=Math.max(3,c.width/160); x.lineCap='round'; x.strokeStyle='#22d3ee';
+  [[S,H],[H,K],[K,A],[A,Fo],[S,E],[E,W]].forEach(([a,b])=>{ x.beginPath(); x.moveTo(...pt(a)); x.lineTo(...pt(b)); x.stroke(); });
+  x.fillStyle='#fff'; [S,H,K,A,Fo,E,W].forEach(j=>{ x.beginPath(); x.arc(...pt(j),x.lineWidth*1.3,0,7); x.fill(); });
+  const fs=Math.round(c.width/22); x.font='700 '+fs+'px system-ui,sans-serif'; x.fillStyle='#fde047'; x.strokeStyle='rgba(0,0,0,.7)'; x.lineWidth=fs/6;
+  const lab=(j,t)=>{ const p=pt(j); x.strokeText(t,p[0]+fs*0.5,p[1]); x.fillText(t,p[0]+fs*0.5,p[1]); };
+  if(f.knee!=null) lab(K,Math.round(f.knee)+'°'); if(f.hip!=null) lab(H,Math.round(f.hip)+'°');
+  const inf=$('#fitInfo'); if(inf) inf.textContent='ภาพ '+(i+1)+'/'+F.length+' · เข่า '+(f.knee!=null?Math.round(f.knee)+'°':'–'); }
+
+/* ---------- strength & stretching for cyclists ---------- */
+// Stick figures: each pose is 11 points in a 100×100 side view [head, neck, hip, knee1, foot1, knee2, foot2, elbow1, hand1, elbow2, hand2]
+const PO={
+  stand:[50,14,50,24,50,52,50,72,50,92,50,72,50,92,50,38,50,52,50,38,50,52],
+  standArms:[50,14,50,24,50,52,50,72,50,92,50,72,50,92,40,30,28,30,40,30,28,30],
+  squat:[40,36,44,44,62,66,44,70,50,92,44,70,50,92,32,46,20,46,32,46,20,46],
+  lungeUp:[50,14,50,24,50,52,42,72,34,92,58,72,68,92,50,38,50,52,50,38,50,52],
+  lungeDn:[48,28,48,38,50,62,34,64,32,92,58,86,74,92,48,52,48,62,48,52,48,62],
+  bridgeDn:[14,84,24,84,52,86,66,70,74,90,66,70,74,90,26,90,40,90,26,90,40,90],
+  bridgeUp:[16,84,26,82,52,66,66,62,74,90,66,62,74,90,26,90,40,90,26,90,40,90],
+  plank:[18,58,26,62,56,68,72,72,88,76,72,72,88,76,26,80,36,80,26,80,36,80],
+  plank2:[18,57,26,61,56,66,72,71,88,76,72,71,88,76,26,80,36,80,26,80,36,80],
+  sideplank:[20,52,28,56,58,70,74,78,90,86,74,78,90,86,28,78,28,88,34,40,40,26],
+  sldlDn:[28,40,36,42,56,50,56,72,56,92,76,46,94,42,34,56,34,68,34,56,34,68],
+  calfUp:[50,10,50,20,50,48,50,68,50,90,50,68,50,90,50,34,50,48,50,34,50,48],
+  marchUp:[50,14,50,24,50,52,38,60,40,80,50,72,50,92,42,38,40,50,58,38,60,48],
+  swing:[50,14,50,24,50,52,62,68,74,82,50,72,50,92,50,38,56,48,50,38,56,48],
+  swingB:[50,14,50,24,50,52,40,70,30,86,50,72,50,92,50,38,44,48,50,38,44,48],
+  quad:[20,50,28,54,60,56,60,76,80,78,60,76,80,78,28,66,28,78,28,66,28,78],
+  birddog:[20,50,28,54,60,56,60,76,80,78,78,56,96,54,16,52,6,50,28,66,28,78],
+  deadbug:[14,82,24,82,54,84,54,66,70,66,54,66,70,66,24,66,24,54,24,66,24,54],
+  deadbug2:[14,82,24,82,54,84,54,66,70,66,72,80,94,82,16,76,6,74,24,66,24,54],
+  prone:[16,80,26,84,56,86,74,86,90,86,74,86,90,86,14,84,4,84,14,84,4,84],
+  superman:[16,72,26,80,56,86,74,82,90,76,74,82,90,76,14,76,4,72,14,76,4,72],
+  pushUp:[16,52,24,56,56,66,72,72,88,78,72,72,88,78,24,68,24,82,24,68,24,82],
+  pushDn:[16,72,24,74,56,76,72,76,88,80,72,76,88,80,34,74,24,82,34,74,24,82],
+  clam:[14,80,24,80,52,80,64,80,72,86,64,80,72,86,24,88,36,88,24,88,36,88],
+  clamOpen:[14,80,24,80,52,80,60,62,72,86,64,80,72,86,24,88,36,88,24,88,36,88],
+  hipFlex:[48,26,48,36,50,60,34,64,30,92,62,90,80,92,48,48,52,58,48,48,52,58],
+  hipFlex2:[44,28,45,38,47,62,32,64,30,92,62,90,80,92,45,50,50,58,45,50,50,58],
+  hamSit:[52,60,46,66,30,86,54,86,76,86,54,86,76,86,56,76,72,84,56,76,72,84],
+  hamSit2:[60,70,52,74,30,86,54,86,76,86,54,86,76,86,62,80,76,86,62,80,76,86],
+  quadSt:[50,14,50,24,50,52,50,72,50,92,50,72,40,58,50,38,50,52,46,46,42,58],
+  fig4:[14,82,24,82,52,84,62,64,72,58,64,70,52,66,26,74,40,64,26,74,40,64],
+  fig4b:[14,82,24,82,52,84,58,58,66,50,60,66,48,62,26,72,40,60,26,72,40,60],
+  cat:[22,54,28,52,60,56,60,76,80,78,60,76,80,78,28,66,28,78,28,66,28,78],
+  cow:[20,46,28,58,60,56,60,76,80,78,60,76,80,78,28,68,28,78,28,68,28,78],
+  child:[22,80,30,78,60,80,48,86,70,90,48,86,70,90,16,84,6,86,16,84,6,86],
+  chest:[50,14,50,24,50,52,50,72,50,92,50,72,50,92,58,36,64,50,58,36,64,50],
+  chest2:[50,12,50,22,50,52,50,72,50,92,50,72,50,92,60,34,68,46,60,34,68,46],
+  calfSt:[30,22,34,30,48,56,40,72,40,92,56,74,66,92,22,30,12,30,22,30,12,30],
+  calfSt2:[26,24,30,32,46,56,36,72,40,92,56,74,66,92,20,32,10,32,20,32,10,32]
+};
+// exercises: name, poses, per-set amount (reps / seconds), sides, muscles, cue
+const EX={
+  march:['ย่ำเท้ายกเข่าสูง',['stand','marchUp'],{s:45},0,{legs:1},'ยกเข่าสลับ แกว่งแขน หายใจสบาย'],
+  swing:['เหวี่ยงขา',['swingB','swing'],{s:20},1,{hips:1},'จับผนังทรงตัว เหวี่ยงขาหน้า-หลังสบาย ๆ'],
+  squat:['สควอท',['standArms','squat'],{r:12},0,{legs:2,glutes:2},'สะโพกถอยหลังเหมือนนั่งเก้าอี้ เข่าไม่บิดเข้าใน'],
+  lunge:['ลันจ์ถอยหลัง',['lungeUp','lungeDn'],{r:8},1,{legs:2,glutes:2},'ก้าวถอยหลัง ลดเข่าหลังลงใกล้พื้น ลำตัวตรง'],
+  bridge:['สะพานสะโพก',['bridgeDn','bridgeUp'],{r:12},0,{glutes:2,back:1},'บีบก้น ดันสะโพกขึ้นจนลำตัวเป็นเส้นตรง ค้าง 1 วินาที'],
+  sldl:['เดดลิฟต์ขาเดียว',['stand','sldlDn'],{r:8},1,{legs:1,glutes:2,back:1},'หลังตรง พับสะโพก ขาหลังยกเป็นเส้นตรงกับลำตัว'],
+  plank:['แพลงก์',['plank','plank2'],{s:30},0,{core:2},'ลำตัวตรงจากหัวถึงเท้า เกร็งท้อง ไม่แอ่นหลัง'],
+  side:['ไซด์แพลงก์',['sideplank','sideplank'],{s:20},1,{core:2},'สะโพกยกสูง ลำตัวเป็นเส้นตรง'],
+  calf:['เขย่งปลายเท้า',['stand','calfUp'],{r:15},0,{legs:1},'ขึ้นช้า ๆ ค้างด้านบน 1 วินาที'],
+  birddog:['เบิร์ดด็อก',['quad','birddog'],{r:8},1,{core:2,back:1},'เหยียดแขนกับขาตรงข้าม ไม่บิดสะโพก'],
+  deadbug:['เดดบัก',['deadbug','deadbug2'],{r:8},1,{core:2},'หลังแนบพื้นตลอด เหยียดแขนขาตรงข้ามช้า ๆ'],
+  superman:['ซูเปอร์แมน',['prone','superman'],{r:10},0,{back:2},'ยกอกและขาพร้อมกันเบา ๆ ค้าง 2 วินาที'],
+  pushup:['วิดพื้น',['pushUp','pushDn'],{r:8},0,{upper:2,core:1},'ลำตัวตรง ถ้าหนักไปให้วางเข่า'],
+  clam:['แคลมเชลล์',['clam','clamOpen'],{r:12},1,{hips:2},'นอนตะแคง เท้าชิด เปิดเข่าขึ้นช้า ๆ สะโพกไม่หงายตาม'],
+  hipflex:['ยืดสะโพกด้านหน้า',['hipFlex','hipFlex2'],{s:30},1,{hips:1},'คุกเข่าข้างหนึ่ง ดันสะโพกไปหน้าเบา ๆ'],
+  hams:['ยืดหลังต้นขา',['hamSit','hamSit2'],{s:30},1,{legs:1},'นั่งเหยียดขา ก้มจากสะโพก หลังตรง'],
+  quadst:['ยืดต้นขาด้านหน้า',['stand','quadSt'],{s:30},1,{legs:1},'จับข้อเท้าดึงส้นเท้าเข้าหาก้น เข่าชิดกัน'],
+  fig4:['ยืดก้น (เลข 4)',['fig4','fig4b'],{s:30},1,{glutes:1,hips:1},'นอนหงาย ไขว้ข้อเท้าบนเข่า ดึงขาเข้าหาอก'],
+  catcow:['แมว-วัว',['cat','cow'],{s:40},0,{back:1},'สลับโก่งหลังและแอ่นหลังช้า ๆ ตามลมหายใจ'],
+  child:['ท่าเด็ก',['child','child'],{s:40},0,{back:1},'นั่งบนส้นเท้า ก้มยืดแขนไปด้านหน้า หายใจลึก'],
+  chest:['ยืดอกและไหล่',['chest','chest2'],{s:30},0,{upper:1},'ประสานมือด้านหลัง ยกอก ดึงไหล่ไปด้านหลัง'],
+  calfst:['ยืดน่อง',['calfSt','calfSt2'],{s:30},1,{legs:1},'ดันผนัง ส้นเท้าหลังติดพื้น ขาหลังตรง']
+};
+const WO_SESS={
+  A:{n:'ขาแข็งแรง + แกนกลาง',warm:['march','swing'],main:['squat','lunge','bridge','sldl','plank','side','calf'],cool:['hipflex','quadst']},
+  B:{n:'สะโพก หลัง และไหล่',warm:['march','swing'],main:['clam','birddog','superman','deadbug','pushup','bridge','side'],cool:['catcow','chest']},
+  C:{n:'ยืดเหยียดหลังปั่น',warm:[],main:['hipflex','quadst','hams','fig4','calfst','catcow','child','chest'],cool:[]}
+};
+const MUSCLE_N={legs:'ต้นขา/น่อง',glutes:'ก้น',hips:'สะโพก',core:'แกนกลาง',back:'หลัง',upper:'อก/ไหล่/แขน'};
+const WO={sess:'A',min:30};
+function woBuild(sid,min){ const S=WO_SESS[sid], stretch=sid==='C', sets=stretch?1:min<=20?2:min<=30?3:4, list=[];
+  S.warm.forEach(k=>list.push({k,sets:1,tag:'วอร์ม'}));
+  let main=S.main.slice(); if(!stretch&&min<=20) main=main.slice(0,5); if(stretch&&min<=15) main=main.slice(0,6);
+  main.forEach(k=>list.push({k,sets:stretch?(min>=25?2:1):sets,tag:stretch?'ยืด':''}));
+  S.cool.forEach(k=>list.push({k,sets:1,tag:'คูลดาวน์'}));
+  const est=Math.round(list.reduce((a,x)=>{ const e=EX[x.k][2], per=(e.s||e.r*3)*(EX[x.k][3]?2:1); return a+x.sets*per+(x.sets-1)*(stretch?10:60)+20; },0)/60);
+  return {list,est,sets}; }
+function poseSvg(name,cls){ const p=PO[name]; return '<svg viewBox="0 0 100 100" class="'+(cls||'wo-fig')+'" aria-hidden="true">'+figPaths(p)+'</svg>'; }
+function figPaths(p){ const pt=i=>p[i*2].toFixed(1)+','+p[i*2+1].toFixed(1);
+  const L=(a,b,c,w,col)=>'<polyline points="'+pt(a)+' '+pt(b)+(c!=null?' '+pt(c):'')+'" fill="none" stroke="'+col+'" stroke-width="'+w+'" stroke-linecap="round" stroke-linejoin="round"/>';
+  return '<line x1="2" x2="98" y1="93.5" y2="93.5" stroke="#cbd5d1" stroke-width="1.2"/>'+L(2,5,6,4.6,'#93c5fd')+L(1,9,10,4,'#93c5fd')+L(1,2,null,5,'#0f172a')+L(2,3,4,4.6,'#0e7490')+L(1,7,8,4,'#0e7490')+'<circle cx="'+p[0]+'" cy="'+p[1]+'" r="6" fill="#0f172a"/>'; }
+function woWeek(){ const w=(store.get(K_WO,[])||[]).filter(x=>x.t>dayStart()-((new Date().getDay()+6)%7)*DAY), m={}; w.forEach(x=>Object.entries(x.muscles||{}).forEach(([k,v])=>m[k]=(m[k]||0)+v)); return {list:w,m}; }
+function woOpen(sid){ if(sid) WO.sess=sid; const S=WO_SESS[WO.sess], B=woBuild(WO.sess,WO.min), wk=woWeek();
+  const lv=v=>!v?['ไม่ได้ใช้','#e2e8f0']:v<=4?['เบา','#fde047']:v<=10?['ปานกลาง','#fb923c']:v<=18?['หนัก','#ef4444']:['หนักมาก','#9f1239'];
+  fxOpen(fxTop('🏋️ เวท / ยืดเหยียดสำหรับนักปั่น','ใช้น้ำหนักตัว ไม่ต้องมีอุปกรณ์')+
+    '<div class="pl-card"><b>กล้ามเนื้อที่ฝึกสัปดาห์นี้</b><div class="wo-mus">'+Object.keys(MUSCLE_N).map(k=>{ const L0=lv(wk.m[k]||0); return '<div><i style="background:'+L0[1]+'"></i><span>'+MUSCLE_N[k]+'</span><small>'+L0[0]+'</small></div>'; }).join('')+'</div>'+
+      '<p class="pl-mute">'+(wk.list.length?'ฝึกไป '+wk.list.length+' ครั้ง รวม '+wk.list.reduce((a,x)=>a+(x.min||0),0)+' นาที':'ยังไม่ได้ฝึกในแอปสัปดาห์นี้ · นักปั่นแนะนำเวท 2 ครั้ง/สัปดาห์ และยืดหลังปั่นทุกครั้ง')+'</p></div>'+
+    '<div class="pl-card"><div class="pn-h"><span class="pn-k">เซสชัน</span></div><div class="seg" id="woS">'+Object.keys(WO_SESS).map(k=>'<button data-s="'+k+'"'+(k===WO.sess?' class="on"':'')+'>'+(k==='C'?'ยืดเหยียด':'เวท '+k)+'</button>').join('')+'</div>'+
+      '<h3 style="margin:12px 0 2px">'+S.n+'</h3><p class="pl-mute" style="margin:0">≈ '+B.est+' นาที · '+B.list.length+' ท่า</p>'+
+      '<div class="pn-chips" id="woMin">'+(WO.sess==='C'?[10,15,20,25]:[20,25,30,35,45]).map(m=>'<button class="rt-chip'+(m===WO.min?' on':'')+'" data-m="'+m+'">'+m+' นาที</button>').join('')+'</div>'+
+      '<div class="wo-list">'+B.list.map((x,i)=>{ const E=EX[x.k], e=E[2]; return '<div class="wo-it">'+poseSvg(E[1][1],'wo-th')+'<div><b>'+E[0]+(x.tag?' <em>'+x.tag+'</em>':'')+'</b><small>'+(x.sets>1?x.sets+' เซ็ต × ':'')+(e.r?e.r+' ครั้ง':e.s+' วิ')+(E[3]?'/ข้าง':'')+'</small></div></div>'; }).join('')+'</div>'+
+      '<button class="btn pri" id="woGo" style="width:100%;margin-top:10px">▶ เริ่ม '+S.n+'</button></div>'+
+    '<p class="pl-mute" style="text-align:center">หยุดทันทีถ้าเจ็บ ไม่ใช่แค่เมื่อย · ถ้ามีอาการบาดเจ็บหรือโรคประจำตัว ควรปรึกษาผู้เชี่ยวชาญก่อน</p>');
+  $('#woS').onclick=e=>{ const b=e.target.closest('[data-s]'); if(b){ WO.sess=b.dataset.s; WO.min=WO.sess==='C'?15:30; woOpen(); } };
+  $('#woMin').onclick=e=>{ const b=e.target.closest('[data-m]'); if(b){ WO.min=+b.dataset.m; woOpen(); } };
+  $('#woGo').onclick=()=>woPlay(B); }
+// player: one exercise at a time with the animated figure, a countdown for timed moves, rest between sets
+function woPlay(B){ const steps=[]; B.list.forEach(x=>{ const E=EX[x.k]; for(let s=1;s<=x.sets;s++) for(let side=0;side<(E[3]?2:1);side++){ steps.push({x,E,s,side}); } });
+  const st={i:0,t0:Date.now(),done:0,timer:0,raf:0,rest:0};
+  const stop=()=>{ clearInterval(st.timer); cancelAnimationFrame(st.raf); };
+  const finish=()=>{ stop(); const min=Math.max(1,Math.round((Date.now()-st.t0)/60000)), mus={};
+    B.list.forEach(x=>Object.entries(EX[x.k][4]).forEach(([k,v])=>mus[k]=(mus[k]||0)+v*x.sets));
+    const w=store.get(K_WO,[])||[]; w.unshift({t:Date.now(),sid:WO.sess,min,muscles:mus,load:Math.round(min*(WO.sess==='C'?0.3:0.9))}); store.set(K_WO,w.slice(0,200));
+    say('เสร็จแล้ว เก่งมาก');
+    fxOpen(fxTop('🎉 เสร็จแล้ว')+'<div class="pl-card" style="text-align:center"><div class="hr-res"><b>'+min+'</b><span>นาที</span></div><p class="pl-mute">'+WO_SESS[WO.sess].n+' · '+st.done+'/'+steps.length+' ช่วง</p></div><button class="btn pri" id="woOk" style="width:100%">กลับ</button>');
+    $('#woOk').onclick=()=>woOpen(); };
+  const show=()=>{ stop(); if(st.i>=steps.length){ finish(); return; } const S=steps[st.i], E=S.E, e=E[2], next=steps[st.i+1];
+    const pr=Math.round(st.i/steps.length*100);
+    fxOpen(fxTop(E[0],(S.x.sets>1?'เซ็ต '+S.s+'/'+S.x.sets:'')+(E[3]?(S.x.sets>1?' · ':'')+(S.side?'ข้างซ้าย':'ข้างขวา'):''))+
+      '<div class="hr-prog" style="margin:0 0 10px"><i style="width:'+pr+'%"></i></div>'+
+      '<div class="pl-card wo-play"><svg viewBox="0 0 100 100" class="wo-big" id="woFig" aria-label="ภาพท่า '+esc(E[0])+'"></svg>'+
+      '<div class="wo-cnt"><b id="woCnt">'+(e.r?e.r:e.s)+'</b><span>'+(e.r?'ครั้ง':'วินาที')+'</span></div><p class="wo-cue">'+E[5]+'</p></div>'+
+      '<div class="stack"><button class="btn pri" id="woNext">'+(e.r?'✓ ทำครบแล้ว':'⏭ ข้าม')+'</button><button class="btn ghost" id="woBack"'+(st.i?'':' disabled')+'>◀ ท่าก่อนหน้า</button><button class="btn ghost" id="woEnd">จบเซสชัน</button></div>'+
+      (next?'<p class="pl-mute" style="text-align:center">ถัดไป: '+next.E[0]+'</p>':''), stop);
+    // animate between the two poses
+    const a=PO[E[1][0]], b=PO[E[1][1]], fig=$('#woFig'), t0=performance.now(), per=e.r?2200:4000;
+    const anim=now=>{ const f=(1-Math.cos(((now-t0)%per)/per*2*Math.PI))/2, p=a.map((v,i)=>v+(b[i]-v)*f); if(fig) fig.innerHTML=figPaths(p); st.raf=requestAnimationFrame(anim); }; st.raf=requestAnimationFrame(anim);
+    say(E[0]+(E[3]?(S.side?' ข้างซ้าย':' ข้างขวา'):'')+(e.r?' '+e.r+' ครั้ง':' '+e.s+' วินาที'));
+    if(e.s){ let left=e.s; st.timer=setInterval(()=>{ left--; const c=$('#woCnt'); if(c) c.textContent=Math.max(0,left); if(left===3) say('สาม'); if(left<=0){ clearInterval(st.timer); st.done++; st.i++; restOr(); } },1000); }
+    $('#woNext').onclick=()=>{ st.done++; st.i++; restOr(); };
+    $('#woBack').onclick=()=>{ if(st.i){ st.i--; show(); } };
+    $('#woEnd').onclick=()=>{ if(st.done) finish(); else { stop(); woOpen(); } }; };
+  const restOr=()=>{ const prev=steps[st.i-1], cur=steps[st.i]; const stretch=WO.sess==='C';
+    if(!cur){ show(); return; } const r=prev&&prev.x===cur.x&&!stretch&&cur.side===0?45:prev&&prev.x!==cur.x?(stretch?5:20):0;
+    if(!r){ show(); return; } stop(); let left=r;
+    fxOpen(fxTop('พัก')+'<div class="pl-card" style="text-align:center"><div class="hr-res"><b id="woR">'+left+'</b><span>วินาที</span></div><p class="pl-mute">ถัดไป: '+cur.E[0]+'</p>'+poseSvg(cur.E[1][0],'wo-big')+'</div><button class="btn pri" id="woSkip" style="width:100%">⏭ ข้ามพัก</button>', stop);
+    st.timer=setInterval(()=>{ left--; const e2=$('#woR'); if(e2) e2.textContent=left; if(left<=0) show(); },1000);
+    $('#woSkip').onclick=show; };
+  show(); }
+
+/* ---------- in-ride screen themes ---------- */
+const RTHEMES=[['classic','มาตรฐาน','พื้นขาว อ่านง่ายกลางแดด'],['dark','กลางคืน','พื้นเข้ม ไม่แสบตา ประหยัดแบต (จอ OLED)'],['hr','โซนหัวใจ','แถบโซนชีพจรสีใหญ่ ต้องต่อสายคาดอก'],['big','ตัวเลขใหญ่','3 ค่าหลักขนาดใหญ่ ซ่อนค่ารอง']];
+const RK={spd:'ความเร็ว (กม./ชม.)',hr:'ชีพจร (bpm)',cad:'รอบขา (rpm)',pwr:'กำลัง (W)',dist:'ระยะทาง (กม.)',time:'เวลาปั่น',avg:'เฉลี่ย (กม./ชม.)',gain:'ไต่ระดับ (ม.)',zone:'โซนหัวใจ',clock:'เวลาตอนนี้',left:'เหลือถึงปลายทาง (กม.)'};
+function rideSlots(){ const s=settings.rideSlots; return Array.isArray(s)&&s.length===3&&s.every(k=>RK[k])?s:['hr','spd','cad']; }
+function rideTheme(){ const t=settings.rideTheme; return RTHEMES.some(x=>x[0]===t)?t:'classic'; }
+function rideThemeApply(){ const ui=$('#rideUI'); if(!ui) return; RTHEMES.forEach(x=>ui.classList.toggle('th-'+x[0],rideTheme()===x[0]));
+  const m=ui.querySelector('.rmain'); if(!m) return; const s=rideSlots();
+  m.innerHTML=s.map((k,i)=>'<div'+(i===1?' class="rbig"':'')+'><b class="rnum" data-rk="'+k+'">--</b><span>'+RK[k]+'</span></div>').join(''); }
+function rideSlotVal(k,sv,r,now){ switch(k){
+  case 'spd': return sSpd.toFixed(1); case 'hr': return sv.hr!=null?Math.round(sv.hr):'--'; case 'cad': return sv.cad!=null?Math.round(sv.cad):'--'; case 'pwr': return sv.pwr!=null?Math.round(sv.pwr):'--';
+  case 'dist': return (r.dist/1000).toFixed(2); case 'time': return fmtClock(r.moving); case 'avg': return avgKmh(r.dist,r.moving).toFixed(1); case 'gain': return Math.round(r.gain);
+  case 'zone': { const z=hrZone(sv.hr); return z?z.z[0]:'--'; }
+  case 'clock': { const d=new Date(now); return pad(d.getHours())+':'+pad(d.getMinutes()); }
+  case 'left': { const L=R.follow&&R.follow.started&&!R.follow.off&&R.res?Math.max(0,R.res.dist-(R.follow.res.cum?R.follow.res.cum[R.follow.idx]:0)):null; return L!=null?(L/1000).toFixed(1):'--'; } }
+  return '--'; }
+function rideSlotsFill(sv,r,now){ $$('#rideUI [data-rk]').forEach(el=>{ const v=String(rideSlotVal(el.dataset.rk,sv,r,now)); if(el.textContent!==v) el.textContent=v; });
+  const zb=$('#ruZone'); if(!zb) return; const show=rideTheme()==='hr'||FX.activePlan&&rec&&FX.activePlan.t>=rec.start-60e3;
+  zb.style.display=show?'':'none'; if(!show) return;
+  const z=hrZone(sv.hr), P=FX.activePlan&&rec&&FX.activePlan.t>=rec.start-60e3?FX.activePlan:null;
+  let h='';
+  if(rideTheme()==='hr'){ if(!hrMaxOf()) h='<div class="rz-msg">ใส่อายุในข้อมูลหัวใจเพื่อแสดงโซน</div>';
+    else if(sv.hr==null) h='<div class="rz-msg">ยังไม่ได้เชื่อมสายคาดอกวัดชีพจร — แตะไอคอนบลูทูธด้านบนเพื่อเชื่อม</div>';
+    else h='<div class="rz-bar">'+ZONES.map((q,i)=>'<i class="'+(z&&z.i===i?'on':'')+'" style="--zc:'+q[4]+'">'+q[0]+'</i>').join('')+'</div><div class="rz-lab" style="color:'+z.z[4]+'">'+z.z[0]+' '+z.z[1]+' · '+Math.round(z.pct*100)+'% ของชีพจรสูงสุด</div>'; }
+  if(P){ const K=PLAN_TYPES[P.k]; let st='';
+    if(z&&P.T.hr){ st=sv.hr<P.T.hr[0]-3?' ⬆ เร่งได้อีก':sv.hr>P.T.hr[1]+3?' ⬇ ผ่อนลง':' ✓ อยู่ในเป้า'; }
+    else if(sSpd>3){ st=sSpd<P.T.spd[0]-1?' ⬆ เร่งได้อีก':sSpd>P.T.spd[1]+2?' ⬇ ผ่อนลง':' ✓ อยู่ในเป้า'; }
+    h+='<div class="rz-plan">🎯 '+K.n+' · '+(P.T.hr?'❤ '+P.T.hr[0]+'–'+P.T.hr[1]+' · ':'')+P.T.spd[0]+'–'+P.T.spd[1]+' กม./ชม.'+st+'</div>'; }
+  if(zb.innerHTML!==h) zb.innerHTML=h; }
+function openRideTheme(){ const cur=rideTheme(), s=rideSlots();
+  const opts=k=>Object.keys(RK).map(x=>'<option value="'+x+'"'+(x===k?' selected':'')+'>'+RK[x]+'</option>').join('');
+  openModal('<h3>📱 หน้าจอระหว่างปั่น</h3><div class="sub">เลือกธีมและค่าที่อยากเห็นใหญ่ที่สุด</div>'+
+    '<div class="th-grid">'+RTHEMES.map(t=>'<button class="th-card th-'+t[0]+(t[0]===cur?' on':'')+'" data-th="'+t[0]+'" aria-pressed="'+(t[0]===cur)+'"><span class="th-prev"><i></i><b>'+(t[0]==='hr'?'Z3':'25.4')+'</b><em></em></span><b>'+t[1]+'</b><small>'+t[2]+'</small></button>').join('')+'</div>'+
+    '<h4 style="margin:14px 0 6px">ค่าหลัก 3 ช่อง</h4><div class="th-slots"><label>ซ้าย<select class="txt" id="sl0">'+opts(s[0])+'</select></label><label>กลาง (ใหญ่)<select class="txt" id="sl1">'+opts(s[1])+'</select></label><label>ขวา<select class="txt" id="sl2">'+opts(s[2])+'</select></label></div>'+
+    (!hrMaxOf()?'<div class="pl-note warn" style="margin-top:10px">ธีมโซนหัวใจต้องรู้ชีพจรสูงสุด <button class="linkbtn" id="thHeart">ใส่อายุ</button></div>':'')+
+    '<div class="stack"><button class="btn pri" id="thOk">บันทึก</button><button class="btn ghost" id="thX">ยกเลิก</button></div>');
+  let pick=cur; $$('#modal [data-th]').forEach(b=>b.onclick=()=>{ pick=b.dataset.th; $$('#modal [data-th]').forEach(x=>{ x.classList.toggle('on',x===b); x.setAttribute('aria-pressed',x===b); }); });
+  const hh=$('#thHeart'); if(hh) hh.onclick=()=>openHeartSettings(openRideTheme);
+  $('#thX').onclick=closeModal;
+  $('#thOk').onclick=()=>{ settings.rideTheme=pick; settings.rideSlots=[0,1,2].map(i=>$('#sl'+i).value); saveSettings(); rideThemeApply(); closeModal(); toast('ตั้งหน้าจอระหว่างปั่นแล้ว: '+RTHEMES.find(x=>x[0]===pick)[1]); }; }
+
 /* =================== app updates (แจ้งอัปเดต) =================== */
 // The Android app and installed copies can keep an old page open for days, so the app asks the server for
 // version.json and offers a one-tap update that clears the saved copy and reloads.
-const APP_VERSION='2026.11.24.15', UPD={remote:null,last:0,hide:null};
+const APP_VERSION='2026.11.28.1', UPD={remote:null,last:0,hide:null};
 function verCmp(a,b){ const x=String(a).split(/[.\-]/).map(Number), y=String(b).split(/[.\-]/).map(Number); for(let i=0;i<Math.max(x.length,y.length);i++){ const d=(x[i]||0)-(y[i]||0); if(d) return d; } return 0; }
 async function updCheck(loud){ if(!loud&&Date.now()-UPD.last<10*60e3) return; UPD.last=Date.now();
   try{ const r=await fetch('./version.json?t='+Date.now(),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); const j=await r.json();
@@ -4471,9 +5167,9 @@ $('#myImg').onclick=()=>{ const d=MY.data||myData(MY.period); if(!d.items.length
 
 /* =================== tabs, settings, donate =================== */
 /* ---------- pages (bottom navigation) ---------- */
-function goPage(p,opt){ opt=opt||{}; if(document.body.classList.contains('planon')) closePlan(); if(!PAGES.includes(p)) p='home'; const prev=page; page=p;
+function goPage(p,opt){ opt=opt||{}; if(document.body.classList.contains('planon')){ closePlan(); if($('#fxView').classList.contains('show')) fxClose(); } if(!PAGES.includes(p)) p='home'; const prev=page; page=p;
   if(p!=='route'&&typeof MY!=='undefined'&&MY.on) closeMyMap();
-  PAGES.forEach(x=>document.body.classList.toggle('pg-'+x,x===p));
+  PAGES.forEach(x=>document.body.classList.toggle('pg-'+x,x===p)); if(p==='dev') bikesRender();
   $$('#bnav button').forEach(b=>b.classList.toggle('on',b.dataset.pg===p));
   $$('.pg').forEach(x=>x.classList.toggle('on',x.id==='pg-'+p));
   try{ sessionStorage.setItem('pk_page',p); }catch(e){}
@@ -4496,6 +5192,7 @@ $('#pages').addEventListener('click',e=>{ const g=e.target.closest('[data-go]');
   if(m){ const k=m.dataset.m;
     if(k==='acct') openAccount(); else if(k==='profile'){ if(!settings.name) onboarding(); else openSettings(); }
     else if(k==='settings') openSettings(); else if(k==='stats'){ ST.sel=null; openStats(); }
+    else if(k==='load') loadOpen(); else if(k==='heart') openHeartSettings(); else if(k==='rtheme') openRideTheme();
     else if(k==='goal') openGoal('month'); else if(k==='mymap') openMyMap(period);
     else if(k==='donate') $('#pillDonate').click();
     else if(k==='privacy') window.open('privacy.html','_blank','noopener');
@@ -4521,6 +5218,7 @@ function renderHome(){ const el=$('#homeSum'); if(!el) return;
   const last=rides.slice(0,3);
   $('#homeRides').innerHTML=last.length?last.map(r=>'<button class="item" data-rid="'+r.id+'"><div class="ico">🚴</div><div class="main"><div class="t">'+esc(r.name)+'</div><div class="s">'+fmtDate(r.start)+' · '+fmtDur(r.moving)+'</div></div><div class="km">'+(r.dist/1000).toFixed(2)+'<br><small>กม.</small></div></button>').join('')
     :'<div class="empty">ยังไม่มีกิจกรรม — กด ▶ เริ่มปั่น หรือนำเข้าไฟล์จากไมล์ที่หน้า อุปกรณ์</div>';
+  fxHome();
 }
 $('#homeRides').addEventListener('click',e=>{ const b=e.target.closest('[data-rid]'); if(b) openRide(b.dataset.rid); });
 function renderMe(){ if(!$('#meName')) return; const mv=$('#meVer'); if(mv) mv.textContent=APP_VERSION; $('#meName').textContent=(settings.name||'').trim()||'นักปั่น';
